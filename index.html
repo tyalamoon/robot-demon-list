@@ -1500,13 +1500,21 @@ function renderLeaderboard() {
     );
 
     const info = makeElement("div", "level-info");
-    const thumbnail = makeElement("div", "thumbnail", "RDL");
-    thumbnail.setAttribute("aria-hidden", "true");
-    thumbnail.title = "Level preview from proof video, when available";
+    const proofForThumbnail = safeHttpUrl(String(record.proof_url || ""));
+    const thumbnail = makeElement(proofForThumbnail ? "a" : "div", "thumbnail", "RDL");
+    if (proofForThumbnail) {
+      thumbnail.href = proofForThumbnail;
+      thumbnail.target = "_blank";
+      thumbnail.rel = "noopener noreferrer";
+      thumbnail.title = "Open proof video";
+      thumbnail.setAttribute("aria-label", "Open proof video for " + record.level_name);
+    } else {
+      thumbnail.setAttribute("aria-hidden", "true");
+      thumbnail.title = "No valid proof link available";
+    }
 
     // Use a YouTube proof video's thumbnail when the submitted proof is a YouTube URL.
     // Other proof providers keep the designed RDL fallback instead of showing a broken image.
-    const proofForThumbnail = safeHttpUrl(String(record.proof_url || ""));
     let youtubeId = "";
     if (proofForThumbnail) {
       try {
@@ -1557,15 +1565,7 @@ function renderLeaderboard() {
     );
 
     const score = makeElement("div", "level-score");
-    const proofUrl = safeHttpUrl(String(record.proof_url || ""));
-
-    if (proofUrl) {
-      const proof = makeElement("a", "proof-link", "VIEW PROOF");
-      proof.href = proofUrl;
-      proof.target = "_blank";
-      proof.rel = "noopener noreferrer";
-      score.appendChild(proof);
-    } else {
+    if (!proofForThumbnail) {
       score.appendChild(makeElement("span", "proof-link", "NO VALID LINK"));
     }
 
