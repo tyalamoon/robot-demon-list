@@ -874,6 +874,60 @@ body.submit-open #submit {
   display: block !important;
 }
 
+
+/* Level details inspired by community demon-list detail pages. */
+.level { cursor: pointer; }
+.level .thumbnail { cursor: pointer; }
+.level-modal-backdrop {
+  position: fixed; inset: 0; z-index: 1000; display: none;
+  align-items: center; justify-content: center; padding: 22px;
+  background: rgba(0,0,0,.78); backdrop-filter: blur(7px);
+}
+.level-modal-backdrop.open { display: flex; }
+.level-modal {
+  width: min(850px, 100%); max-height: min(90vh, 900px); overflow-y: auto;
+  border: 1px solid var(--border); border-radius: 16px; background: #141414;
+  box-shadow: 0 24px 90px rgba(0,0,0,.55);
+}
+.level-modal-top {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 18px;
+  padding: 24px 26px 18px; border-bottom: 1px solid var(--border);
+}
+.level-modal-kicker { color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; }
+.level-modal-rank { color: var(--gold); font-size: clamp(28px, 5vw, 42px); font-weight: 950; line-height: 1.15; }
+.level-modal-points { color: var(--gold-light); font-size: 15px; font-weight: 900; }
+.level-modal-close {
+  width: 38px; height: 38px; flex: 0 0 38px; border: 1px solid var(--border);
+  border-radius: 9px; background: var(--surface-light); color: var(--text); font-size: 22px; cursor: pointer;
+}
+.level-modal-body { padding: 24px 26px 28px; }
+.level-modal-title { margin: 0 0 5px; font-size: clamp(26px, 5vw, 38px); line-height: 1.2; overflow-wrap: anywhere; }
+.level-modal-creators { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+.level-modal-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin: 18px 0; }
+.level-modal-chip { border: 1px solid var(--border); border-radius: 7px; padding: 6px 10px; color: var(--muted); font-size: 12px; font-weight: 800; }
+.level-modal-id { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 14px 0 22px; color: var(--muted); font-size: 13px; }
+.level-modal-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 24px; }
+.level-modal-preview { display: block; width: 100%; max-height: 340px; object-fit: cover; border: 1px solid var(--border); border-radius: 10px; background: #090909; }
+.level-modal-preview-link { display: block; text-decoration: none; }
+.level-modal-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 22px 0; }
+.level-modal-stat { padding: 15px 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); }
+.level-modal-stat strong { display: block; color: var(--gold); font-size: 22px; line-height: 1.25; }
+.level-modal-stat span { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
+.level-modal-tabs { display: flex; flex-wrap: wrap; gap: 7px; border-bottom: 1px solid var(--border); margin-top: 22px; }
+.level-modal-tab { border: 0; border-bottom: 2px solid transparent; padding: 11px 13px; background: transparent; color: var(--muted); font-weight: 800; cursor: pointer; }
+.level-modal-tab.active { border-bottom-color: var(--gold); color: var(--gold); }
+.level-modal-tab-content { min-height: 95px; padding: 18px 2px 0; }
+.level-modal-record { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid #292929; }
+.level-modal-record:last-child { border-bottom: 0; }
+.level-modal-record small { display: block; color: var(--muted); }
+.level-modal-empty { color: var(--muted); font-size: 14px; }
+@media (max-width: 600px) {
+  .level-modal-backdrop { padding: 8px; }
+  .level-modal-top, .level-modal-body { padding-left: 16px; padding-right: 16px; }
+  .level-modal-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .level-modal-actions .button { flex: 1 1 100%; }
+}
+
 </style>
 </head>
 
@@ -1063,6 +1117,41 @@ body.submit-open #submit {
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<div class="level-modal-backdrop" id="levelModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="levelModalTitle">
+  <section class="level-modal">
+    <header class="level-modal-top">
+      <div>
+        <div class="level-modal-kicker" id="levelModalCategory">Classic</div>
+        <div class="level-modal-rank" id="levelModalRank">#—</div>
+        <div class="level-modal-points" id="levelModalPoints">0.00 pts</div>
+      </div>
+      <button class="level-modal-close" id="levelModalClose" type="button" aria-label="Close level details">×</button>
+    </header>
+    <div class="level-modal-body">
+      <h2 class="level-modal-title" id="levelModalTitle">Level details</h2>
+      <div class="level-modal-creators" id="levelModalCreators"></div>
+      <div class="level-modal-meta" id="levelModalMeta"></div>
+      <div class="level-modal-id"><span id="levelModalId"></span><button class="button" id="levelModalCopy" type="button">Copy link</button><button class="button" id="levelModalFavorite" type="button">☆ Favorite</button></div>
+      <a class="level-modal-preview-link" id="levelModalPreviewLink" target="_blank" rel="noopener noreferrer"><img class="level-modal-preview" id="levelModalPreview" alt="Level video preview" hidden></a>
+      <div class="level-modal-actions"><a class="button button-primary" id="levelModalWatch" target="_blank" rel="noopener noreferrer" hidden>Watch completion</a><button class="button" id="levelModalSubmit" type="button">Submit a record</button><a class="button" id="levelModalYoutube" target="_blank" rel="noopener noreferrer" hidden>Open on YouTube ↗</a></div>
+      <div class="level-modal-stats">
+        <div class="level-modal-stat"><strong id="levelModalMinimum">—</strong><span>Record minimum</span></div>
+        <div class="level-modal-stat"><strong id="levelModalClears">0</strong><span>100% clears</span></div>
+        <div class="level-modal-stat"><strong id="levelModalRuns">0</strong><span>Runs / records</span></div>
+        <div class="level-modal-stat"><strong id="levelModalCategoryStat">Classic</strong><span>Category</span></div>
+      </div>
+      <nav class="level-modal-tabs" aria-label="Level details tabs">
+        <button class="level-modal-tab active" type="button" data-level-tab="records">Records</button>
+        <button class="level-modal-tab" type="button" data-level-tab="runs">Runs</button>
+        <button class="level-modal-tab" type="button" data-level-tab="history">History</button>
+        <button class="level-modal-tab" type="button" data-level-tab="discussion">Discussion</button>
+      </nav>
+      <div class="level-modal-tab-content" id="levelModalTabContent" aria-live="polite"></div>
+    </div>
+  </section>
+</div>
+
 <script>
 "use strict";
 
@@ -1582,6 +1671,184 @@ function renderPlayerPointsLeaderboard() {
   });
 }
 
+
+const levelModalBackdrop = document.getElementById("levelModalBackdrop");
+const levelModalTabContent = document.getElementById("levelModalTabContent");
+let activeDetailRecord = null;
+let activeDetailRecords = [];
+let activeDetailRank = "—";
+let activeDetailTab = "records";
+
+function getLevelGroup(record) {
+  const key = String(record.level_name || "").trim().toLocaleLowerCase();
+  return records.filter(item => String(item.level_name || "").trim().toLocaleLowerCase() === key);
+}
+
+function getYouTubeVideoId(url) {
+  if (!url) return "";
+  try {
+    const address = new URL(url);
+    const host = address.hostname.toLowerCase();
+    let id = "";
+    if (host === "youtu.be") id = address.pathname.split("/").filter(Boolean)[0] || "";
+    else if (["youtube.com", "www.youtube.com", "m.youtube.com", "youtube-nocookie.com", "www.youtube-nocookie.com"].includes(host)) {
+      if (address.pathname === "/watch") id = address.searchParams.get("v") || "";
+      else {
+        const match = address.pathname.match(/^\/(?:embed|shorts)\/([^/?]+)/);
+        id = match ? match[1] : "";
+      }
+    }
+    return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : "";
+  } catch { return ""; }
+}
+
+function openLevelDetails(record, displayedRank) {
+  activeDetailRecord = record;
+  activeDetailRecords = getLevelGroup(record);
+  activeDetailRank = displayedRank || "—";
+  activeDetailTab = "records";
+  const safeName = String(record.level_name || "Untitled level");
+  document.getElementById("levelModalCategory").textContent = "Classic";
+  document.getElementById("levelModalRank").textContent = "#" + activeDetailRank;
+  document.getElementById("levelModalPoints").textContent = pointsForRank(activeDetailRank).toFixed(2) + " pts";
+  document.getElementById("levelModalTitle").textContent = safeName;
+  const creators = Array.from(new Set(activeDetailRecords.map(item => String(item.player_name || "Unknown").trim()).filter(Boolean)));
+  document.getElementById("levelModalCreators").textContent = "by " + (creators.join(", ") || "Unknown") + " · RDL community record";
+  const meta = document.getElementById("levelModalMeta");
+  meta.replaceChildren();
+  [activeDetailRecord.percent === 100 ? "100% completion" : String(activeDetailRecord.percent ?? "—") + "% completion", "Robot Demon List"].forEach(label => {
+    meta.appendChild(makeElement("span", "level-modal-chip", label));
+  });
+  document.getElementById("levelModalId").textContent = "RDL ID: " + String(record.id);
+  const favoriteButton = document.getElementById("levelModalFavorite");
+  let favorites = [];
+  try { favorites = JSON.parse(localStorage.getItem("rdl-favorite-levels") || "[]"); } catch { favorites = []; }
+  const isFavorite = favorites.includes(String(record.id));
+  favoriteButton.textContent = isFavorite ? "★ Favorited" : "☆ Favorite";
+  favoriteButton.setAttribute("aria-pressed", String(isFavorite));
+
+  const proofUrl = safeHttpUrl(String(record.proof_url || ""));
+  const videoId = getYouTubeVideoId(proofUrl);
+  const preview = document.getElementById("levelModalPreview");
+  const previewLink = document.getElementById("levelModalPreviewLink");
+  const watch = document.getElementById("levelModalWatch");
+  const youtube = document.getElementById("levelModalYoutube");
+  if (videoId) {
+    preview.src = "https://i.ytimg.com/vi/" + videoId + "/hqdefault.jpg";
+    preview.alt = "YouTube preview for " + safeName;
+    preview.hidden = false;
+    previewLink.href = proofUrl;
+    previewLink.hidden = false;
+    youtube.href = "https://www.youtube.com/watch?v=" + videoId;
+    youtube.hidden = false;
+  } else if (proofUrl) {
+    preview.hidden = true;
+    preview.removeAttribute("src");
+    previewLink.href = proofUrl;
+    previewLink.hidden = true;
+    youtube.href = proofUrl;
+    youtube.hidden = false;
+  } else {
+    preview.hidden = true;
+    preview.removeAttribute("src");
+    previewLink.hidden = true;
+    youtube.hidden = true;
+  }
+  watch.href = proofUrl || "#";
+  watch.hidden = !proofUrl;
+  document.getElementById("levelModalMinimum").textContent = activeDetailRecords.length ? Math.min(...activeDetailRecords.map(item => Number(item.percent) || 0)) + "%" : "—";
+  document.getElementById("levelModalClears").textContent = activeDetailRecords.filter(item => Number(item.percent) === 100).length.toLocaleString();
+  document.getElementById("levelModalRuns").textContent = activeDetailRecords.length.toLocaleString();
+  document.getElementById("levelModalCategoryStat").textContent = "Classic";
+  document.querySelectorAll("[data-level-tab]").forEach(button => {
+    button.classList.toggle("active", button.dataset.levelTab === activeDetailTab);
+  });
+  renderLevelDetailsTab();
+  levelModalBackdrop.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function renderLevelDetailsTab() {
+  if (!activeDetailRecord) return;
+  levelModalTabContent.replaceChildren();
+  if (activeDetailTab === "records") {
+    if (!activeDetailRecords.length) {
+      levelModalTabContent.appendChild(makeElement("p", "level-modal-empty", "No approved records yet."));
+      return;
+    }
+    const ranks = getDisplayRanks(records);
+    activeDetailRecords.slice().sort((a, b) => Number(b.percent) - Number(a.percent)).forEach(item => {
+      const row = makeElement("div", "level-modal-record");
+      const info = makeElement("div");
+      info.append(
+        makeElement("strong", "", String(item.percent ?? "—") + "%"),
+        makeElement("small", "", String(item.player_name || "Unknown") + " · #" + (ranks.get(item.id) || "—"))
+      );
+      row.append(info);
+      const proof = safeHttpUrl(String(item.proof_url || ""));
+      if (proof) {
+        const link = makeElement("a", "proof-link", "Proof ↗");
+        link.href = proof; link.target = "_blank"; link.rel = "noopener noreferrer";
+        row.appendChild(link);
+      }
+      levelModalTabContent.appendChild(row);
+    });
+  } else if (activeDetailTab === "runs") {
+    levelModalTabContent.appendChild(makeElement("p", "level-modal-empty", "RDL currently tracks submitted completion percentages, not individual in-game runs."));
+  } else if (activeDetailTab === "history") {
+    levelModalTabContent.appendChild(makeElement("p", "level-modal-empty", "Rank history is not stored yet. The current rank is #" + activeDetailRank + "."));
+  } else {
+    levelModalTabContent.appendChild(makeElement("p", "level-modal-empty", "Discussion is not available yet. Use the proof link or submit a record to contribute."));
+  }
+}
+
+function closeLevelDetails() {
+  levelModalBackdrop.classList.remove("open");
+  document.body.style.overflow = "";
+  activeDetailRecord = null;
+}
+
+document.getElementById("levelModalClose").addEventListener("click", closeLevelDetails);
+levelModalBackdrop.addEventListener("click", event => {
+  if (event.target === levelModalBackdrop) closeLevelDetails();
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && levelModalBackdrop.classList.contains("open")) closeLevelDetails();
+});
+document.querySelectorAll("[data-level-tab]").forEach(button => {
+  button.addEventListener("click", () => {
+    activeDetailTab = button.dataset.levelTab;
+    document.querySelectorAll("[data-level-tab]").forEach(tab => tab.classList.toggle("active", tab === button));
+    renderLevelDetailsTab();
+  });
+});
+document.getElementById("levelModalCopy").addEventListener("click", async event => {
+  if (!activeDetailRecord) return;
+  const link = window.location.origin + window.location.pathname + "#level-" + encodeURIComponent(activeDetailRecord.id);
+  try {
+    await navigator.clipboard.writeText(link);
+    event.currentTarget.textContent = "Copied!";
+    setTimeout(() => { event.currentTarget.textContent = "Copy link"; }, 1400);
+  } catch {
+    window.prompt("Copy this level link:", link);
+  }
+});
+document.getElementById("levelModalFavorite").addEventListener("click", event => {
+  if (!activeDetailRecord) return;
+  const id = String(activeDetailRecord.id);
+  let favorites = [];
+  try { favorites = JSON.parse(localStorage.getItem("rdl-favorite-levels") || "[]"); } catch { favorites = []; }
+  favorites = favorites.includes(id) ? favorites.filter(item => item !== id) : [...favorites, id];
+  try { localStorage.setItem("rdl-favorite-levels", JSON.stringify(favorites)); } catch {}
+  event.currentTarget.textContent = favorites.includes(id) ? "★ Favorited" : "☆ Favorite";
+  event.currentTarget.setAttribute("aria-pressed", String(favorites.includes(id)));
+});
+document.getElementById("levelModalSubmit").addEventListener("click", () => {
+  closeLevelDetails();
+  document.querySelector('.main-nav a[href="#submit"]')?.click();
+  document.getElementById("submit")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
 function renderLeaderboard() {
   renderPlayerPointsLeaderboard();
   const query = searchInput.value.trim().toLowerCase();
@@ -1685,6 +1952,20 @@ function renderLeaderboard() {
     );
 
     info.append(thumbnail, details);
+    row.tabIndex = 0;
+    row.setAttribute("role", "button");
+    row.setAttribute("aria-label", "Open details for " + String(record.level_name || "level"));
+    const openDetails = event => {
+      if (event.target.closest(".thumbnail, a, button, input, select, textarea")) return;
+      openLevelDetails(record, displayedRank);
+    };
+    row.addEventListener("click", openDetails);
+    row.addEventListener("keydown", event => {
+      if ((event.key === "Enter" || event.key === " ") && !event.target.closest(".thumbnail, a, button, input, select, textarea")) {
+        event.preventDefault();
+        openLevelDetails(record, displayedRank);
+      }
+    });
 
     const score = makeElement("div", "level-score");
     if (!proofForThumbnail) {
