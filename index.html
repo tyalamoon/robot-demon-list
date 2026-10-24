@@ -1569,7 +1569,7 @@ function renderLeaderboard() {
       score.appendChild(makeElement("span", "proof-link", "NO VALID LINK"));
     }
 
-    score.appendChild(makeElement("span", "approved-label", "APPROVED"));
+    // Do not show the moderation status on public level cards.
     if (isRdlOwner) {
       const rankControls = makeElement("div", "rank-controls");
       rankControls.style.display = "flex";
