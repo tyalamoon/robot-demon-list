@@ -917,7 +917,7 @@ textarea.field { min-height: 90px; resize: vertical; }
         </div>
       </div>
       <div class="column-head" aria-hidden="true">
-        <span>Rank</span><span>Level / Player</span><span>Progress</span><span>Proof</span>
+        <span>Rank</span><span>Level / Player</span><span>Proof</span>
       </div>
       <div id="levels" aria-live="polite">
         <div class="empty">
@@ -1557,13 +1557,6 @@ function renderLeaderboard() {
 
     info.append(thumbnail, details);
 
-    const percent = Number(record.percent);
-    const percentBadge = makeElement(
-      "span",
-      "percent-badge",
-      Number.isFinite(percent) ? percent + "%" : "—"
-    );
-
     const score = makeElement("div", "level-score");
     if (!proofForThumbnail) {
       score.appendChild(makeElement("span", "proof-link", "NO VALID LINK"));
@@ -1620,7 +1613,7 @@ function renderLeaderboard() {
       score.appendChild(deleteButton);
     }
 
-    row.append(rank, info, percentBadge, score);
+    row.append(rank, info, score);
     levelsElement.appendChild(row);
   });
 }
