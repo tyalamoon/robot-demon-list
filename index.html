@@ -7,164 +7,6 @@
 <meta name="description" content="Robot Demon List — a community leaderboard for Geometry Dash robot challenges.">
 <meta name="theme-color" content="#101010">
 
-/* RDL — GSL-inspired leaderboard cards */
-.level {
-  display: grid;
-  grid-template-columns: 58px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 16px;
-  padding: 18px;
-  margin-bottom: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: 16px;
-  background: linear-gradient(135deg, #171b27, #10131c);
-  transition: border-color 160ms ease, transform 160ms ease;
-}
-
-.level:hover {
-  border-color: rgba(139, 116, 255, 0.55);
-  transform: translateY(-2px);
-}
-
-.level .rank {
-  grid-column: 1;
-  grid-row: 1;
-  text-align: center;
-  font-weight: 800;
-  font-size: 18px;
-}
-
-.level .level-info {
-  grid-column: 2;
-  grid-row: 1;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-width: 0;
-}
-
-.level .thumbnail {
-  width: 104px;
-  height: 72px;
-  flex: 0 0 104px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border-radius: 10px;
-  background:
-    radial-gradient(ellipse at 75% 25%, rgba(151, 113, 255, 0.45), transparent 55%),
-    linear-gradient(135deg, #29264d, #151b32 65%, #10131c);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #d5ccff;
-  font-weight: 900;
-  font-size: 20px;
-  letter-spacing: 3px;
-}
-
-.level .level-details {
-  min-width: 0;
-}
-
-.level .level-name {
-  font-size: 17px;
-  font-weight: 800;
-  overflow-wrap: anywhere;
-}
-
-.level .creator {
-  margin-top: 5px;
-  color: #a5aec2;
-  font-size: 13px;
-  overflow-wrap: anywhere;
-}
-
-.level .percent-badge {
-  grid-column: 3;
-  grid-row: 1;
-  justify-self: end;
-  padding: 8px 12px;
-  border: 1px solid rgba(242, 190, 82, 0.35);
-  border-radius: 10px;
-  background: rgba(242, 190, 82, 0.10);
-  color: #f2c66d;
-  font-size: 17px;
-  font-weight: 900;
-  white-space: nowrap;
-}
-
-.level .level-score {
-  grid-column: 2 / 4;
-  grid-row: 2;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  min-width: 0;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-.level .proof-link {
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-}
-
-.level .approved-label {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1px;
-}
-
-.level .rank-controls {
-  margin-left: auto;
-}
-
-.level .admin-delete-level {
-  margin-left: auto;
-}
-
-@media (max-width: 560px) {
-  .level {
-    grid-template-columns: 38px minmax(0, 1fr);
-    gap: 10px;
-    padding: 12px;
-  }
-
-  .level .rank {
-    font-size: 14px;
-  }
-
-  .level .level-info {
-    grid-column: 2;
-    grid-row: 1;
-    flex-wrap: wrap;
-  }
-
-  .level .thumbnail {
-    width: 76px;
-    height: 58px;
-    flex-basis: 76px;
-    font-size: 16px;
-  }
-
-  .level .level-name {
-    font-size: 15px;
-  }
-
-  .level .percent-badge {
-    grid-column: 2;
-    grid-row: 2;
-    justify-self: start;
-  }
-
-  .level .level-score {
-    grid-column: 1 / 3;
-    grid-row: 3;
-  }
-}
-
 <style>
 :root {
   --background: #101010;
@@ -788,6 +630,187 @@ textarea.field { min-height: 90px; resize: vertical; }
   .section-tag { display: none; }
   .footer-inner { width: calc(100% - 24px); }
 }
+
+/* GSL-inspired liquid-glass leaderboard cards.
+   The RDL navigation and hero are intentionally not changed. */
+.level {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto 12px;
+  padding: 12px 24px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .10);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(160, 180, 255, .12), rgba(160, 180, 255, .045) 48%, rgba(160, 180, 255, .075)),
+    rgba(18, 25, 46, .76);
+  box-shadow: 0 24px 50px -24px rgba(2, 6, 18, .7), inset 0 1px 0 rgba(255,255,255,.10);
+  position: relative;
+  transition: transform .4s cubic-bezier(.16, 1, .3, 1), border-color .4s ease, box-shadow .4s ease;
+}
+.level::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.045), rgba(255,255,255,.01));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .4s ease;
+}
+.level:hover {
+  transform: translateY(-4px) scale(1.005);
+  border-color: rgba(255,255,255,.22);
+  box-shadow: 0 30px 60px -22px rgba(2, 6, 18, .78), inset 0 1px 0 rgba(255,255,255,.16);
+}
+.level:hover::before { opacity: 1; }
+.level > * { position: relative; z-index: 1; }
+.level .rank {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: center;
+  color: #a3aec8;
+  font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  text-align: center;
+}
+.level .rank.top-three { color: #ffd75e; text-shadow: 0 0 18px rgba(255,215,94,.18); }
+.level .level-info {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
+}
+.level .thumbnail {
+  width: 200px;
+  height: 112px;
+  flex: 0 0 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  background:
+    radial-gradient(ellipse at 75% 25%, rgba(111,134,255,.42), transparent 58%),
+    linear-gradient(135deg, #171f3d, #0a0f1e);
+  box-shadow: 0 5px 15px rgba(0,0,0,.5);
+  color: #dce4ff;
+  font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  transition: transform .4s cubic-bezier(.16,1,.3,1), border-color .4s ease, box-shadow .4s ease;
+}
+.level:hover .thumbnail {
+  transform: scale(1.03);
+  border-color: rgba(255,255,255,.4);
+  box-shadow: 0 5px 12px rgba(0,0,0,.4);
+}
+.level .thumbnail img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .4s ease;
+}
+.level:hover .thumbnail img { transform: scale(1.08); }
+.level .level-details { min-width: 0; }
+.level .level-name {
+  color: #eef2fc;
+  font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
+  font-size: clamp(15px, 1.8vw, 23px);
+  font-weight: 900;
+  line-height: 1.25;
+  letter-spacing: .7px;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+  transition: color .3s ease;
+}
+.level:hover .level-name { color: #38c3f5; }
+.level .creator {
+  margin-top: 7px;
+  color: #a3aec8;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.level .percent-badge {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  padding: 7px 11px;
+  border: 1px solid rgba(56,195,245,.30);
+  border-radius: 999px;
+  background: rgba(56,195,245,.08);
+  color: #78ddff;
+  font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+.level .level-score {
+  grid-column: 2 / 4;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.level .proof-link {
+  color: #38c3f5;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .5px;
+  text-decoration: none;
+}
+.level .proof-link:hover { text-decoration: underline; }
+.level .approved-label {
+  padding: 3px 8px;
+  border: 1px solid rgba(47,212,143,.28);
+  border-radius: 999px;
+  background: rgba(47,212,143,.08);
+  color: #2fd48f;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .8px;
+}
+.level .rank-controls { margin-left: auto; }
+.level .admin-delete-level { margin-left: 0; }
+@media (max-width: 720px) {
+  .level {
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 12px;
+  }
+  .level .level-info { gap: 12px; }
+  .level .thumbnail { width: 120px; height: 68px; flex-basis: 120px; }
+  .level .rank { font-size: 14px; }
+  .level .level-score { grid-column: 2 / 4; }
+}
+@media (max-width: 520px) {
+  .level {
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 9px;
+    padding: 10px;
+  }
+  .level .level-info { grid-column: 2; grid-row: 1; gap: 10px; }
+  .level .thumbnail { width: 88px; height: 58px; flex-basis: 88px; font-size: 14px; }
+  .level .level-name { font-size: 14px; }
+  .level .percent-badge { grid-column: 2; grid-row: 2; justify-self: start; }
+  .level .level-score { grid-column: 1 / 3; grid-row: 3; }
+  .level .rank-controls { margin-left: 0; }
+}
+
 </style>
 </head>
 
@@ -1478,8 +1501,45 @@ function renderLeaderboard() {
 
     const info = makeElement("div", "level-info");
     const thumbnail = makeElement("div", "thumbnail", "RDL");
-thumbnail.setAttribute("aria-hidden", "true");
-thumbnail.title = "Level preview unavailable";
+    thumbnail.setAttribute("aria-hidden", "true");
+    thumbnail.title = "Level preview from proof video, when available";
+
+    // Use a YouTube proof video's thumbnail when the submitted proof is a YouTube URL.
+    // Other proof providers keep the designed RDL fallback instead of showing a broken image.
+    const proofForThumbnail = safeHttpUrl(String(record.proof_url || ""));
+    let youtubeId = "";
+    if (proofForThumbnail) {
+      try {
+        const proofAddress = new URL(proofForThumbnail);
+        const host = proofAddress.hostname.toLowerCase();
+        if (host === "youtu.be") {
+          youtubeId = proofAddress.pathname.split("/").filter(Boolean)[0] || "";
+        } else if (["youtube.com", "www.youtube.com", "m.youtube.com", "youtube-nocookie.com", "www.youtube-nocookie.com"].includes(host)) {
+          if (proofAddress.pathname === "/watch") {
+            youtubeId = proofAddress.searchParams.get("v") || "";
+          } else {
+            const videoPath = proofAddress.pathname.match(/^\/(?:embed|shorts)\/([^/?]+)/);
+            youtubeId = videoPath ? videoPath[1] : "";
+          }
+        }
+      } catch {
+        youtubeId = "";
+      }
+    }
+
+    if (/^[A-Za-z0-9_-]{11}$/.test(youtubeId)) {
+      thumbnail.textContent = "";
+      const preview = makeElement("img");
+      preview.src = "https://i.ytimg.com/vi/" + youtubeId + "/hqdefault.jpg";
+      preview.alt = "";
+      preview.loading = "lazy";
+      preview.referrerPolicy = "no-referrer";
+      preview.addEventListener("error", () => {
+        preview.remove();
+        thumbnail.textContent = "RDL";
+      }, { once: true });
+      thumbnail.appendChild(preview);
+    }
 
     const details = makeElement("div", "level-details");
     details.append(
