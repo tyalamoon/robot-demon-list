@@ -402,7 +402,16 @@ main {
   background: rgba(255,133,133,.1);
   border-color: var(--red);
 }
-
+.rank-select {
+  max-width: 130px;
+  min-height: 30px;
+  padding: 5px 7px;
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  background: #111;
+  color: var(--gold);
+  font-size: 11px;
+}
 .empty {
   display: flex;
   flex-direction: column;
@@ -1306,7 +1315,32 @@ function renderLeaderboard() {
     }
 
     score.appendChild(makeElement("span", "approved-label", "APPROVED"));
+    if (isRdlOwner) {
+  const rankSelect = makeElement("select", "rank-select");
+  rankSelect.setAttribute(
+    "aria-label",
+    "Set leaderboard rank for " + record.level_name
+  );
 
+  const autoOption = makeElement("option", "", "Automatic rank");
+  autoOption.value = "";
+  rankSelect.appendChild(autoOption);
+
+  for (let position = 1; position <= 100; position++) {
+    const option = makeElement("option", "", "Top " + position);
+    option.value = String(position);
+    rankSelect.appendChild(option);
+  }
+
+  rankSelect.value =
+    record.rank_position == null ? "" : String(record.rank_position);
+
+  rankSelect.addEventListener("change", () => {
+    setLevelRank(record.id, rankSelect.value, rankSelect);
+  });
+
+  score.appendChild(rankSelect);
+}
     /*
       The delete button only appears when the owner check succeeds.
       Supabase RLS must independently enforce owner-only DELETE access.
@@ -1335,7 +1369,68 @@ function renderLeaderboard() {
     levelsElement.appendChild(row);
   });
 }
+async function setLevelRank(recordId, selectedRank, selectElement) {
+  if (!isRdlOwner) {
+    alert("Only the RDL owner can change leaderboard rankings.");
+    return;
+  }
 
+  const rankPosition =
+    selectedRank === "" ? null : Number(selectedRank);
+
+  if (
+    rankPosition !== null &&
+    (!Number.isInteger(rankPosition) ||
+      rankPosition < 1 ||
+      rankPosition > 100)
+  ) {
+    alert("Choose a rank between Top 1 and Top 100, or Automatic rank.");
+    return;
+  }
+
+  selectElement.disabled = true;
+
+  try {
+    if (rankPosition !== null) {
+      // Free the selected position before assigning it to this level.
+      const { error: clearError } = await rdlSupabase
+        .from("record_submissions")
+        .update({ rank_position: null })
+        .eq("status", "approved")
+        .eq("rank_position", rankPosition);
+
+      if (clearError) throw clearError;
+    }
+
+    const { data, error } = await rdlSupabase
+      .from("record_submissions")
+      .update({ rank_position: rankPosition })
+      .eq("id", recordId)
+      .eq("status", "approved")
+      .select("id");
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      throw new Error(
+        "No approved record was updated. Check the owner UPDATE policy."
+      );
+    }
+
+    await loadRecords();
+  } catch (error) {
+    console.error("RDL rank update error:", error);
+
+    alert(
+      "Couldn't update the rank: " +
+      (error?.message || "Unknown Supabase error")
+    );
+
+    await loadRecords();
+  } finally {
+    selectElement.disabled = false;
+  }
+}
 async function loadRecords() {
   if (loadingRecords) return;
 
@@ -1344,12 +1439,18 @@ async function loadRecords() {
   setLoadingMessage("Loading approved records...", "Please wait.");
 
   try {
-    const { data, error } = await rdlSupabase
-      .from("record_submissions")
-      .select("id, player_name, level_name, percent, proof_url, submitted_at")
-      .eq("status", "approved")
-      .order("percent", { ascending: false })
-      .order("submitted_at", { ascending: true });
+   const { data, error } = await rdlSupabase
+  .from("record_submissions")
+  .select(
+    "id, player_name, level_name, percent, proof_url, submitted_at, rank_position"
+  )
+  .eq("status", "approved")
+  .order("rank_position", {
+    ascending: true,
+    nullsFirst: false
+  })
+  .order("percent", { ascending: false })
+  .order("submitted_at", { ascending: true });
 
     if (error) throw error;
 
