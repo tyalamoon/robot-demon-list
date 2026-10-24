@@ -831,13 +831,19 @@ textarea.field { min-height: 90px; resize: vertical; }
 </header>
 
 <main id="home">
-  <section class="hero">
-    <span class="eyebrow">The community leaderboard</span>
-    <h1>ROBOT <span>DEMON LIST</span></h1>
-    <p>Track robot challenge records, discover players, and submit your achievements. Every public leaderboard entry must be approved.</p>
-    <div class="hero-actions">
-      <a class="button button-primary" href="#leaderboard">View leaderboard</a>
-      <a class="button" href="#submit">Submit a record</a>
+  <section class="section" id="leaderboard">
+    <div class="board">
+      <div class="board-top">
+        <div class="board-tools">
+          <input class="field search-field" id="search" type="search" placeholder="Search players or levels..." aria-label="Search players or levels" maxlength="150">
+        </div>
+      </div>
+      <div id="levels" aria-live="polite">
+        <div class="empty">
+          <strong>Loading leaderboard...</strong>
+          <span>Connecting to the records database.</span>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -895,22 +901,6 @@ textarea.field { min-height: 90px; resize: vertical; }
     <div class="stat-card">
       <span class="stat-value" id="resultCount">—</span>
       <span class="stat-label">Records shown</span>
-    </div>
-  </section>
-
-  <section class="section" id="leaderboard">
-    <div class="board">
-      <div class="board-top">
-        <div class="board-tools">
-          <input class="field search-field" id="search" type="search" placeholder="Search players or levels..." aria-label="Search players or levels" maxlength="150">
-        </div>
-      </div>
-      <div id="levels" aria-live="polite">
-        <div class="empty">
-          <strong>Loading leaderboard...</strong>
-          <span>Connecting to the records database.</span>
-        </div>
-      </div>
     </div>
   </section>
 
