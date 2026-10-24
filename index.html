@@ -7,7 +7,49 @@
 <meta name="theme-color" content="#101112">
 <title>Robot Demon List | RDL</title>
 <meta name="description" content="The Robot Demon List — a community leaderboard for Geometry Dash levels beaten using GD Robot.">
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
 
+.main-nav a {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 11px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: #b8bbc0;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: .15s ease;
+}
+
+.main-nav a:hover,
+.main-nav a.active {
+  color: var(--gold);
+  background: var(--gold-soft);
+  border-color: #51452d;
+}
+
+.nav-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+@media (max-width: 680px) {
+  .main-nav {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .main-nav a {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
 <style>
 :root {
   --bg: #101112;
