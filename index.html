@@ -1,0 +1,258 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Robot Demon List</title>
+<style>
+:root {
+  --bg: #101112;
+  --panel: #181a1c;
+  --border: #303337;
+  --text: #e8e8e8;
+  --muted: #96999e;
+  --accent: #e8bd54;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+}
+header {
+  background: #171819;
+  border-bottom: 1px solid var(--border);
+  padding: 18px 20px;
+}
+.nav {
+  max-width: 1050px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.logo { font-size: 23px; font-weight: 900; letter-spacing: -1px; }
+.logo span { color: var(--accent); }
+nav { display: flex; gap: 18px; flex-wrap: wrap; }
+nav a { color: #c5c6c8; text-decoration: none; }
+nav a:hover { color: var(--accent); }
+main { max-width: 1000px; margin: 35px auto; padding: 0 16px; }
+h1 { font-size: 28px; margin: 0 0 8px; }
+.subtitle { color: var(--muted); margin: 0 0 24px; line-height: 1.5; }
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.stat {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 16px;
+  border-radius: 5px;
+}
+.stat strong { display: block; font-size: 22px; margin-bottom: 5px; }
+.stat span { color: var(--muted); font-size: 12px; }
+.toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+input, select {
+  background: #1b1d1f;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 11px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+input { flex: 1; min-width: 0; }
+select { max-width: 180px; }
+.list {
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.list-heading {
+  display: grid;
+  grid-template-columns: 55px 1fr 145px;
+  gap: 12px;
+  background: #202224;
+  color: var(--muted);
+  padding: 12px 16px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+}
+.level {
+  display: grid;
+  grid-template-columns: 55px 1fr 145px;
+  gap: 12px;
+  align-items: center;
+  padding: 15px 16px;
+  border-top: 1px solid #292b2e;
+  transition: background .15s;
+}
+.level:hover { background: #202224; }
+.rank { color: var(--accent); font-weight: bold; font-size: 16px; }
+.level-name { font-weight: bold; margin-bottom: 5px; }
+.creator { color: var(--muted); font-size: 12px; }
+.difficulty {
+  justify-self: start;
+  padding: 5px 8px;
+  border: 1px solid #684b4b;
+  background: #352426;
+  color: #ffaaaa;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: bold;
+}
+.note {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 5px;
+  padding: 14px;
+  margin-top: 16px;
+  line-height: 1.6;
+}
+footer {
+  text-align: center;
+  color: #777b80;
+  padding: 25px 12px 35px;
+  font-size: 12px;
+}
+@media (max-width: 550px) {
+  .nav { align-items: flex-start; flex-direction: column; }
+  .stats { gap: 7px; }
+  .stat { padding: 11px; }
+  .stat strong { font-size: 18px; }
+  .list-heading, .level { grid-template-columns: 35px 1fr 85px; gap: 8px; padding: 12px 9px; }
+  .difficulty { font-size: 9px; padding: 4px; }
+  .toolbar { flex-direction: column; }
+  select { max-width: none; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <div class="logo">ROBOT <span>DEMON LIST</span></div>
+    <nav>
+      <a href="#leaderboard">Leaderboard</a>
+      <a href="#about">About RDL</a>
+      <a href="#submit">Submit a record</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <h1>Leaderboard</h1>
+  <p class="subtitle">The levels beaten with GD Robot, ranked in one place.</p>
+
+  <section class="stats">
+    <div class="stat"><strong id="levelCount">5</strong><span>Listed levels (demo)</span></div>
+    <div class="stat"><strong>ALL</strong><span>Difficulties allowed</span></div>
+    <div class="stat"><strong>RDL</strong><span>Robot Demon List</span></div>
+  </section>
+
+  <section id="leaderboard">
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Search levels or creators...">
+      <select id="difficulty">
+        <option value="all">All difficulties</option>
+        <option value="Extreme Demon">Extreme Demon</option>
+        <option value="Insane Demon">Insane Demon</option>
+        <option value="Hard Demon">Hard Demon</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="list">
+      <div class="list-heading">
+        <span>Rank</span><span>Level</span><span>Difficulty</span>
+      </div>
+      <div id="levels"></div>
+    </div>
+  </section>
+
+  <section class="note" id="about">
+    <strong>About RDL</strong><br>
+    Robot Demon List is a community leaderboard for Geometry Dash levels
+    beaten using GD Robot. These example entries are placeholders, not verified records.
+  </section>
+
+  <section class="note" id="submit">
+    <strong>Want to submit a record?</strong><br>
+    Record submissions and verification are not available yet. This is the first
+    front-end prototype; account and submission features will need to be built next.
+  </section>
+</main>
+
+<footer>ROBOT DEMON LIST · RDL · Community project</footer>
+
+<script>
+const demoLevels = [
+  { name: "Example Level Alpha", creator: "Demo Creator", difficulty: "Extreme Demon" },
+  { name: "Example Level Beta", creator: "Demo Creator", difficulty: "Insane Demon" },
+  { name: "Example Level Gamma", creator: "Demo Creator", difficulty: "Hard Demon" },
+  { name: "Example Level Delta", creator: "Demo Creator", difficulty: "Other" },
+  { name: "Example Level Epsilon", creator: "Demo Creator", difficulty: "Extreme Demon" }
+];
+
+const levels = document.getElementById("levels");
+const search = document.getElementById("search");
+const difficulty = document.getElementById("difficulty");
+
+function render() {
+  const query = search.value.toLowerCase();
+  const filter = difficulty.value;
+  const filtered = demoLevels.filter(level =>
+    (level.name + " " + level.creator).toLowerCase().includes(query) &&
+    (filter === "all" ||
+     (filter === "Other" ? !["Extreme Demon", "Insane Demon", "Hard Demon"].includes(level.difficulty) : level.difficulty === filter))
+  );
+
+  document.getElementById("levelCount").textContent = filtered.length;
+  levels.innerHTML = "";
+
+  if (!filtered.length) {
+    levels.innerHTML = '<div class="level">No matching levels found.</div>';
+    return;
+  }
+
+  filtered.forEach((level, index) => {
+    const row = document.createElement("div");
+    row.className = "level";
+    const rank = document.createElement("span");
+    rank.className = "rank";
+    rank.textContent = "#" + (index + 1);
+
+    const info = document.createElement("div");
+    const name = document.createElement("div");
+    name.className = "level-name";
+    name.textContent = level.name;
+    const creator = document.createElement("div");
+    creator.className = "creator";
+    creator.textContent = "by " + level.creator;
+    info.append(name, creator);
+
+    const badge = document.createElement("span");
+    badge.className = "difficulty";
+    badge.textContent = level.difficulty.toUpperCase();
+
+    row.append(rank, info, badge);
+    levels.appendChild(row);
+  });
+}
+
+search.addEventListener("input", render);
+difficulty.addEventListener("change", render);
+render();
+</script>
+</body>
+</html>
