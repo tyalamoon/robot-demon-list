@@ -786,33 +786,141 @@ footer strong { color: #b5b8bd; }
 </footer>
 
 <script>
-const demoLevels = [
-  {
-    name: "Example Level Alpha",
-    creator: "Demo Creator",
-    difficulty: "Extreme Demon"
-  },
-  {
-    name: "Example Level Beta",
-    creator: "Demo Creator",
-    difficulty: "Insane Demon"
-  },
-  {
-    name: "Example Level Gamma",
-    creator: "Demo Creator",
-    difficulty: "Hard Demon"
-  },
-  {
-    name: "Example Level Delta",
-    creator: "Demo Creator",
-    difficulty: "Other"
-  },
-  {
-    name: "Example Level Epsilon",
-    creator: "Demo Creator",
-    difficulty: "Extreme Demon"
+
+<script>
+const search = document.getElementById("search");
+const difficulty = document.getElementById("difficulty");
+const levels = document.getElementById("levels");
+
+let records = [];
+
+function makeElement(tag, className = "", text = "") {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  element.textContent = text;
+  return element;
+}
+
+function difficultyClass(difficulty) {
+  return String(difficulty || "Other")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-");
+}
+
+function render() {
+  const query = search.value.trim().toLowerCase();
+  const filter = difficulty.value;
+
+  const filtered = records.filter(record => {
+    const matchesSearch =
+      (record.player_name + " " + record.level_name)
+        .toLowerCase().includes(query);
+
+    // RDL records don't currently have a difficulty column.
+    // Keep the existing filter usable by showing all records
+    // for "all" and "Other".
+    const matchesDifficulty =
+      filter === "all" || filter === "Other";
+
+    return matchesSearch && matchesDifficulty;
+  });
+
+  document.getElementById("levelCount").textContent = filtered.length;
+  document.getElementById("resultCount").textContent = filtered.length;
+  levels.replaceChildren();
+
+  if (filtered.length === 0) {
+    const empty = makeElement("div", "empty");
+    empty.append(
+      makeElement("strong", "", "No approved records yet"),
+      makeElement("span", "", "Approved RDL records will appear here.")
+    );
+    levels.appendChild(empty);
+    return;
   }
-];
+
+  filtered.forEach((record, index) => {
+    const row = makeElement("article", "level");
+
+    const rank = makeElement(
+      "span",
+      "rank" + (index < 3 ? " top-three" : ""),
+      "#" + (index + 1)
+    );
+
+    const info = makeElement("div", "level-info");
+    const thumbnail = makeElement("div", "thumbnail");
+    thumbnail.setAttribute("aria-hidden", "true");
+    thumbnail.appendChild(makeElement("span", "", "RDL"));
+
+    const details = makeElement("div", "level-details");
+    details.append(
+      makeElement("div", "level-name", record.level_name),
+      makeElement("div", "creator", "by " + record.player_name)
+    );
+
+    info.append(thumbnail, details);
+
+    const badge = makeElement(
+      "span",
+      "difficulty other",
+      record.percent + "%"
+    );
+
+    const score = makeElement("div", "level-score");
+    const proof = document.createElement("a");
+    proof.textContent = "PROOF";
+    proof.href = record.proof_url;
+    proof.target = "_blank";
+    proof.rel = "noopener noreferrer";
+    proof.className = "proof-link";
+
+    const status = makeElement("small", "", "APPROVED");
+    score.append(proof, status);
+
+    row.append(rank, info, badge, score);
+    levels.appendChild(row);
+  });
+}
+
+async function loadRecords() {
+  levels.replaceChildren(
+    makeElement("div", "empty", "Loading approved records...")
+  );
+
+  const { data, error } = await rdlSupabase
+    .from("record_submissions")
+    .select("id, player_name, level_name, percent, proof_url, submitted_at")
+    .eq("status", "approved")
+    .order("percent", { ascending: false });
+
+  if (error) {
+    console.error("RDL Supabase error:", error);
+    levels.replaceChildren(
+      makeElement("div", "empty", "Couldn't load records. Please try again later.")
+    );
+    document.getElementById("levelCount").textContent = "0";
+    document.getElementById("resultCount").textContent = "0";
+    return;
+  }
+
+  records = data || [];
+  render();
+}
+
+search.addEventListener("input", render);
+difficulty.addEventListener("change", render);
+
+document.getElementById("clear").addEventListener("click", () => {
+  search.value = "";
+  difficulty.value = "all";
+  render();
+  search.focus();
+});
+
+loadRecords();
+</script>
+
 
 const levels = document.getElementById("levels");
 const search = document.getElementById("search");
