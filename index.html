@@ -1177,9 +1177,15 @@ accountNavLink?.addEventListener("click", (event) => {
 
 submitNavLink?.addEventListener("click", (event) => {
   event.preventDefault();
+  const submitSection = document.getElementById("submit");
+  const wasOpen = document.body.classList.contains("submit-open");
   document.body.classList.remove("account-open", "players-open");
-  document.body.classList.add("submit-open");
-  document.getElementById("submit")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  document.body.classList.toggle("submit-open", !wasOpen);
+  if (!wasOpen) {
+    submitSection?.scrollIntoView({ behavior: "smooth", block: "start" });
+  } else {
+    document.getElementById("leaderboard")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 });
 
 playersNavLink?.addEventListener("click", (event) => {
