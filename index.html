@@ -1008,10 +1008,16 @@ const rdlSupabase = window.supabase.createClient(
 );
 
 const accountNavLink = document.querySelector('.main-nav a[href="#account"]');
+const leaderboardNavLink = document.querySelector('.main-nav a[href="#leaderboard"]');
+
 accountNavLink?.addEventListener("click", (event) => {
   event.preventDefault();
   document.body.classList.add("account-open");
   document.getElementById("account")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+leaderboardNavLink?.addEventListener("click", (event) => {
+  document.body.classList.remove("account-open");
 });
 
 const accountSignedOut = document.getElementById("accountSignedOut");
