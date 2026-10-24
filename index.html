@@ -4,308 +4,838 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Robot Demon List</title>
-<meta
-name="description"
-content="Robot Demon List — a community leaderboard for Geometry Dash robot challenges."
->
+<meta name="description" content="Robot Demon List — a community leaderboard for Geometry Dash robot challenges.">
 <meta name="theme-color" content="#101010">
+
 <style>
-:root{--background:#101010;--surface:#181818;--surface-light:#202020;--border:#303030;--gold:#e8b84d;--gold-light:#ffda80;--text:#f4f1e9;--muted:#a5a29b;--green:#77d99a;--red:#ff8585;}*{box-sizing:border-box;}html{scroll-behavior:smooth;}body{margin:0;min-height:100vh;background:radial-gradient( ellipse at top,rgba(232,184,77,0.08),transparent 45% ),var(--background);color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.6;}a{color:inherit;}button,input,select,textarea{font:inherit;}button,a,input,select,textarea{-webkit-tap-highlight-color:transparent;}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}.site-header{border-bottom:1px solid var(--border);background:rgba(16,16,16,0.92);}.nav-inner{width:min(1120px,calc(100% - 40px));min-height:76px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px;}.brand{display:inline-flex;align-items:center;gap:12px;text-decoration:none;font-weight:900;letter-spacing:1.5px;}.brand-icon{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--gold);border-radius:10px;color:var(--gold);font-size:18px;background:rgba(232,184,77,0.08);}.brand-text{font-size:15px;}.brand-text span{color:var(--gold);}.main-nav{display:flex;align-items:center;gap:24px;}.main-nav a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:700;transition:color 0.2s;}.main-nav a:hover{color:var(--gold);}.main-nav .nav-submit{padding:9px 15px;border:1px solid var(--gold);border-radius:7px;color:var(--gold);}.main-nav .nav-submit:hover{background:var(--gold);color:#15120a;}main{width:min(1120px,calc(100% - 40px));margin:0 auto;}.hero{padding:82px 0 54px;text-align:center;}.eyebrow{display:inline-block;margin-bottom:14px;color:var(--gold);font-size:12px;font-weight:800;letter-spacing:3px;text-transform:uppercase;}.hero h1{margin:0;font-size:clamp(38px,7vw,72px);line-height:1.08;font-weight:950;letter-spacing:-2px;}.hero h1 span{color:var(--gold);}.hero p{max-width:620px;margin:22px auto 0;color:var(--muted);font-size:16px;}.hero-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:28px;}.button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:11px 18px;border:1px solid var(--border);border-radius:8px;background:var(--surface-light);color:var(--text);text-decoration:none;font-size:14px;font-weight:800;cursor:pointer;transition:transform 0.15s,background 0.15s,border-color 0.15s;}.button:hover{transform:translateY(-1px);border-color:var(--gold);}.button-primary{border-color:var(--gold);background:var(--gold);color:#18130a;}.button-primary:hover{background:var(--gold-light);}.button:disabled{opacity:0.6;cursor:wait;transform:none;}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0 0 62px;}.stat-card{padding:22px;border:1px solid var(--border);border-radius:12px;background:linear-gradient( 135deg,rgba(255,255,255,0.035),rgba(255,255,255,0.01) );text-align:center;}.stat-value{display:block;color:var(--gold);font-size:30px;font-weight:900;line-height:1.3;}.stat-label{color:var(--muted);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}.section{margin-bottom:72px;scroll-margin-top:24px;}.section-heading{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:22px;}.section-heading h2{margin:0;font-size:clamp(26px,4vw,36px);line-height:1.2;letter-spacing:-0.8px;}.section-heading h2 span{color:var(--gold);}.section-heading p{margin:8px 0 0;color:var(--muted);font-size:14px;}.section-tag{flex-shrink:0;padding:6px 10px;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:1px;}.board{overflow:hidden;border:1px solid var(--border);border-radius:12px;background:var(--surface);}.board-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding:20px;border-bottom:1px solid var(--border);}.board-title{font-size:15px;font-weight:900;}.board-title span{color:var(--gold);}.board-tools{display:flex;flex:1;justify-content:end;flex-wrap:wrap;gap:10px;}.field{width:100%;min-width:0;padding:12px 13px;border:1px solid var(--border);border-radius:7px;background:#111;color:var(--text);}.field::placeholder{color:#77736c;}.search-field{width:min(100%,300px);}.column-head{display:grid;grid-template-columns:62px minmax(0,1fr) 105px 100px;gap:14px;padding:12px 20px;border-bottom:1px solid var(--border);background:#141414;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;}.column-head span:last-child{text-align:right;}#levels{min-height:110px;}.level{display:grid;grid-template-columns:62px minmax(0,1fr) 105px 100px;align-items:center;gap:14px;padding:17px 20px;border-bottom:1px solid #292929;transition:background 0.15s;}.level:last-child{border-bottom:none;}.level:hover{background:rgba(255,255,255,0.025);}.rank{color:var(--muted);font-size:14px;font-weight:900;}.rank.top-three{color:var(--gold);}.level-info{display:flex;align-items:center;gap:13px;min-width:0;}.thumbnail{display:grid;flex-shrink:0;place-items:center;width:45px;height:45px;border:1px solid #54452a;border-radius:8px;background:linear-gradient( 135deg,rgba(232,184,77,0.16),rgba(232,184,77,0.025) );color:var(--gold);font-size:11px;font-weight:900;}.level-details{min-width:0;}.level-name{overflow-wrap:anywhere;font-size:14px;font-weight:900;}.creator{overflow-wrap:anywhere;margin-top:3px;color:var(--muted);font-size:12px;}.percent-badge{justify-self:start;padding:5px 9px;border:1px solid rgba(232,184,77,0.3);border-radius:6px;background:rgba(232,184,77,0.08);color:var(--gold);font-size:12px;font-weight:900;white-space:nowrap;}.level-score{display:flex;flex-direction:column;align-items:end;gap:5px;}.proof-link{color:var(--gold);font-size:11px;font-weight:900;letter-spacing:0.6px;text-decoration:none;}.proof-link:hover{color:var(--gold-light);text-decoration:underline;}.approved-label{color:var(--green);font-size:9px;font-weight:900;letter-spacing:0.7px;}.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;gap:8px;padding:30px 20px;text-align:center;}.empty strong{font-size:15px;}.empty span{color:var(--muted);font-size:13px;}.board-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:14px 20px;border-top:1px solid var(--border);background:#141414;color:var(--muted);font-size:11px;}.board-bottom strong{color:var(--gold);}.submit-card{display:grid;grid-template-columns:minmax(0,0.8fr) minmax(0,1.2fr);gap:36px;padding:clamp(22px,5vw,42px);border:1px solid #514328;border-radius:13px;background:radial-gradient( ellipse at top left,rgba(232,184,77,0.1),transparent 60% ),var(--surface);}.submit-intro h2{margin:0;font-size:clamp(26px,4vw,36px);line-height:1.2;letter-spacing:-0.8px;}.submit-intro h2 span{color:var(--gold);}.submit-intro p{color:var(--muted);font-size:14px;}.submit-note{margin-top:20px;padding:13px 14px;border-left:3px solid var(--gold);background:rgba(232,184,77,0.06);color:#c8c1b3;font-size:12px;}.submit-form{display:flex;flex-direction:column;gap:15px;}.form-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;}.form-group{display:flex;flex-direction:column;gap:6px;}.form-group label{color:#ded9cf;font-size:12px;font-weight:800;}.form-group small{color:var(--muted);font-size:11px;}textarea.field{min-height:90px;resize:vertical;}.form-message{display:none;padding:12px 14px;border:1px solid var(--border);border-radius:7px;overflow-wrap:anywhere;font-size:13px;}.form-message.visible{display:block;}.form-message.success{border-color:rgba(119,217,154,0.35);background:rgba(119,217,154,0.07);color:var(--green);}.form-message.error{border-color:rgba(255,133,133,0.35);background:rgba(255,133,133,0.07);color:var(--red);}.form-message.info{color:var(--muted);}.submit-form .button{width:100%;}.site-footer{margin-top:30px;border-top:1px solid var(--border);background:#0c0c0c;}.footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;width:min(1120px,calc(100% - 40px));margin:0 auto;padding:28px 0;color:var(--muted);font-size:12px;}.footer-inner strong{color:var(--gold);}.footer-links{display:flex;gap:18px;}.footer-links a{color:var(--muted);text-decoration:none;}.footer-links a:hover{color:var(--gold);}.account-card{max-width:760px;margin:0 auto;padding:clamp(22px,5vw,36px);border:1px solid #514328;border-radius:13px;background:radial-gradient(ellipse at top left,rgba(232,184,77,0.09),transparent 60%),var(--surface);}.account-card h2{margin:0;font-size:clamp(25px,4vw,34px);}.account-card h2 span{color:var(--gold);}.account-copy{color:var(--muted);font-size:14px;}.auth-form{display:grid;gap:13px;margin-top:20px;}.auth-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}.auth-actions .button,.auth-form>.button{width:100%;}.auth-message{margin-top:14px;color:var(--muted);font-size:13px;overflow-wrap:anywhere;}.auth-message.error{color:var(--red);}.auth-message.success{color:var(--green);}.account-status{padding:13px 14px;border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,0.025);overflow-wrap:anywhere;font-size:13px;}.account-status strong{color:var(--gold);}.admin-panel{padding:clamp(20px,4vw,32px);border:1px solid var(--gold);border-radius:12px;background:var(--surface);}.admin-status{margin:12px 0;color:var(--muted);font-size:13px;overflow-wrap:anywhere;}.admin-list{display:grid;gap:14px;margin-top:20px;}.admin-record{padding:18px;border:1px solid var(--border);border-radius:9px;background:#141414;overflow-wrap:anywhere;}.admin-record h3{margin:0 0 8px;color:var(--gold);}.admin-record p{margin:6px 0;font-size:13px;}.admin-record a{color:var(--gold);}.admin-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;}.admin-approve{border-color:var(--green);color:var(--green);}.admin-reject{border-color:var(--red);color:var(--red);}.admin-record button:disabled{opacity:0.5;cursor:wait;}@media (max-width:520px){.auth-actions{grid-template-columns:1fr;}}@media (max-width:720px){.nav-inner{min-height:68px;}.main-nav{gap:13px;}.main-nav a{font-size:12px;}.main-nav .nav-submit{padding:7px 9px;}.hero{padding:60px 0 40px;}.stats{gap:8px;margin-bottom:48px;}.stat-card{padding:16px 8px;}.stat-value{font-size:25px;}.stat-label{font-size:9px;letter-spacing:0.5px;}.section-heading{align-items:start;}.submit-card{grid-template-columns:1fr;gap:25px;}.column-head,.level{grid-template-columns:36px minmax(0,1fr) 75px 66px;gap:8px;padding-left:12px;padding-right:12px;}.column-head{font-size:9px;letter-spacing:0;}.thumbnail{width:36px;height:36px;}.level-info{gap:8px;}.level-name{font-size:12px;}.creator{font-size:11px;}.percent-badge{padding:4px 6px;font-size:11px;}.proof-link{font-size:10px;}.approved-label{font-size:8px;}}@media (max-width:430px){.nav-inner{width:calc(100% - 24px);gap:10px;}.brand{gap:7px;}.brand-icon{width:34px;height:34px;}.brand-text{font-size:12px;letter-spacing:0.5px;}.main-nav{gap:9px;}.main-nav a{font-size:11px;}main{width:calc(100% - 24px);}.search-field{width:100%;}.board-tools{width:100%;}.board-top{padding:15px 12px;}.form-row{grid-template-columns:1fr;}.section-tag{display:none;}.footer-inner{width:calc(100% - 24px);}}
+:root {
+  --background: #101010;
+  --surface: #181818;
+  --surface-light: #202020;
+  --border: #303030;
+  --gold: #e8b84d;
+  --gold-light: #ffda80;
+  --text: #f4f1e9;
+  --muted: #a5a29b;
+  --green: #77d99a;
+  --red: #ff8585;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, rgba(232,184,77,.08), transparent 45%), var(--background);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.6;
+}
+
+a { color: inherit; }
+button, input, select, textarea { font: inherit; }
+
+button:focus-visible, a:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.site-header {
+  border-bottom: 1px solid var(--border);
+  background: rgba(16,16,16,.92);
+}
+
+.nav-inner {
+  width: min(1120px, calc(100% - 40px));
+  min-height: 76px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+}
+
+.brand-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--gold);
+  border-radius: 10px;
+  color: var(--gold);
+  font-size: 18px;
+  background: rgba(232,184,77,.08);
+}
+
+.brand-text { font-size: 15px; }
+.brand-text span, .hero h1 span, .section-heading h2 span,
+.submit-intro h2 span, .account-card h2 span { color: var(--gold); }
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.main-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.main-nav a:hover { color: var(--gold); }
+
+.main-nav .nav-submit {
+  padding: 9px 15px;
+  border: 1px solid var(--gold);
+  border-radius: 7px;
+  color: var(--gold);
+}
+
+.main-nav .nav-submit:hover {
+  background: var(--gold);
+  color: #15120a;
+}
+
+main {
+  width: min(1120px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.hero {
+  padding: 82px 0 54px;
+  text-align: center;
+}
+
+.eyebrow {
+  display: inline-block;
+  margin-bottom: 14px;
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(38px, 7vw, 72px);
+  line-height: 1.08;
+  font-weight: 950;
+  letter-spacing: -2px;
+}
+
+.hero p {
+  max-width: 620px;
+  margin: 22px auto 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.hero-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 11px 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-light);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform .15s, background .15s, border-color .15s;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  border-color: var(--gold);
+}
+
+.button-primary {
+  border-color: var(--gold);
+  background: var(--gold);
+  color: #18130a;
+}
+
+.button-primary:hover { background: var(--gold-light); }
+
+.button:disabled {
+  opacity: .6;
+  cursor: wait;
+  transform: none;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0 0 62px;
+}
+
+.stat-card {
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255,255,255,.035), rgba(255,255,255,.01));
+  text-align: center;
+}
+
+.stat-value {
+  display: block;
+  color: var(--gold);
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1.3;
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.section {
+  margin-bottom: 72px;
+  scroll-margin-top: 24px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: clamp(26px, 4vw, 36px);
+  line-height: 1.2;
+  letter-spacing: -.8px;
+}
+
+.section-heading p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.section-tag {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.board {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.board-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.board-title { font-size: 15px; font-weight: 900; }
+.board-title span { color: var(--gold); }
+
+.board-tools {
+  display: flex;
+  flex: 1;
+  justify-content: end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.field {
+  width: 100%;
+  min-width: 0;
+  padding: 12px 13px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: #111;
+  color: var(--text);
+}
+
+.field::placeholder { color: #77736c; }
+.search-field { width: min(100%, 300px); }
+
+.column-head, .level {
+  display: grid;
+  grid-template-columns: 62px minmax(0,1fr) 105px 100px;
+  gap: 14px;
+  padding: 12px 20px;
+}
+
+.column-head {
+  border-bottom: 1px solid var(--border);
+  background: #141414;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.column-head span:last-child { text-align: right; }
+#levels { min-height: 110px; }
+
+.level {
+  align-items: center;
+  border-bottom: 1px solid #292929;
+  transition: background .15s;
+}
+
+.level:last-child { border-bottom: none; }
+.level:hover { background: rgba(255,255,255,.025); }
+
+.rank { color: var(--muted); font-size: 14px; font-weight: 900; }
+.rank.top-three { color: var(--gold); }
+
+.level-info {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+.thumbnail {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 45px;
+  height: 45px;
+  border: 1px solid #54452a;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(232,184,77,.16), rgba(232,184,77,.025));
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.level-details { min-width: 0; }
+.level-name { overflow-wrap: anywhere; font-size: 14px; font-weight: 900; }
+.creator { overflow-wrap: anywhere; margin-top: 3px; color: var(--muted); font-size: 12px; }
+
+.percent-badge {
+  justify-self: start;
+  padding: 5px 9px;
+  border: 1px solid rgba(232,184,77,.3);
+  border-radius: 6px;
+  background: rgba(232,184,77,.08);
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.level-score {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  gap: 5px;
+}
+
+.proof-link {
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .6px;
+  text-decoration: none;
+}
+
+.proof-link:hover { color: var(--gold-light); text-decoration: underline; }
+
+.approved-label {
+  color: var(--green);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .7px;
+}
+
+.admin-delete-level {
+  min-height: 30px;
+  padding: 5px 8px;
+  border-color: var(--red);
+  color: var(--red);
+  font-size: 10px;
+}
+
+.admin-delete-level:hover {
+  background: rgba(255,133,133,.1);
+  border-color: var(--red);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  gap: 8px;
+  padding: 30px 20px;
+  text-align: center;
+}
+
+.empty strong { font-size: 15px; }
+.empty span { color: var(--muted); font-size: 13px; }
+
+.board-bottom {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  background: #141414;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.board-bottom strong { color: var(--gold); }
+
+.submit-card {
+  display: grid;
+  grid-template-columns: minmax(0,.8fr) minmax(0,1.2fr);
+  gap: 36px;
+  padding: clamp(22px,5vw,42px);
+  border: 1px solid #514328;
+  border-radius: 13px;
+  background: radial-gradient(ellipse at top left, rgba(232,184,77,.1), transparent 60%), var(--surface);
+}
+
+.submit-intro h2 {
+  margin: 0;
+  font-size: clamp(26px,4vw,36px);
+  line-height: 1.2;
+  letter-spacing: -.8px;
+}
+
+.submit-intro p { color: var(--muted); font-size: 14px; }
+
+.submit-note {
+  margin-top: 20px;
+  padding: 13px 14px;
+  border-left: 3px solid var(--gold);
+  background: rgba(232,184,77,.06);
+  color: #c8c1b3;
+  font-size: 12px;
+}
+
+.submit-form { display: flex; flex-direction: column; gap: 15px; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 13px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { color: #ded9cf; font-size: 12px; font-weight: 800; }
+.form-group small { color: var(--muted); font-size: 11px; }
+textarea.field { min-height: 90px; resize: vertical; }
+
+.form-message {
+  display: none;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+
+.form-message.visible { display: block; }
+.form-message.success { border-color: rgba(119,217,154,.35); background: rgba(119,217,154,.07); color: var(--green); }
+.form-message.error { border-color: rgba(255,133,133,.35); background: rgba(255,133,133,.07); color: var(--red); }
+.form-message.info { color: var(--muted); }
+.submit-form .button { width: 100%; }
+
+.site-footer { margin-top: 30px; border-top: 1px solid var(--border); background: #0c0c0c; }
+
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  width: min(1120px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 28px 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.footer-inner strong { color: var(--gold); }
+.footer-links { display: flex; gap: 18px; }
+.footer-links a { color: var(--muted); text-decoration: none; }
+.footer-links a:hover { color: var(--gold); }
+
+.account-card {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(22px,5vw,36px);
+  border: 1px solid #514328;
+  border-radius: 13px;
+  background: radial-gradient(ellipse at top left, rgba(232,184,77,.09), transparent 60%), var(--surface);
+}
+
+.account-card h2 { margin: 0; font-size: clamp(25px,4vw,34px); }
+.account-copy { color: var(--muted); font-size: 14px; }
+.auth-form { display: grid; gap: 13px; margin-top: 20px; }
+
+.auth-actions {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 10px;
+}
+
+.auth-actions .button, .auth-form > .button { width: 100%; }
+.auth-message { margin-top: 14px; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.auth-message.error { color: var(--red); }
+.auth-message.success { color: var(--green); }
+
+.account-status {
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255,255,255,.025);
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+
+.account-status strong { color: var(--gold); }
+
+.admin-panel {
+  padding: clamp(20px,4vw,32px);
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.admin-status { margin: 12px 0; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.admin-list { display: grid; gap: 14px; margin-top: 20px; }
+
+.admin-record {
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #141414;
+  overflow-wrap: anywhere;
+}
+
+.admin-record h3 { margin: 0 0 8px; color: var(--gold); }
+.admin-record p { margin: 6px 0; font-size: 13px; }
+.admin-record a { color: var(--gold); }
+.admin-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.admin-approve { border-color: var(--green); color: var(--green); }
+.admin-reject { border-color: var(--red); color: var(--red); }
+.admin-record button:disabled { opacity: .5; cursor: wait; }
+
+@media (max-width:720px) {
+  .nav-inner { min-height: 68px; }
+  .main-nav { gap: 13px; }
+  .main-nav a { font-size: 12px; }
+  .main-nav .nav-submit { padding: 7px 9px; }
+  .hero { padding: 60px 0 40px; }
+  .stats { gap: 8px; margin-bottom: 48px; }
+  .stat-card { padding: 16px 8px; }
+  .stat-value { font-size: 25px; }
+  .stat-label { font-size: 9px; letter-spacing: .5px; }
+  .section-heading { align-items: start; }
+  .submit-card { grid-template-columns: 1fr; gap: 25px; }
+  .column-head, .level {
+    grid-template-columns: 36px minmax(0,1fr) 75px 66px;
+    gap: 8px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .column-head { font-size: 9px; letter-spacing: 0; }
+  .thumbnail { width: 36px; height: 36px; }
+  .level-info { gap: 8px; }
+  .level-name { font-size: 12px; }
+  .creator { font-size: 11px; }
+  .percent-badge { padding: 4px 6px; font-size: 11px; }
+  .proof-link { font-size: 10px; }
+  .approved-label { font-size: 8px; }
+}
+
+@media (max-width:520px) {
+  .auth-actions { grid-template-columns: 1fr; }
+}
+
+@media (max-width:430px) {
+  .nav-inner { width: calc(100% - 24px); gap: 10px; }
+  .brand { gap: 7px; }
+  .brand-icon { width: 34px; height: 34px; }
+  .brand-text { font-size: 12px; letter-spacing: .5px; }
+  .main-nav { gap: 9px; }
+  .main-nav a { font-size: 11px; }
+  main { width: calc(100% - 24px); }
+  .search-field { width: 100%; }
+  .board-tools { width: 100%; }
+  .board-top { padding: 15px 12px; }
+  .form-row { grid-template-columns: 1fr; }
+  .section-tag { display: none; }
+  .footer-inner { width: calc(100% - 24px); }
+}
 </style>
 </head>
+
 <body>
 <header class="site-header">
-<div class="nav-inner">
-<a class="brand" href="#home" aria-label="Robot Demon List home">
-<span class="brand-icon" aria-hidden="true">R</span>
-<span class="brand-text">ROBOT <span>DEMON LIST</span></span>
-</a>
-<nav class="main-nav" aria-label="Main navigation">
-<a href="#leaderboard">Leaderboard</a>
-<a href="#about">About</a>
-<a href="#account">Account</a>
-<a class="nav-submit" href="#submit">Submit record</a>
-</nav>
-</div>
+  <div class="nav-inner">
+    <a class="brand" href="#home" aria-label="Robot Demon List home">
+      <span class="brand-icon" aria-hidden="true">R</span>
+      <span class="brand-text">ROBOT <span>DEMON LIST</span></span>
+    </a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="#leaderboard">Leaderboard</a>
+      <a href="#about">About</a>
+      <a href="#account">Account</a>
+      <a class="nav-submit" href="#submit">Submit record</a>
+    </nav>
+  </div>
 </header>
+
 <main id="home">
-<section class="hero">
-<span class="eyebrow">The community leaderboard</span>
-<h1>ROBOT <span>DEMON LIST</span></h1>
-<p>
-Track robot challenge records, discover players, and submit your
-achievements. Every public leaderboard entry must be approved.
-</p>
-<div class="hero-actions">
-<a class="button button-primary" href="#leaderboard">
-View leaderboard
-</a>
-<a class="button" href="#submit">Submit a record</a>
-</div>
-</section>
-<section class="section" id="account">
-<div class="section-heading">
-<div>
-<h2>Your <span>Account</span></h2>
-<p>Create an RDL account or sign in.</p>
-</div>
-<span class="section-tag">SUPABASE AUTH</span>
-</div>
-<div class="account-card">
-<div id="accountSignedOut">
-<h2>Join the <span>RDL community</span></h2>
-<p class="account-copy">Use email and password, or continue with Google. If email confirmation is enabled, check your inbox after signing up.</p>
-<form class="auth-form" id="authForm">
-<div class="form-group">
-<label for="authEmail">Email address</label>
-<input class="field" id="authEmail" type="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
-</div>
-<div class="form-group">
-<label for="authPassword">Password</label>
-<input class="field" id="authPassword" type="password" autocomplete="current-password" minlength="6" maxlength="128" placeholder="At least 6 characters" required>
-</div>
-<div class="auth-actions">
-<button class="button button-primary" id="signInButton" type="button">Log in</button>
-<button class="button" id="signUpButton" type="button">Create account</button>
-</div>
-<button class="button" id="googleSignInButton" type="button">Continue with Google</button>
-</form>
-</div>
-<div id="accountSignedIn" hidden>
-<h2>You're <span>signed in</span></h2>
-<p class="account-copy">Your current account:</p>
-<div class="account-status">
-<strong id="accountEmail">Signed-in account</strong>
-</div>
-<div style="margin-top: 16px;">
-<button class="button" id="signOutButton" type="button">Log out</button>
-</div>
-</div>
-<div class="auth-message" id="authMessage" role="status" aria-live="polite"></div>
-</div>
-</section>
-<section class="stats" aria-label="Leaderboard statistics">
-<div class="stat-card">
-<span class="stat-value" id="levelCount">—</span>
-<span class="stat-label">Approved records</span>
-</div>
-<div class="stat-card">
-<span class="stat-value" id="playerCount">—</span>
-<span class="stat-label">Players</span>
-</div>
-<div class="stat-card">
-<span class="stat-value" id="resultCount">—</span>
-<span class="stat-label">Records shown</span>
-</div>
-</section>
-<section class="section" id="leaderboard">
-<div class="section-heading">
-<div>
-<h2>The <span>Leaderboard</span></h2>
-<p>Approved records ranked by completion percentage.</p>
-</div>
-<span class="section-tag">LIVE RECORDS</span>
-</div>
-<div class="board">
-<div class="board-top">
-<div class="board-title">
-RDL <span>/</span> All approved records
-</div>
-<div class="board-tools">
-<input
-class="field search-field"
-id="search"
-type="search"
-placeholder="Search players or levels..."
-aria-label="Search players or levels"
-maxlength="150"
->
-<button class="button" id="clear" type="button">
-Clear
-</button>
-<button class="button" id="refresh" type="button">
-Refresh
-</button>
-</div>
-</div>
-<div class="column-head" aria-hidden="true">
-<span>Rank</span>
-<span>Level / Player</span>
-<span>Progress</span>
-<span>Proof</span>
-</div>
-<div id="levels" aria-live="polite">
-<div class="empty">
-<strong>Loading leaderboard...</strong>
-<span>Connecting to the records database.</span>
-</div>
-</div>
-<div class="board-bottom">
-<span>Showing <strong id="footerCount">0</strong> records</span>
-<span>Only approved submissions are displayed.</span>
-</div>
-</div>
-</section>
-<section class="section" id="submit">
-<div class="submit-card">
-<div class="submit-intro">
-<span class="eyebrow">Your achievement</span>
-<h2>Submit a <span>Record</span></h2>
-<p>
-Completed a challenge? Send your record to the RDL review queue.
-Include a link to your proof so it can be checked.
-</p>
-<div class="submit-note">
-<strong>Important:</strong> submitting a record does not publish
-it immediately. New records stay pending until they are reviewed
-and approved.
-</div>
-</div>
-<form class="submit-form" id="submissionForm">
-<div class="form-row">
-<div class="form-group">
-<label for="playerName">Player name *</label>
-<input
-class="field"
-id="playerName"
-name="player_name"
-type="text"
-placeholder="Your username"
-maxlength="40"
-required
-autocomplete="nickname"
->
-</div>
-<div class="form-group">
-<label for="levelName">Level name *</label>
-<input
-class="field"
-id="levelName"
-name="level_name"
-type="text"
-placeholder="Level you completed"
-maxlength="100"
-required
->
-</div>
-</div>
-<div class="form-group">
-<label for="percent">Completion percentage *</label>
-<input
-class="field"
-id="percent"
-name="percent"
-type="number"
-min="0"
-max="100"
-step="1"
-placeholder="100"
-required
->
-<small>Enter a whole number from 0 to 100.</small>
-</div>
-<div class="form-group">
-<label for="proofUrl">Proof link *</label>
-<input
-class="field"
-id="proofUrl"
-name="proof_url"
-type="url"
-placeholder="https://..."
-maxlength="2048"
-required
->
-<small>A link to your video or other verifiable proof.</small>
-</div>
-<div class="form-group">
-<label for="notes">Notes (optional)</label>
-<textarea
-class="field"
-id="notes"
-name="notes"
-placeholder="Additional information for the reviewers..."
-maxlength="1000"
-></textarea>
-</div>
-<div
-class="form-message"
-id="formMessage"
-role="status"
-aria-live="polite"
-></div>
-<button
-class="button button-primary"
-id="submitButton"
-type="submit"
->
-Submit for review
-</button>
-</form>
-</div>
-</section>
-<!-- Owner-only moderation panel; visibility is not a security boundary. -->
-<section class="section" id="adminPanel" hidden>
-<div class="section-heading">
-<div>
-<h2>RDL <span>Admin Panel</span></h2>
-<p>Review submissions before they appear on the public leaderboard.</p>
-</div>
-<span class="section-tag">OWNER ONLY</span>
-</div>
-<div class="admin-panel">
-<button class="button button-primary" id="refreshPending" type="button">
-Refresh pending records
-</button>
-<p class="admin-status" id="adminStatus" role="status" aria-live="polite">
-Checking administrator permissions...
-</p>
-<div class="admin-list" id="pendingList"></div>
-</div>
-</section>
-<section class="section" id="about">
-<div class="section-heading">
-<div>
-<h2>About <span>RDL</span></h2>
-<p>A community leaderboard for robot challenges.</p>
-</div>
-</div>
-<div class="board" style="padding: 24px;">
-<p style="margin-top: 0; color: var(--muted);">
-Robot Demon List collects player-submitted records. Submissions
-are stored for review and appear on the public leaderboard only
-after approval.
-</p>
-<p style="margin-bottom: 0; color: var(--muted);">
-Geometry Dash is a game by RobTop Games. Robot Demon List is a
-community project and is not an official RobTop Games website.
-</p>
-</div>
-</section>
+  <section class="hero">
+    <span class="eyebrow">The community leaderboard</span>
+    <h1>ROBOT <span>DEMON LIST</span></h1>
+    <p>Track robot challenge records, discover players, and submit your achievements. Every public leaderboard entry must be approved.</p>
+    <div class="hero-actions">
+      <a class="button button-primary" href="#leaderboard">View leaderboard</a>
+      <a class="button" href="#submit">Submit a record</a>
+    </div>
+  </section>
+
+  <section class="section" id="account">
+    <div class="section-heading">
+      <div>
+        <h2>Your <span>Account</span></h2>
+        <p>Create an RDL account or sign in.</p>
+      </div>
+      <span class="section-tag">SUPABASE AUTH</span>
+    </div>
+
+    <div class="account-card">
+      <div id="accountSignedOut">
+        <h2>Join the <span>RDL community</span></h2>
+        <p class="account-copy">Use email and password, or continue with Google. If email confirmation is enabled, check your inbox after signing up.</p>
+        <form class="auth-form" id="authForm">
+          <div class="form-group">
+            <label for="authEmail">Email address</label>
+            <input class="field" id="authEmail" type="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="authPassword">Password</label>
+            <input class="field" id="authPassword" type="password" autocomplete="current-password" minlength="6" maxlength="128" placeholder="At least 6 characters" required>
+          </div>
+          <div class="auth-actions">
+            <button class="button button-primary" id="signInButton" type="button">Log in</button>
+            <button class="button" id="signUpButton" type="button">Create account</button>
+          </div>
+          <button class="button" id="googleSignInButton" type="button">Continue with Google</button>
+        </form>
+      </div>
+
+      <div id="accountSignedIn" hidden>
+        <h2>You're <span>signed in</span></h2>
+        <p class="account-copy">Your current account:</p>
+        <div class="account-status"><strong id="accountEmail">Signed-in account</strong></div>
+        <div style="margin-top:16px">
+          <button class="button" id="signOutButton" type="button">Log out</button>
+        </div>
+      </div>
+      <div class="auth-message" id="authMessage" role="status" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="stats" aria-label="Leaderboard statistics">
+    <div class="stat-card">
+      <span class="stat-value" id="levelCount">—</span>
+      <span class="stat-label">Approved records</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" id="playerCount">—</span>
+      <span class="stat-label">Players</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" id="resultCount">—</span>
+      <span class="stat-label">Records shown</span>
+    </div>
+  </section>
+
+  <section class="section" id="leaderboard">
+    <div class="section-heading">
+      <div>
+        <h2>The <span>Leaderboard</span></h2>
+        <p>Approved records ranked by completion percentage.</p>
+      </div>
+      <span class="section-tag">LIVE RECORDS</span>
+    </div>
+
+    <div class="board">
+      <div class="board-top">
+        <div class="board-title">RDL <span>/</span> All approved records</div>
+        <div class="board-tools">
+          <input class="field search-field" id="search" type="search" placeholder="Search players or levels..." aria-label="Search players or levels" maxlength="150">
+          <button class="button" id="clear" type="button">Clear</button>
+          <button class="button" id="refresh" type="button">Refresh</button>
+        </div>
+      </div>
+      <div class="column-head" aria-hidden="true">
+        <span>Rank</span><span>Level / Player</span><span>Progress</span><span>Proof</span>
+      </div>
+      <div id="levels" aria-live="polite">
+        <div class="empty">
+          <strong>Loading leaderboard...</strong>
+          <span>Connecting to the records database.</span>
+        </div>
+      </div>
+      <div class="board-bottom">
+        <span>Showing <strong id="footerCount">0</strong> records</span>
+        <span>Only approved submissions are displayed.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="submit">
+    <div class="submit-card">
+      <div class="submit-intro">
+        <span class="eyebrow">Your achievement</span>
+        <h2>Submit a <span>Record</span></h2>
+        <p>Completed a challenge? Send your record to the RDL review queue. Include a link to your proof so it can be checked.</p>
+        <div class="submit-note">
+          <strong>Important:</strong> submitting a record does not publish it immediately. New records stay pending until they are reviewed and approved.
+        </div>
+      </div>
+
+      <form class="submit-form" id="submissionForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="playerName">Player name *</label>
+            <input class="field" id="playerName" name="player_name" type="text" placeholder="Your username" maxlength="40" required autocomplete="nickname">
+          </div>
+          <div class="form-group">
+            <label for="levelName">Level name *</label>
+            <input class="field" id="levelName" name="level_name" type="text" placeholder="Level you completed" maxlength="100" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="percent">Completion percentage *</label>
+          <input class="field" id="percent" name="percent" type="number" min="0" max="100" step="1" placeholder="100" required>
+          <small>Enter a whole number from 0 to 100.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="proofUrl">Proof link *</label>
+          <input class="field" id="proofUrl" name="proof_url" type="url" placeholder="https://..." maxlength="2048" required>
+          <small>A link to your video or other verifiable proof.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="notes">Notes (optional)</label>
+          <textarea class="field" id="notes" name="notes" placeholder="Additional information for the reviewers..." maxlength="1000"></textarea>
+        </div>
+
+        <div class="form-message" id="formMessage" role="status" aria-live="polite"></div>
+        <button class="button button-primary" id="submitButton" type="submit">Submit for review</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="section" id="adminPanel" hidden>
+    <div class="section-heading">
+      <div>
+        <h2>RDL <span>Admin Panel</span></h2>
+        <p>Review submissions before they appear on the public leaderboard.</p>
+      </div>
+      <span class="section-tag">OWNER ONLY</span>
+    </div>
+    <div class="admin-panel">
+      <button class="button button-primary" id="refreshPending" type="button">Refresh pending records</button>
+      <p class="admin-status" id="adminStatus" role="status" aria-live="polite">Checking administrator permissions...</p>
+      <div class="admin-list" id="pendingList"></div>
+    </div>
+  </section>
+
+  <section class="section" id="about">
+    <div class="section-heading">
+      <div>
+        <h2>About <span>RDL</span></h2>
+        <p>A community leaderboard for robot challenges.</p>
+      </div>
+    </div>
+    <div class="board" style="padding:24px">
+      <p style="margin-top:0;color:var(--muted)">Robot Demon List collects player-submitted records. Submissions are stored for review and appear on the public leaderboard only after approval.</p>
+      <p style="margin-bottom:0;color:var(--muted)">Geometry Dash is a game by RobTop Games. Robot Demon List is a community project and is not an official RobTop Games website.</p>
+    </div>
+  </section>
 </main>
+
 <footer class="site-footer">
-<div class="footer-inner">
-<div>
-<strong>ROBOT DEMON LIST</strong>
-<span> · Community leaderboard</span>
-</div>
-<div class="footer-links">
-<a href="#leaderboard">Leaderboard</a>
-<a href="#account">Account</a>
-<a href="#submit">Submit</a>
-<a href="#home">Back to top ↑</a>
-</div>
-<div>Community project · Not affiliated with RobTop Games</div>
-</div>
-</footer><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+  <div class="footer-inner">
+    <div><strong>ROBOT DEMON LIST</strong><span> · Community leaderboard</span></div>
+    <div class="footer-links">
+      <a href="#leaderboard">Leaderboard</a>
+      <a href="#account">Account</a>
+      <a href="#submit">Submit</a>
+      <a href="#home">Back to top ↑</a>
+    </div>
+    <div>Community project · Not affiliated with RobTop Games</div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
 "use strict";
-const SUPABASE_URL =
-"https://jcdzinddbqdygfewzotp.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY =
-"sb_publishable_sQgdgYJOfGcqr1l6X-xs1g_L1FRgAl1";
+
+const SUPABASE_URL = "https://jcdzinddbqdygfewzotp.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_sQgdgYJOfGcqr1l6X-xs1g_LFRgAl1";
+
 const rdlSupabase = window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_PUBLISHABLE_KEY
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
 );
+
 const accountSignedOut = document.getElementById("accountSignedOut");
 const accountSignedIn = document.getElementById("accountSignedIn");
 const accountEmail = document.getElementById("accountEmail");
@@ -316,253 +846,12 @@ const signInButton = document.getElementById("signInButton");
 const signUpButton = document.getElementById("signUpButton");
 const googleSignInButton = document.getElementById("googleSignInButton");
 const signOutButton = document.getElementById("signOutButton");
-function showAuthMessage(message, type = "") {
-authMessage.textContent = message;
-authMessage.className = "auth-message" + (type ? " " + type : "");
-}
-function renderAuthSession(session) {
-const user = session?.user || null;
-accountSignedOut.hidden = Boolean(user);
-accountSignedIn.hidden = !user;
-accountEmail.textContent = user?.email || "Signed-in account";
-if (!user) {
-adminPanel.hidden = true;
-isRdlOwner = false;
-}
-}
-async function runAuthAction(action, successMessage) {
-showAuthMessage("", "");
-signInButton.disabled = true;
-signUpButton.disabled = true;
-googleSignInButton.disabled = true;
-try {
-const { error } = await action();
-if (error) throw error;
-if (successMessage) showAuthMessage(successMessage, "success");
-} catch (error) {
-console.error("RDL authentication error:", error);
-showAuthMessage(
-error?.message || "Authentication failed. Please try again.",
-"error"
-);
-} finally {
-signInButton.disabled = false;
-signUpButton.disabled = false;
-googleSignInButton.disabled = false;
-}
-}
-signInButton.addEventListener("click", () => {
-runAuthAction(
-() => rdlSupabase.auth.signInWithPassword({
-email: authEmail.value.trim(),
-password: authPassword.value
-}),
-"Logged in successfully."
-);
-});
-signUpButton.addEventListener("click", () => {
-runAuthAction(
-() => rdlSupabase.auth.signUp({
-email: authEmail.value.trim(),
-password: authPassword.value
-}),
-"Account created. If email confirmation is enabled, check your inbox."
-);
-});
-googleSignInButton.addEventListener("click", async () => {
-await runAuthAction(
-() => rdlSupabase.auth.signInWithOAuth({
-provider: "google",
-options: {
-redirectTo: window.location.origin + window.location.pathname
-}
-}),
-"Redirecting to Google..."
-);
-});
-signOutButton.addEventListener("click", async () => {
-const { error } = await rdlSupabase.auth.signOut();
-if (error) showAuthMessage(error.message, "error");
-else showAuthMessage("You have logged out.", "success");
-});
-rdlSupabase.auth.onAuthStateChange((_event, session) => {
-renderAuthSession(session);
-queueMicrotask(() => refreshAdminPanel(session));
-});
-rdlSupabase.auth.getSession().then(({ data, error }) => {
-if (error) {
-showAuthMessage(error.message, "error");
-return;
-}
-renderAuthSession(data.session);
-refreshAdminPanel(data.session);
-});
-/* RDL OWNER-ONLY ADMIN MODERATION */
+
 const adminPanel = document.getElementById("adminPanel");
 const adminStatus = document.getElementById("adminStatus");
 const pendingList = document.getElementById("pendingList");
 const refreshPendingButton = document.getElementById("refreshPending");
-let isRdlOwner = false;
-let loadingPending = false;
-let adminRequestVersion = 0;
-function setAdminStatus(message) {
-adminStatus.textContent = message;
-}
-async function refreshAdminPanel(session) {
-const requestVersion = ++adminRequestVersion;
-isRdlOwner = false;
-adminPanel.hidden = true;
-pendingList.replaceChildren();
-if (!session || !session.user) {
-setAdminStatus("Sign in with the owner account to access moderation.");
-return;
-}
-setAdminStatus("Checking administrator permissions...");
-try {
-const { data, error } = await rdlSupabase.rpc("is_rdl_owner");
-if (error) throw error;
-const { data: currentSessionData, error: sessionError } =
-await rdlSupabase.auth.getSession();
-if (sessionError) throw sessionError;
-const currentUserId = currentSessionData.session?.user?.id;
-if (requestVersion !== adminRequestVersion || currentUserId !== session.user.id) {
-return;
-}
-if (data !== true) {
-setAdminStatus("This account does not have administrator access.");
-return;
-}
-isRdlOwner = true;
-adminPanel.hidden = false;
-await loadPendingSubmissions();
-} catch (error) {
-console.error("RDL admin permission check failed:", error);
-if (requestVersion === adminRequestVersion) {
-setAdminStatus(
-"Couldn't verify admin permissions. Check the public.is_rdl_owner() function and its EXECUTE permission."
-);
-}
-}
-}
-async function loadPendingSubmissions() {
-if (!isRdlOwner || loadingPending) return;
-loadingPending = true;
-refreshPendingButton.disabled = true;
-pendingList.replaceChildren();
-setAdminStatus("Loading pending submissions...");
-try {
-const { data, error } = await rdlSupabase
-.from("record_submissions")
-.select("id, player_name, level_name, percent, proof_url, notes, submitted_at")
-.eq("status", "pending")
-.order("submitted_at", { ascending: true });
-if (error) throw error;
-if (!data || data.length === 0) {
-setAdminStatus("No pending submissions. You're all caught up!");
-return;
-}
-setAdminStatus(`${data.length} submission(s) awaiting review.`);
-for (const record of data) {
-const card = document.createElement("article");
-card.className = "admin-record";
-const heading = document.createElement("h3");
-heading.textContent = record.level_name || "Unnamed level";
-const player = document.createElement("p");
-player.textContent = `Player: ${record.player_name || "Unknown"}`;
-const percent = document.createElement("p");
-percent.textContent = `Progress: ${record.percent}%`;
-const proof = document.createElement("p");
-const proofUrl = safeHttpUrl(String(record.proof_url || ""));
-if (proofUrl) {
-const link = document.createElement("a");
-link.href = proofUrl;
-link.target = "_blank";
-link.rel = "noopener noreferrer";
-link.textContent = "Open proof";
-proof.appendChild(link);
-} else {
-proof.textContent = "No valid proof link";
-}
-card.append(heading, player, percent, proof);
-if (record.notes) {
-const notes = document.createElement("p");
-notes.textContent = `Notes: ${record.notes}`;
-card.appendChild(notes);
-}
-if (record.submitted_at) {
-const submitted = document.createElement("p");
-const date = new Date(record.submitted_at);
-submitted.textContent = `Submitted: ${Number.isNaN(date.getTime()) ? record.submitted_at : date.toLocaleString()}`;
-card.appendChild(submitted);
-}
-const actions = document.createElement("div");
-actions.className = "admin-actions";
-const approveButton = document.createElement("button");
-approveButton.type = "button";
-approveButton.className = "button admin-approve";
-approveButton.textContent = "Approve";
-approveButton.addEventListener("click", () => {
-moderateSubmission(record.id, "approved");
-});
-const rejectButton = document.createElement("button");
-rejectButton.type = "button";
-rejectButton.className = "button admin-reject";
-rejectButton.textContent = "Reject";
-rejectButton.addEventListener("click", () => {
-moderateSubmission(record.id, "rejected");
-});
-actions.append(approveButton, rejectButton);
-card.appendChild(actions);
-pendingList.appendChild(card);
-}
-} catch (error) {
-console.error("RDL pending submissions error:", error);
-setAdminStatus(
-"Couldn't load submissions. Check the owner SELECT policy in Supabase."
-);
-} finally {
-loadingPending = false;
-refreshPendingButton.disabled = false;
-}
-}
-async function moderateSubmission(recordId, newStatus) {
-if (!isRdlOwner) {
-setAdminStatus("You don't have permission to moderate records.");
-return;
-}
-const action = newStatus === "approved" ? "approve" : "reject";
-if (!window.confirm(`Are you sure you want to ${action} this record?`)) {
-return;
-}
-setAdminStatus(`${action === "approve" ? "Approving" : "Rejecting"} record...`);
-try {
-const { data, error } = await rdlSupabase
-.from("record_submissions")
-.update({ status: newStatus })
-.eq("id", recordId)
-.eq("status", "pending")
-.select("id");
-if (error) throw error;
-if (!data || data.length === 0) {
-setAdminStatus(
-"No record was changed. It may already have been reviewed, or Supabase denied the update."
-);
-await loadPendingSubmissions();
-return;
-}
-setAdminStatus(newStatus === "approved" ? "Record approved!" : "Record rejected.");
-await loadPendingSubmissions();
-if (newStatus === "approved") {
-await loadRecords();
-}
-} catch (error) {
-console.error("RDL moderation error:", error);
-setAdminStatus(
-"Moderation failed. Check the Supabase UPDATE policy and owner permissions."
-);
-}
-}
-refreshPendingButton.addEventListener("click", loadPendingSubmissions);
+
 const levelsElement = document.getElementById("levels");
 const searchInput = document.getElementById("search");
 const clearButton = document.getElementById("clear");
@@ -571,266 +860,616 @@ const levelCountElement = document.getElementById("levelCount");
 const playerCountElement = document.getElementById("playerCount");
 const resultCountElement = document.getElementById("resultCount");
 const footerCountElement = document.getElementById("footerCount");
-let records = [];
-let loadingRecords = false;
-function makeElement(tag, className = "", text = "") {
-const element = document.createElement(tag);
-if (className) {
-element.className = className;
-}
-if (text !== undefined && text !== null) {
-element.textContent = String(text);
-}
-return element;
-}
-function setLoadingMessage(title, description = "") {
-const empty = makeElement("div", "empty");
-empty.appendChild(makeElement("strong", "", title));
-if (description) {
-empty.appendChild(makeElement("span", "", description));
-}
-levelsElement.replaceChildren(empty);
-}
-function safeHttpUrl(value) {
-try {
-const url = new URL(value);
-if (url.protocol === "https:" || url.protocol === "http:") {
-return url.href;
-}
-} catch {
-}
-return null;
-}
-function updateStatistics(filteredRecords) {
-const uniquePlayers = new Set(
-records.map(record =>
-String(record.player_name || "").trim().toLowerCase()
-)
-);
-levelCountElement.textContent = String(records.length);
-playerCountElement.textContent = String(uniquePlayers.size);
-resultCountElement.textContent = String(filteredRecords.length);
-footerCountElement.textContent = String(filteredRecords.length);
-}
-function renderLeaderboard() {
-const query = searchInput.value.trim().toLowerCase();
-const filteredRecords = records.filter(record => {
-const player = String(record.player_name || "").toLowerCase();
-const level = String(record.level_name || "").toLowerCase();
-return player.includes(query) || level.includes(query);
-});
-updateStatistics(filteredRecords);
-levelsElement.replaceChildren();
-if (filteredRecords.length === 0) {
-const empty = makeElement("div", "empty");
-if (records.length === 0) {
-empty.append(
-makeElement("strong", "", "No approved records yet"),
-makeElement(
-"span",
-"",
-"Submit a record above. Approved records will appear here."
-)
-);
-} else {
-empty.append(
-makeElement("strong", "", "No matching records"),
-makeElement(
-"span",
-"",
-"Try a different player or level name."
-)
-);
-}
-levelsElement.appendChild(empty);
-return;
-}
-filteredRecords.forEach((record, index) => {
-const row = makeElement("article", "level");
-const rank = makeElement(
-"span",
-"rank" + (index < 3 ? " top-three" : ""),
-"#" + (index + 1)
-);
-const info = makeElement("div", "level-info");
-const thumbnail = makeElement("div", "thumbnail", "RDL");
-thumbnail.setAttribute("aria-hidden", "true");
-const details = makeElement("div", "level-details");
-details.append(
-makeElement("div", "level-name", record.level_name),
-makeElement("div", "creator", "by " + record.player_name)
-);
-info.append(thumbnail, details);
-const percent = Number(record.percent);
-const percentBadge = makeElement(
-"span",
-"percent-badge",
-Number.isFinite(percent) ? percent + "%" : "—"
-);
-const score = makeElement("div", "level-score");
-const proofUrl = safeHttpUrl(String(record.proof_url || ""));
-if (proofUrl) {
-const proof = makeElement("a", "proof-link", "VIEW PROOF");
-proof.href = proofUrl;
-proof.target = "_blank";
-proof.rel = "noopener noreferrer";
-score.appendChild(proof);
-} else {
-score.appendChild(
-makeElement("span", "proof-link", "NO VALID LINK")
-);
-}
-score.appendChild(
-makeElement("span", "approved-label", "APPROVED")
-);
-row.append(rank, info, percentBadge, score);
-levelsElement.appendChild(row);
-});
-}
-async function loadRecords() {
-if (loadingRecords) return;
-loadingRecords = true;
-refreshButton.disabled = true;
-setLoadingMessage(
-"Loading approved records...",
-"Please wait."
-);
-try {
-const { data, error } = await rdlSupabase
-.from("record_submissions")
-.select(
-"id, player_name, level_name, percent, proof_url, submitted_at"
-)
-.eq("status", "approved")
-.order("percent", { ascending: false })
-.order("submitted_at", { ascending: true });
-if (error) throw error;
-records = Array.isArray(data) ? data : [];
-renderLeaderboard();
-} catch (error) {
-console.error("RDL leaderboard error:", error);
-records = [];
-updateStatistics([]);
-setLoadingMessage(
-"Couldn't load the leaderboard",
-"Check your internet connection and Supabase settings, then try Refresh."
-);
-} finally {
-loadingRecords = false;
-refreshButton.disabled = false;
-}
-}
-searchInput.addEventListener("input", renderLeaderboard);
-clearButton.addEventListener("click", () => {
-searchInput.value = "";
-renderLeaderboard();
-searchInput.focus();
-});
-refreshButton.addEventListener("click", loadRecords);
+
 const submissionForm = document.getElementById("submissionForm");
 const submitButton = document.getElementById("submitButton");
 const formMessage = document.getElementById("formMessage");
-function showFormMessage(message, type) {
-formMessage.textContent = message;
-formMessage.className = "form-message visible " + type;
+
+let isRdlOwner = false;
+let loadingPending = false;
+let loadingRecords = false;
+let adminRequestVersion = 0;
+let records = [];
+
+function showAuthMessage(message, type = "") {
+  authMessage.textContent = message;
+  authMessage.className = "auth-message" + (type ? " " + type : "");
 }
-function hideFormMessage() {
-formMessage.textContent = "";
-formMessage.className = "form-message";
+
+function setAdminStatus(message) {
+  adminStatus.textContent = message;
 }
-submissionForm.addEventListener("submit", async event => {
-event.preventDefault();
-hideFormMessage();
-const playerName = document
-.getElementById("playerName")
-.value.trim();
-const levelName = document
-.getElementById("levelName")
-.value.trim();
-const percentInput = document
-.getElementById("percent")
-.value.trim();
-const proofInput = document
-.getElementById("proofUrl")
-.value.trim();
-const notes = document
-.getElementById("notes")
-.value.trim();
-if (!playerName || playerName.length > 40) {
-showFormMessage(
-"Enter a player name between 1 and 40 characters.",
-"error"
-);
-return;
+
+function makeElement(tag, className = "", text = "") {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (text !== undefined && text !== null) {
+    element.textContent = String(text);
+  }
+  return element;
 }
-if (!levelName || levelName.length > 100) {
-showFormMessage(
-"Enter a level name between 1 and 100 characters.",
-"error"
-);
-return;
+
+function safeHttpUrl(value) {
+  try {
+    const url = new URL(value);
+    if (url.protocol === "https:" || url.protocol === "http:") {
+      return url.href;
+    }
+  } catch {}
+  return null;
 }
-if (
-percentInput === "" ||
-!/^\d+$/.test(percentInput) ||
-Number(percentInput) < 0 ||
-Number(percentInput) > 100
-) {
-showFormMessage(
-"Completion must be a whole number from 0 to 100.",
-"error"
-);
-return;
+
+function renderAuthSession(session) {
+  const user = session?.user || null;
+  accountSignedOut.hidden = Boolean(user);
+  accountSignedIn.hidden = !user;
+  accountEmail.textContent = user?.email || "Signed-in account";
+
+  if (!user) {
+    isRdlOwner = false;
+    adminPanel.hidden = true;
+  }
 }
-const proofUrl = safeHttpUrl(proofInput);
-if (!proofUrl || proofInput.length > 2048) {
-showFormMessage(
-"Enter a valid proof link starting with http:// or https://.",
-"error"
-);
-return;
+
+async function runAuthAction(action, successMessage) {
+  showAuthMessage("");
+
+  signInButton.disabled = true;
+  signUpButton.disabled = true;
+  googleSignInButton.disabled = true;
+
+  try {
+    const { error } = await action();
+    if (error) throw error;
+    if (successMessage) showAuthMessage(successMessage, "success");
+  } catch (error) {
+    console.error("RDL authentication error:", error);
+    showAuthMessage(
+      error?.message || "Authentication failed. Please try again.",
+      "error"
+    );
+  } finally {
+    signInButton.disabled = false;
+    signUpButton.disabled = false;
+    googleSignInButton.disabled = false;
+  }
 }
-if (notes.length > 1000) {
-showFormMessage(
-"Notes must be 1000 characters or fewer.",
-"error"
-);
-return;
-}
-submitButton.disabled = true;
-submitButton.textContent = "Submitting...";
-showFormMessage(
-"Sending your record for review...",
-"info"
-);
-try {
-const submission = {
-player_name: playerName,
-level_name: levelName,
-percent: Number(percentInput),
-proof_url: proofUrl,
-notes: notes || null
-};
-const { error } = await rdlSupabase
-.from("record_submissions")
-.insert(submission);
-if (error) throw error;
-submissionForm.reset();
-showFormMessage(
-"Record submitted successfully! It is now pending review and will only appear on the leaderboard if approved.",
-"success"
-);
-} catch (error) {
-console.error("RDL submission error:", error);
-showFormMessage(
-"Your record could not be submitted. Please check your connection and database insert policy, then try again.",
-"error"
-);
-} finally {
-submitButton.disabled = false;
-submitButton.textContent = "Submit for review";
-}
+
+signInButton.addEventListener("click", () => {
+  runAuthAction(
+    () => rdlSupabase.auth.signInWithPassword({
+      email: authEmail.value.trim(),
+      password: authPassword.value
+    }),
+    "Logged in successfully."
+  );
 });
+
+signUpButton.addEventListener("click", () => {
+  runAuthAction(
+    () => rdlSupabase.auth.signUp({
+      email: authEmail.value.trim(),
+      password: authPassword.value
+    }),
+    "Account created. If email confirmation is enabled, check your inbox."
+  );
+});
+
+googleSignInButton.addEventListener("click", () => {
+  runAuthAction(
+    () => rdlSupabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + window.location.pathname
+      }
+    }),
+    "Redirecting to Google..."
+  );
+});
+
+signOutButton.addEventListener("click", async () => {
+  const { error } = await rdlSupabase.auth.signOut();
+  if (error) showAuthMessage(error.message, "error");
+  else showAuthMessage("You have logged out.", "success");
+});
+
+/* OWNER PERMISSION CHECK */
+async function refreshAdminPanel(session) {
+  const requestVersion = ++adminRequestVersion;
+  isRdlOwner = false;
+  adminPanel.hidden = true;
+  pendingList.replaceChildren();
+
+  if (!session?.user) {
+    setAdminStatus("Sign in with the owner account to access moderation.");
+    renderLeaderboard();
+    return;
+  }
+
+  setAdminStatus("Checking administrator permissions...");
+
+  try {
+    const { data, error } = await rdlSupabase.rpc("is_rdl_owner");
+    if (error) throw error;
+
+    const { data: sessionData, error: sessionError } =
+      await rdlSupabase.auth.getSession();
+
+    if (sessionError) throw sessionError;
+
+    if (requestVersion !== adminRequestVersion) return;
+
+    const currentUserId = sessionData.session?.user?.id;
+    if (currentUserId !== session.user.id) return;
+
+    if (data !== true) {
+      setAdminStatus("This account does not have administrator access.");
+      renderLeaderboard();
+      return;
+    }
+
+    isRdlOwner = true;
+    adminPanel.hidden = false;
+
+    renderLeaderboard();
+    await loadPendingSubmissions();
+  } catch (error) {
+    console.error("RDL admin permission check failed:", error);
+    if (requestVersion === adminRequestVersion) {
+      setAdminStatus(
+        "Couldn't verify admin permissions. Check is_rdl_owner() and its EXECUTE permission."
+      );
+    }
+    renderLeaderboard();
+  }
+}
+
+rdlSupabase.auth.onAuthStateChange((_event, session) => {
+  renderAuthSession(session);
+  queueMicrotask(() => refreshAdminPanel(session));
+});
+
+rdlSupabase.auth.getSession().then(({ data, error }) => {
+  if (error) {
+    showAuthMessage(error.message, "error");
+    return;
+  }
+  renderAuthSession(data.session);
+  refreshAdminPanel(data.session);
+});
+
+/* PENDING SUBMISSIONS */
+async function loadPendingSubmissions() {
+  if (!isRdlOwner || loadingPending) return;
+
+  loadingPending = true;
+  refreshPendingButton.disabled = true;
+  pendingList.replaceChildren();
+  setAdminStatus("Loading pending submissions...");
+
+  try {
+    const { data, error } = await rdlSupabase
+      .from("record_submissions")
+      .select("id, player_name, level_name, percent, proof_url, notes, submitted_at")
+      .eq("status", "pending")
+      .order("submitted_at", { ascending: true });
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      setAdminStatus("No pending submissions. You're all caught up!");
+      return;
+    }
+
+    setAdminStatus(`${data.length} submission(s) awaiting review.`);
+
+    for (const record of data) {
+      const card = makeElement("article", "admin-record");
+      card.appendChild(makeElement("h3", "", record.level_name || "Unnamed level"));
+      card.appendChild(makeElement("p", "", `Player: ${record.player_name || "Unknown"}`));
+      card.appendChild(makeElement("p", "", `Progress: ${record.percent}%`));
+
+      const proof = makeElement("p");
+      const proofUrl = safeHttpUrl(String(record.proof_url || ""));
+
+      if (proofUrl) {
+        const link = makeElement("a", "", "Open proof");
+        link.href = proofUrl;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        proof.appendChild(link);
+      } else {
+        proof.textContent = "No valid proof link";
+      }
+
+      card.appendChild(proof);
+
+      if (record.notes) {
+        card.appendChild(makeElement("p", "", `Notes: ${record.notes}`));
+      }
+
+      if (record.submitted_at) {
+        const date = new Date(record.submitted_at);
+        card.appendChild(makeElement(
+          "p",
+          "",
+          `Submitted: ${Number.isNaN(date.getTime()) ? record.submitted_at : date.toLocaleString()}`
+        ));
+      }
+
+      const actions = makeElement("div", "admin-actions");
+
+      const approveButton = makeElement("button", "button admin-approve", "Approve");
+      approveButton.type = "button";
+      approveButton.addEventListener("click", () => {
+        moderateSubmission(record.id, "approved");
+      });
+
+      const rejectButton = makeElement("button", "button admin-reject", "Reject");
+      rejectButton.type = "button";
+      rejectButton.addEventListener("click", () => {
+        moderateSubmission(record.id, "rejected");
+      });
+
+      const deleteButton = makeElement("button", "button admin-delete-level", "Delete permanently");
+      deleteButton.type = "button";
+      deleteButton.addEventListener("click", () => {
+        deleteLevel(record.id, record.level_name);
+      });
+
+      actions.append(approveButton, rejectButton, deleteButton);
+      card.appendChild(actions);
+      pendingList.appendChild(card);
+    }
+  } catch (error) {
+    console.error("RDL pending submissions error:", error);
+    setAdminStatus("Couldn't load submissions. Check your Supabase SELECT policy.");
+  } finally {
+    loadingPending = false;
+    refreshPendingButton.disabled = false;
+  }
+}
+
+async function moderateSubmission(recordId, newStatus) {
+  if (!isRdlOwner) {
+    setAdminStatus("You don't have permission to moderate records.");
+    return;
+  }
+
+  const action = newStatus === "approved" ? "approve" : "reject";
+  if (!window.confirm(`Are you sure you want to ${action} this record?`)) return;
+
+  setAdminStatus(`${action === "approve" ? "Approving" : "Rejecting"} record...`);
+
+  try {
+    const { data, error } = await rdlSupabase
+      .from("record_submissions")
+      .update({ status: newStatus })
+      .eq("id", recordId)
+      .eq("status", "pending")
+      .select("id");
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      setAdminStatus("No record was changed. It may already have been reviewed or permission was denied.");
+      await loadPendingSubmissions();
+      return;
+    }
+
+    setAdminStatus(newStatus === "approved" ? "Record approved!" : "Record rejected!");
+    await loadPendingSubmissions();
+    await loadRecords();
+  } catch (error) {
+    console.error("RDL moderation error:", error);
+    setAdminStatus("Moderation failed. Check your Supabase UPDATE policy.");
+  }
+}
+
+refreshPendingButton.addEventListener("click", loadPendingSubmissions);
+
+/* DELETE A RECORD */
+async function deleteLevel(recordId, levelName) {
+  if (!isRdlOwner) {
+    alert("Only the RDL owner can delete records.");
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `PERMANENTLY DELETE "${levelName}"?\n\nThis deletes the entire submission from the database, including its proof link and notes. This cannot easily be undone.`
+  );
+
+  if (!confirmed) return;
+
+  try {
+    const { data, error } = await rdlSupabase
+      .from("record_submissions")
+      .delete()
+      .eq("id", recordId)
+      .select("id");
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      alert("Nothing was deleted. Check the Supabase DELETE policy.");
+      return;
+    }
+
+    await loadRecords();
+
+    if (isRdlOwner) {
+      await loadPendingSubmissions();
+    }
+
+    alert(`"${levelName}" was deleted successfully.`);
+  } catch (error) {
+    console.error("RDL delete error:", error);
+    alert("Deletion failed. Check the Supabase DELETE policy and owner permissions.");
+  }
+}
+
+/* LEADERBOARD */
+function setLoadingMessage(title, description = "") {
+  const empty = makeElement("div", "empty");
+  empty.appendChild(makeElement("strong", "", title));
+
+  if (description) {
+    empty.appendChild(makeElement("span", "", description));
+  }
+
+  levelsElement.replaceChildren(empty);
+}
+
+function updateStatistics(filteredRecords) {
+  const uniquePlayers = new Set(
+    records.map(record =>
+      String(record.player_name || "").trim().toLowerCase()
+    )
+  );
+
+  levelCountElement.textContent = String(records.length);
+  playerCountElement.textContent = String(uniquePlayers.size);
+  resultCountElement.textContent = String(filteredRecords.length);
+  footerCountElement.textContent = String(filteredRecords.length);
+}
+
+function renderLeaderboard() {
+  const query = searchInput.value.trim().toLowerCase();
+
+  const filteredRecords = records.filter(record => {
+    const player = String(record.player_name || "").toLowerCase();
+    const level = String(record.level_name || "").toLowerCase();
+    return player.includes(query) || level.includes(query);
+  });
+
+  updateStatistics(filteredRecords);
+  levelsElement.replaceChildren();
+
+  if (filteredRecords.length === 0) {
+    const empty = makeElement("div", "empty");
+
+    if (records.length === 0) {
+      empty.append(
+        makeElement("strong", "", "No approved records yet"),
+        makeElement("span", "", "Submit a record above. Approved records will appear here.")
+      );
+    } else {
+      empty.append(
+        makeElement("strong", "", "No matching records"),
+        makeElement("span", "", "Try a different player or level name.")
+      );
+    }
+
+    levelsElement.appendChild(empty);
+    return;
+  }
+
+  filteredRecords.forEach((record, index) => {
+    const row = makeElement("article", "level");
+
+    const rank = makeElement(
+      "span",
+      "rank" + (index < 3 ? " top-three" : ""),
+      "#" + (index + 1)
+    );
+
+    const info = makeElement("div", "level-info");
+    const thumbnail = makeElement("div", "thumbnail", "RDL");
+    thumbnail.setAttribute("aria-hidden", "true");
+
+    const details = makeElement("div", "level-details");
+    details.append(
+      makeElement("div", "level-name", record.level_name),
+      makeElement("div", "creator", "by " + record.player_name)
+    );
+
+    info.append(thumbnail, details);
+
+    const percent = Number(record.percent);
+    const percentBadge = makeElement(
+      "span",
+      "percent-badge",
+      Number.isFinite(percent) ? percent + "%" : "—"
+    );
+
+    const score = makeElement("div", "level-score");
+    const proofUrl = safeHttpUrl(String(record.proof_url || ""));
+
+    if (proofUrl) {
+      const proof = makeElement("a", "proof-link", "VIEW PROOF");
+      proof.href = proofUrl;
+      proof.target = "_blank";
+      proof.rel = "noopener noreferrer";
+      score.appendChild(proof);
+    } else {
+      score.appendChild(makeElement("span", "proof-link", "NO VALID LINK"));
+    }
+
+    score.appendChild(makeElement("span", "approved-label", "APPROVED"));
+
+    /*
+      The delete button only appears when the owner check succeeds.
+      Supabase RLS must independently enforce owner-only DELETE access.
+    */
+    if (isRdlOwner) {
+      const deleteButton = makeElement(
+        "button",
+        "button admin-delete-level",
+        "Delete level"
+      );
+
+      deleteButton.type = "button";
+      deleteButton.setAttribute(
+        "aria-label",
+        `Permanently delete ${record.level_name}`
+      );
+
+      deleteButton.addEventListener("click", () => {
+        deleteLevel(record.id, record.level_name);
+      });
+
+      score.appendChild(deleteButton);
+    }
+
+    row.append(rank, info, percentBadge, score);
+    levelsElement.appendChild(row);
+  });
+}
+
+async function loadRecords() {
+  if (loadingRecords) return;
+
+  loadingRecords = true;
+  refreshButton.disabled = true;
+  setLoadingMessage("Loading approved records...", "Please wait.");
+
+  try {
+    const { data, error } = await rdlSupabase
+      .from("record_submissions")
+      .select("id, player_name, level_name, percent, proof_url, submitted_at")
+      .eq("status", "approved")
+      .order("percent", { ascending: false })
+      .order("submitted_at", { ascending: true });
+
+    if (error) throw error;
+
+    records = Array.isArray(data) ? data : [];
+    renderLeaderboard();
+  } catch (error) {
+    console.error("RDL leaderboard error:", error);
+    records = [];
+    updateStatistics([]);
+    setLoadingMessage(
+      "Couldn't load the leaderboard",
+      "Check your connection and Supabase settings, then try Refresh."
+    );
+  } finally {
+    loadingRecords = false;
+    refreshButton.disabled = false;
+  }
+}
+
+searchInput.addEventListener("input", renderLeaderboard);
+
+clearButton.addEventListener("click", () => {
+  searchInput.value = "";
+  renderLeaderboard();
+  searchInput.focus();
+});
+
+refreshButton.addEventListener("click", loadRecords);
+
+/* SUBMISSION FORM */
+function showFormMessage(message, type) {
+  formMessage.textContent = message;
+  formMessage.className = "form-message visible " + type;
+}
+
+function hideFormMessage() {
+  formMessage.textContent = "";
+  formMessage.className = "form-message";
+}
+
+submissionForm.addEventListener("submit", async event => {
+  event.preventDefault();
+  hideFormMessage();
+
+  const playerName = document.getElementById("playerName").value.trim();
+  const levelName = document.getElementById("levelName").value.trim();
+  const percentInput = document.getElementById("percent").value.trim();
+  const proofInput = document.getElementById("proofUrl").value.trim();
+  const notes = document.getElementById("notes").value.trim();
+
+  if (!playerName || playerName.length > 40) {
+    showFormMessage("Enter a player name between 1 and 40 characters.", "error");
+    return;
+  }
+
+  if (!levelName || levelName.length > 100) {
+    showFormMessage("Enter a level name between 1 and 100 characters.", "error");
+    return;
+  }
+
+  if (
+    percentInput === "" ||
+    !/^\d+$/.test(percentInput) ||
+    Number(percentInput) < 0 ||
+    Number(percentInput) > 100
+  ) {
+    showFormMessage("Completion must be a whole number from 0 to 100.", "error");
+    return;
+  }
+
+  const proofUrl = safeHttpUrl(proofInput);
+
+  if (!proofUrl || proofInput.length > 2048) {
+    showFormMessage("Enter a valid proof link starting with http:// or https://.", "error");
+    return;
+  }
+
+  if (notes.length > 1000) {
+    showFormMessage("Notes must be 1000 characters or fewer.", "error");
+    return;
+  }
+
+  submitButton.disabled = true;
+  submitButton.textContent = "Submitting...";
+  showFormMessage("Sending your record for review...", "info");
+
+  try {
+    const submission = {
+      player_name: playerName,
+      level_name: levelName,
+      percent: Number(percentInput),
+      proof_url: proofUrl,
+      notes: notes || null
+    };
+
+    const { error } = await rdlSupabase
+      .from("record_submissions")
+      .insert(submission);
+
+    if (error) throw error;
+
+    submissionForm.reset();
+
+    showFormMessage(
+      "Record submitted successfully! It is now pending review and will only appear on the leaderboard if approved.",
+      "success"
+    );
+  } catch (error) {
+    console.error("RDL submission error:", error);
+
+    showFormMessage(
+      "Your record could not be submitted. Check your connection and database INSERT policy.",
+      "error"
+    );
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "Submit for review";
+  }
+});
+
 loadRecords();
 </script>
 </body>
