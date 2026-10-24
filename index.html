@@ -825,6 +825,10 @@ body.account-open #account {
   display: block !important;
 }
 
+body.submit-open #submit {
+  display: block !important;
+}
+
 </style>
 </head>
 
@@ -1009,15 +1013,24 @@ const rdlSupabase = window.supabase.createClient(
 
 const accountNavLink = document.querySelector('.main-nav a[href="#account"]');
 const leaderboardNavLink = document.querySelector('.main-nav a[href="#leaderboard"]');
+const submitNavLink = document.querySelector('.main-nav a[href="#submit"]');
 
 accountNavLink?.addEventListener("click", (event) => {
   event.preventDefault();
+  document.body.classList.remove("submit-open");
   document.body.classList.add("account-open");
   document.getElementById("account")?.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
-leaderboardNavLink?.addEventListener("click", (event) => {
+submitNavLink?.addEventListener("click", (event) => {
+  event.preventDefault();
   document.body.classList.remove("account-open");
+  document.body.classList.add("submit-open");
+  document.getElementById("submit")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+leaderboardNavLink?.addEventListener("click", (event) => {
+  document.body.classList.remove("account-open", "submit-open");
 });
 
 const accountSignedOut = document.getElementById("accountSignedOut");
