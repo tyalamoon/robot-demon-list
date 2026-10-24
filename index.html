@@ -812,16 +812,61 @@ textarea.field { min-height: 90px; resize: vertical; }
 }
 
 
+.player-board-top {
+  justify-content: flex-start;
+}
+
+.player-points-rule {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.player-standing {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr) 115px;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #292929;
+}
+
+.player-standing:last-child { border-bottom: none; }
+.player-standing:hover { background: rgba(255,255,255,.025); }
+.player-standing-head {
+  background: #141414;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.player-standing-info { min-width: 0; }
+.player-standing-name { overflow-wrap: anywhere; font-size: 14px; font-weight: 900; }
+.player-points-total { color: var(--gold); font-weight: 900; text-align: right; white-space: nowrap; }
+
+@media (max-width: 430px) {
+  .player-standing { grid-template-columns: 36px minmax(0, 1fr) 82px; gap: 8px; padding-left: 12px; padding-right: 12px; }
+  .player-standing-name { font-size: 12px; }
+  .player-points-total { font-size: 12px; }
+}
+
 /* Keep the public page focused on the leaderboard until Account is clicked.
    Existing auth, submission, and admin wiring stays intact. */
 #account,
 .stats,
 #submit,
-#about {
+#about,
+#playerLeaderboard {
   display: none !important;
 }
 
 body.account-open #account {
+  display: block !important;
+}
+
+body.players-open #playerLeaderboard {
   display: block !important;
 }
 
@@ -841,6 +886,7 @@ body.submit-open #submit {
     </a>
     <nav class="main-nav" aria-label="Main navigation">
       <a href="#leaderboard">Levels</a>
+      <a href="#playerLeaderboard">Players</a>
       <a href="#about">About</a>
       <a href="#account">Account</a>
       <a class="nav-submit" href="#submit">Submit record</a>
@@ -861,6 +907,23 @@ body.submit-open #submit {
           <strong>Loading leaderboard...</strong>
           <span>Connecting to the records database.</span>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="playerLeaderboard">
+    <div class="board">
+      <div class="board-top player-board-top">
+        <div>
+          <div class="board-title">Player <span>Points</span></div>
+          <p class="player-points-rule">Points are earned from approved level placements and added together for each player.</p>
+        </div>
+      </div>
+      <div class="player-standing player-standing-head" aria-hidden="true">
+        <span>Rank</span><span>Player</span><span class="player-points-total">Points</span>
+      </div>
+      <div id="playerPoints" aria-live="polite">
+        <div class="empty"><strong>Loading player leaderboard...</strong></div>
       </div>
     </div>
   </section>
@@ -1014,23 +1077,31 @@ const rdlSupabase = window.supabase.createClient(
 const accountNavLink = document.querySelector('.main-nav a[href="#account"]');
 const leaderboardNavLink = document.querySelector('.main-nav a[href="#leaderboard"]');
 const submitNavLink = document.querySelector('.main-nav a[href="#submit"]');
+const playersNavLink = document.querySelector('.main-nav a[href="#playerLeaderboard"]');
 
 accountNavLink?.addEventListener("click", (event) => {
   event.preventDefault();
-  document.body.classList.remove("submit-open");
+  document.body.classList.remove("submit-open", "players-open");
   document.body.classList.add("account-open");
   document.getElementById("account")?.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
 submitNavLink?.addEventListener("click", (event) => {
   event.preventDefault();
-  document.body.classList.remove("account-open");
+  document.body.classList.remove("account-open", "players-open");
   document.body.classList.add("submit-open");
   document.getElementById("submit")?.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
-leaderboardNavLink?.addEventListener("click", (event) => {
+playersNavLink?.addEventListener("click", (event) => {
+  event.preventDefault();
   document.body.classList.remove("account-open", "submit-open");
+  document.body.classList.add("players-open");
+  document.getElementById("playerLeaderboard")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+leaderboardNavLink?.addEventListener("click", (event) => {
+  document.body.classList.remove("account-open", "submit-open", "players-open");
 });
 
 const accountSignedOut = document.getElementById("accountSignedOut");
@@ -1050,6 +1121,7 @@ const pendingList = document.getElementById("pendingList");
 const refreshPendingButton = document.getElementById("refreshPending");
 
 const levelsElement = document.getElementById("levels");
+const playerPointsElement = document.getElementById("playerPoints");
 const searchInput = document.getElementById("search");
 const levelCountElement = document.getElementById("levelCount");
 const playerCountElement = document.getElementById("playerCount");
@@ -1426,7 +1498,92 @@ function updateStatistics(filteredRecords) {
   resultCountElement.textContent = String(filteredRecords.length);
 }
 
+function getDisplayRanks(sourceRecords) {
+  const assignedRecords = sourceRecords
+    .filter(record => record.rank_position !== null && record.rank_position !== undefined)
+    .sort((a, b) => {
+      const rankA = BigInt(String(a.rank_position));
+      const rankB = BigInt(String(b.rank_position));
+      return rankA < rankB ? -1 : rankA > rankB ? 1 : 0;
+    });
+
+  const displayRanks = new Map();
+  let highestAssignedRank = 0n;
+
+  for (const record of assignedRecords) {
+    const assignedRank = BigInt(String(record.rank_position));
+    displayRanks.set(record.id, assignedRank.toString());
+    if (assignedRank > highestAssignedRank) highestAssignedRank = assignedRank;
+  }
+
+  const automaticRecords = sourceRecords.filter(
+    record => record.rank_position === null || record.rank_position === undefined
+  );
+  let nextAutomaticRank = highestAssignedRank;
+
+  for (const record of automaticRecords) {
+    nextAutomaticRank += 1n;
+    displayRanks.set(record.id, nextAutomaticRank.toString());
+  }
+
+  return displayRanks;
+}
+
+function pointsForRank(rank) {
+  const numericRank = Number(rank);
+  if (!Number.isSafeInteger(numericRank) || numericRank < 1) return 0;
+  if (numericRank <= 41) return 510 - numericRank * 10; // #1 = 500, #41 = 100
+  return Math.max(0, 100 - (numericRank - 41) * 5); // Slower decline after 100 points
+}
+
+function renderPlayerPointsLeaderboard() {
+  if (!playerPointsElement) return;
+  playerPointsElement.replaceChildren();
+
+  if (records.length === 0) {
+    const empty = makeElement("div", "empty");
+    empty.append(
+      makeElement("strong", "", "No approved records yet"),
+      makeElement("span", "", "Player points will appear after records are approved.")
+    );
+    playerPointsElement.appendChild(empty);
+    return;
+  }
+
+  const displayRanks = getDisplayRanks(records);
+  const totals = new Map();
+
+  records.forEach(record => {
+    const name = String(record.player_name || "Unknown").trim() || "Unknown";
+    const key = name.toLocaleLowerCase();
+    const rank = displayRanks.get(record.id);
+    const points = pointsForRank(rank);
+    const current = totals.get(key) || { name, points: 0, records: 0 };
+    current.points += points;
+    current.records += 1;
+    totals.set(key, current);
+  });
+
+  const standings = Array.from(totals.values()).sort((a, b) =>
+    b.points - a.points || a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+  );
+
+  standings.forEach((player, index) => {
+    const row = makeElement("article", "player-standing");
+    const rank = makeElement("span", "rank" + (index < 3 ? " top-three" : ""), "#" + (index + 1));
+    const info = makeElement("div", "player-standing-info");
+    info.append(
+      makeElement("div", "player-standing-name", player.name),
+      makeElement("div", "creator", player.records + (player.records === 1 ? " approved record" : " approved records"))
+    );
+    const points = makeElement("strong", "player-points-total", player.points.toLocaleString() + " pts");
+    row.append(rank, info, points);
+    playerPointsElement.appendChild(row);
+  });
+}
+
 function renderLeaderboard() {
+  renderPlayerPointsLeaderboard();
   const query = searchInput.value.trim().toLowerCase();
 
   const filteredRecords = records.filter(record => {
@@ -1458,32 +1615,7 @@ function renderLeaderboard() {
   }
 
   // Assigned ranks remain fixed when a visitor searches the leaderboard.
-  const assignedRecords = records
-    .filter(record => record.rank_position !== null && record.rank_position !== undefined)
-    .sort((a, b) => {
-      const rankA = BigInt(String(a.rank_position));
-      const rankB = BigInt(String(b.rank_position));
-      return rankA < rankB ? -1 : rankA > rankB ? 1 : 0;
-    });
-
-  const displayRanks = new Map();
-  let highestAssignedRank = 0n;
-
-  for (const record of assignedRecords) {
-    const assignedRank = BigInt(String(record.rank_position));
-    displayRanks.set(record.id, assignedRank.toString());
-    if (assignedRank > highestAssignedRank) highestAssignedRank = assignedRank;
-  }
-
-  const automaticRecords = records.filter(
-    record => record.rank_position === null || record.rank_position === undefined
-  );
-  let nextAutomaticRank = highestAssignedRank;
-
-  for (const record of automaticRecords) {
-    nextAutomaticRank += 1n;
-    displayRanks.set(record.id, nextAutomaticRank.toString());
-  }
+  const displayRanks = getDisplayRanks(records);
 
   filteredRecords.forEach(record => {
     const row = makeElement("article", "level");
