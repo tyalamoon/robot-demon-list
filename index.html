@@ -2,1038 +2,1460 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#101112">
-<title>Robot Demon List | RDL</title>
-<meta name="description" content="The Robot Demon List — a community leaderboard for Geometry Dash levels beaten using GD Robot.">
-.main-nav {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.main-nav a {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 9px 11px;
-  border: 1px solid transparent;
-  border-radius: 5px;
-  color: #b8bbc0;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: .15s ease;
-}
-
-.main-nav a:hover,
-.main-nav a.active {
-  color: var(--gold);
-  background: var(--gold-soft);
-  border-color: #51452d;
-}
-
-.nav-icon {
-  font-size: 16px;
-  line-height: 1;
-}
-
-@media (max-width: 680px) {
-  .main-nav {
-    order: 3;
-    width: 100%;
-    overflow-x: auto;
-  }
-
-  .main-nav a {
-    padding: 8px 10px;
-    font-size: 12px;
-  }
-}
-<style>
-:root {
-  --bg: #101112;
-  --header: #151617;
-  --panel: #191b1d;
-  --panel-hover: #222427;
-  --border: #303337;
-  --text: #eeeeef;
-  --muted: #92969c;
-  --gold: #e8bd54;
-  --gold-soft: rgba(232,189,84,.10);
-  --green: #91d6a0;
-  --red: #ff8585;
-}
-
-* { box-sizing: border-box; }
-
-html { scroll-behavior: smooth; }
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-a { color: inherit; }
-
-button, input, select { font: inherit; }
-
-button, select { cursor: pointer; }
-
-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: rgba(21,22,23,.96);
-  border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(12px);
-}
-
-.nav {
-  max-width: 1120px;
-  min-height: 65px;
-  padding: 0 22px;
-  margin: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.logo-icon {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  background: var(--gold);
-  color: #171717;
-  border-radius: 7px;
-  font-size: 17px;
-  font-weight: 950;
-}
-
-.logo-text {
-  font-size: 16px;
-  font-weight: 900;
-  letter-spacing: -.6px;
-}
-
-.logo-text span { color: var(--gold); }
-
-nav {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-nav a {
-  color: #b8bbc0;
-  text-decoration: none;
-  padding: 9px 12px;
-  border-radius: 5px;
-  transition: .15s;
-}
-
-nav a:hover, nav a.active {
-  color: var(--gold);
-  background: var(--gold-soft);
-}
-
-.nav-status {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--muted);
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-.status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--green);
-}
-
-main {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 30px 22px 55px;
-}
-
-.breadcrumb {
-  color: var(--muted);
-  font-size: 11px;
-  margin-bottom: 17px;
-}
-
-.breadcrumb span { color: var(--gold); }
-
-.page-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 20px;
-  margin-bottom: 23px;
-}
-
-.eyebrow {
-  color: var(--gold);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1.7px;
-  text-transform: uppercase;
-  margin-bottom: 5px;
-}
-
-h1 {
-  font-size: clamp(25px, 4vw, 32px);
-  line-height: 1.15;
-  letter-spacing: -1.1px;
-  margin: 0 0 8px;
-}
-
-.subtitle {
-  color: var(--muted);
-  margin: 0;
-  font-size: 12px;
-}
-
-.beta-badge {
-  flex-shrink: 0;
-  color: var(--gold);
-  border: 1px solid #66542f;
-  background: var(--gold-soft);
-  border-radius: 4px;
-  padding: 5px 8px;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: .7px;
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 25px;
-}
-
-.stat {
-  position: relative;
-  overflow: hidden;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 15px 17px;
-}
-
-.stat::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--gold);
-  opacity: .75;
-}
-
-.stat-label {
-  color: var(--muted);
-  text-transform: uppercase;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .8px;
-}
-
-.stat-value {
-  display: block;
-  font-size: 23px;
-  font-weight: 850;
-  letter-spacing: -.5px;
-  margin-top: 3px;
-}
-
-.stat-foot {
-  color: #73777d;
-  font-size: 10px;
-  margin-top: 2px;
-}
-
-.board {
-  border: 1px solid var(--border);
-  background: var(--panel);
-  border-radius: 7px;
-  overflow: hidden;
-}
-
-.board-top {
-  padding: 17px 18px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 15px;
-  border-bottom: 1px solid var(--border);
-}
-
-.board-title {
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: -.2px;
-}
-
-.board-subtitle {
-  color: var(--muted);
-  font-size: 11px;
-  margin-top: 3px;
-}
-
-.list-count {
-  color: var(--muted);
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-.list-count strong { color: var(--text); }
-
-.toolbar {
-  padding: 12px 18px;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  border-bottom: 1px solid var(--border);
-}
-
-.search-wrap {
-  flex: 1;
-  min-width: 0;
-  position: relative;
-}
-
-.search-icon {
-  position: absolute;
-  left: 11px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--muted);
-  pointer-events: none;
-  font-size: 15px;
-}
-
-input, select {
-  height: 36px;
-  color: var(--text);
-  background: #111213;
-  border: 1px solid #35383d;
-  border-radius: 4px;
-  outline: none;
-}
-
-input {
-  width: 100%;
-  padding: 0 12px 0 34px;
-}
-
-select { padding: 0 30px 0 10px; }
-
-input:focus, select:focus {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 2px var(--gold-soft);
-}
-
-input::placeholder { color: #777b81; }
-
-.clear-btn {
-  height: 36px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: #202225;
-  color: #c6c8cc;
-  padding: 0 12px;
-}
-
-.clear-btn:hover {
-  border-color: var(--gold);
-  color: var(--gold);
-}
-
-.column-head, .level {
-  display: grid;
-  grid-template-columns: 54px minmax(0, 1fr) 145px 75px;
-  align-items: center;
-  gap: 13px;
-}
-
-.column-head {
-  padding: 10px 18px;
-  background: #202225;
-  color: #858991;
-  font-size: 9px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.level {
-  min-height: 76px;
-  padding: 10px 18px;
-  border-top: 1px solid #292c2f;
-  transition: background .15s;
-}
-
-.level:hover { background: var(--panel-hover); }
-
-.rank {
-  color: #a9adb3;
-  font-size: 14px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-
-.rank.top-three { color: var(--gold); }
-
-.level-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.thumbnail {
-  width: 52px;
-  height: 43px;
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid #474039;
-  border-radius: 4px;
-  background:
-    linear-gradient(135deg, transparent 45%, rgba(232,189,84,.14) 46%, transparent 70%),
-    linear-gradient(45deg, #29251d, #161719 65%);
-}
-
-.thumbnail::before {
-  content: "";
-  width: 15px;
-  height: 15px;
-  border: 2px solid var(--gold);
-  transform: rotate(45deg);
-  box-shadow: 0 0 12px rgba(232,189,84,.2);
-}
-
-.thumbnail span {
-  position: absolute;
-  right: 4px;
-  bottom: 1px;
-  color: #b9a77d;
-  font-size: 8px;
-  font-weight: 800;
-}
-
-.level-details { min-width: 0; }
-
-.level-name {
-  font-size: 13px;
-  font-weight: 750;
-  color: #ededee;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 3px;
-}
-
-.creator {
-  color: var(--muted);
-  font-size: 11px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.difficulty {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  max-width: 100%;
-  border: 1px solid #684848;
-  border-radius: 3px;
-  padding: 4px 6px;
-  background: #302020;
-  color: #ffaaaa;
-  font-size: 9px;
-  font-weight: 850;
-  letter-spacing: .3px;
-  white-space: nowrap;
-}
-
-.difficulty.insane {
-  color: #ffca78;
-  background: #302719;
-  border-color: #6a5231;
-}
-
-.difficulty.hard {
-  color: #d3a0ff;
-  background: #291f32;
-  border-color: #554064;
-}
-
-.difficulty.other {
-  color: #b9c4cf;
-  background: #222930;
-  border-color: #3d4b59;
-}
-
-.level-score {
-  text-align: right;
-  color: #b5b8bd;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.level-score small {
-  display: block;
-  margin-top: 3px;
-  color: #747980;
-  font-size: 9px;
-  font-weight: 500;
-}
-
-.empty {
-  text-align: center;
-  padding: 45px 15px;
-  color: var(--muted);
-}
-
-.empty strong {
-  display: block;
-  color: var(--text);
-  font-size: 14px;
-  margin-bottom: 5px;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 17px;
-}
-
-.info-card {
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--panel);
-}
-
-.info-title {
-  font-size: 12px;
-  font-weight: 800;
-  margin-bottom: 6px;
-}
-
-.info-card p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.7;
-}
-
-.info-card a {
-  color: var(--gold);
-  text-decoration: none;
-}
-
-footer {
-  max-width: 1080px;
-  margin: auto;
-  padding: 18px 22px 30px;
-  border-top: 1px solid #26282b;
-  color: #73777d;
-  font-size: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-footer strong { color: #b5b8bd; }
-
-@media (max-width: 680px) {
-  .nav {
-    padding: 12px 15px;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  nav {
-    order: 3;
-    width: 100%;
-    overflow-x: auto;
-  }
-
-  nav a { padding: 7px 9px; }
-
-  .nav-status { margin-left: auto; }
-
-  main { padding: 23px 12px 35px; }
-
-  .page-heading { align-items: flex-start; }
-
-  .stats { gap: 7px; }
-
-  .stat { padding: 12px 10px; }
-
-  .stat-value { font-size: 19px; }
-
-  .stat-label { font-size: 8px; }
-
-  .column-head, .level {
-    grid-template-columns: 29px minmax(0, 1fr) 94px;
-    gap: 8px;
-    padding-left: 10px;
-    padding-right: 10px;
-  }
-
-  .column-head span:last-child { display: none; }
-
-  .level-score { display: none; }
-
-  .thumbnail {
-    width: 42px;
-    height: 38px;
-  }
-
-  .level-info { gap: 8px; }
-
-  .level-name { font-size: 12px; }
-
-  .difficulty {
-    font-size: 8px;
-    padding: 4px;
-  }
-
-  .toolbar {
-    padding: 10px;
-    flex-wrap: wrap;
-  }
-
-  .search-wrap { flex-basis: 100%; }
-
-  .toolbar select { flex: 1; min-width: 0; }
-
-  .info-grid { grid-template-columns: 1fr; }
-
-  footer { padding-left: 12px; padding-right: 12px; }
-}
-
-@media (max-width: 360px) {
-  .column-head, .level {
-    grid-template-columns: 24px minmax(0, 1fr) 78px;
-    gap: 6px;
-  }
-
-  .thumbnail { display: none; }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Robot Demon List</title>
+  <meta
+    name="description"
+    content="Robot Demon List — a community leaderboard for Geometry Dash robot challenges."
+  >
+  <meta name="theme-color" content="#101010">
+
+  <style>
+    :root {
+      --background: #101010;
+      --surface: #181818;
+      --surface-light: #202020;
+      --border: #303030;
+      --gold: #e8b84d;
+      --gold-light: #ffda80;
+      --text: #f4f1e9;
+      --muted: #a5a29b;
+      --green: #77d99a;
+      --red: #ff8585;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(
+          ellipse at top,
+          rgba(232, 184, 77, 0.08),
+          transparent 45%
+        ),
+        var(--background);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.6;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button,
+    a,
+    input,
+    select,
+    textarea {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 3px;
+    }
+
+    .site-header {
+      border-bottom: 1px solid var(--border);
+      background: rgba(16, 16, 16, 0.92);
+    }
+
+    .nav-inner {
+      width: min(1120px, calc(100% - 40px));
+      min-height: 76px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--gold);
+      border-radius: 10px;
+      color: var(--gold);
+      font-size: 18px;
+      background: rgba(232, 184, 77, 0.08);
+    }
+
+    .brand-text {
+      font-size: 15px;
+    }
+
+    .brand-text span {
+      color: var(--gold);
+    }
+
+    .main-nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .main-nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      transition: color 0.2s;
+    }
+
+    .main-nav a:hover {
+      color: var(--gold);
+    }
+
+    .main-nav .nav-submit {
+      padding: 9px 15px;
+      border: 1px solid var(--gold);
+      border-radius: 7px;
+      color: var(--gold);
+    }
+
+    .main-nav .nav-submit:hover {
+      background: var(--gold);
+      color: #15120a;
+    }
+
+    main {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .hero {
+      padding: 82px 0 54px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 14px;
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(38px, 7vw, 72px);
+      line-height: 1.08;
+      font-weight: 950;
+      letter-spacing: -2px;
+    }
+
+    .hero h1 span {
+      color: var(--gold);
+    }
+
+    .hero p {
+      max-width: 620px;
+      margin: 22px auto 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 11px 18px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface-light);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition:
+        transform 0.15s,
+        background 0.15s,
+        border-color 0.15s;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+      border-color: var(--gold);
+    }
+
+    .button-primary {
+      border-color: var(--gold);
+      background: var(--gold);
+      color: #18130a;
+    }
+
+    .button-primary:hover {
+      background: var(--gold-light);
+    }
+
+    .button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+      transform: none;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin: 0 0 62px;
+    }
+
+    .stat-card {
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.035),
+        rgba(255, 255, 255, 0.01)
+      );
+      text-align: center;
+    }
+
+    .stat-value {
+      display: block;
+      color: var(--gold);
+      font-size: 30px;
+      font-weight: 900;
+      line-height: 1.3;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .section {
+      margin-bottom: 72px;
+      scroll-margin-top: 24px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: clamp(26px, 4vw, 36px);
+      line-height: 1.2;
+      letter-spacing: -0.8px;
+    }
+
+    .section-heading h2 span {
+      color: var(--gold);
+    }
+
+    .section-heading p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .section-tag {
+      flex-shrink: 0;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .board {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+    }
+
+    .board-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .board-title {
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .board-title span {
+      color: var(--gold);
+    }
+
+    .board-tools {
+      display: flex;
+      flex: 1;
+      justify-content: end;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .field {
+      width: 100%;
+      min-width: 0;
+      padding: 12px 13px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: #111;
+      color: var(--text);
+    }
+
+    .field::placeholder {
+      color: #77736c;
+    }
+
+    .search-field {
+      width: min(100%, 300px);
+    }
+
+    .column-head {
+      display: grid;
+      grid-template-columns: 62px minmax(0, 1fr) 105px 100px;
+      gap: 14px;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      background: #141414;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .column-head span:last-child {
+      text-align: right;
+    }
+
+    #levels {
+      min-height: 110px;
+    }
+
+    .level {
+      display: grid;
+      grid-template-columns: 62px minmax(0, 1fr) 105px 100px;
+      align-items: center;
+      gap: 14px;
+      padding: 17px 20px;
+      border-bottom: 1px solid #292929;
+      transition: background 0.15s;
+    }
+
+    .level:last-child {
+      border-bottom: none;
+    }
+
+    .level:hover {
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .rank {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .rank.top-three {
+      color: var(--gold);
+    }
+
+    .level-info {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-width: 0;
+    }
+
+    .thumbnail {
+      display: grid;
+      flex-shrink: 0;
+      place-items: center;
+      width: 45px;
+      height: 45px;
+      border: 1px solid #54452a;
+      border-radius: 8px;
+      background:
+        linear-gradient(
+          135deg,
+          rgba(232, 184, 77, 0.16),
+          rgba(232, 184, 77, 0.025)
+        );
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .level-details {
+      min-width: 0;
+    }
+
+    .level-name {
+      overflow-wrap: anywhere;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .creator {
+      overflow-wrap: anywhere;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .percent-badge {
+      justify-self: start;
+      padding: 5px 9px;
+      border: 1px solid rgba(232, 184, 77, 0.3);
+      border-radius: 6px;
+      background: rgba(232, 184, 77, 0.08);
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .level-score {
+      display: flex;
+      flex-direction: column;
+      align-items: end;
+      gap: 5px;
+    }
+
+    .proof-link {
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      text-decoration: none;
+    }
+
+    .proof-link:hover {
+      color: var(--gold-light);
+      text-decoration: underline;
+    }
+
+    .approved-label {
+      color: var(--green);
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 0.7px;
+    }
+
+    .empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 180px;
+      gap: 8px;
+      padding: 30px 20px;
+      text-align: center;
+    }
+
+    .empty strong {
+      font-size: 15px;
+    }
+
+    .empty span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .board-bottom {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      background: #141414;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .board-bottom strong {
+      color: var(--gold);
+    }
+
+    .submit-card {
+      display: grid;
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      gap: 36px;
+      padding: clamp(22px, 5vw, 42px);
+      border: 1px solid #514328;
+      border-radius: 13px;
+      background:
+        radial-gradient(
+          ellipse at top left,
+          rgba(232, 184, 77, 0.1),
+          transparent 60%
+        ),
+        var(--surface);
+    }
+
+    .submit-intro h2 {
+      margin: 0;
+      font-size: clamp(26px, 4vw, 36px);
+      line-height: 1.2;
+      letter-spacing: -0.8px;
+    }
+
+    .submit-intro h2 span {
+      color: var(--gold);
+    }
+
+    .submit-intro p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .submit-note {
+      margin-top: 20px;
+      padding: 13px 14px;
+      border-left: 3px solid var(--gold);
+      background: rgba(232, 184, 77, 0.06);
+      color: #c8c1b3;
+      font-size: 12px;
+    }
+
+    .submit-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 13px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      color: #ded9cf;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .form-group small {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    textarea.field {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .form-message {
+      display: none;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      overflow-wrap: anywhere;
+      font-size: 13px;
+    }
+
+    .form-message.visible {
+      display: block;
+    }
+
+    .form-message.success {
+      border-color: rgba(119, 217, 154, 0.35);
+      background: rgba(119, 217, 154, 0.07);
+      color: var(--green);
+    }
+
+    .form-message.error {
+      border-color: rgba(255, 133, 133, 0.35);
+      background: rgba(255, 133, 133, 0.07);
+      color: var(--red);
+    }
+
+    .form-message.info {
+      color: var(--muted);
+    }
+
+    .submit-form .button {
+      width: 100%;
+    }
+
+    .site-footer {
+      margin-top: 30px;
+      border-top: 1px solid var(--border);
+      background: #0c0c0c;
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 28px 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .footer-inner strong {
+      color: var(--gold);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 18px;
+    }
+
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .footer-links a:hover {
+      color: var(--gold);
+    }
+
+    @media (max-width: 720px) {
+      .nav-inner {
+        min-height: 68px;
+      }
+
+      .main-nav {
+        gap: 13px;
+      }
+
+      .main-nav a {
+        font-size: 12px;
+      }
+
+      .main-nav .nav-submit {
+        padding: 7px 9px;
+      }
+
+      .hero {
+        padding: 60px 0 40px;
+      }
+
+      .stats {
+        gap: 8px;
+        margin-bottom: 48px;
+      }
+
+      .stat-card {
+        padding: 16px 8px;
+      }
+
+      .stat-value {
+        font-size: 25px;
+      }
+
+      .stat-label {
+        font-size: 9px;
+        letter-spacing: 0.5px;
+      }
+
+      .section-heading {
+        align-items: start;
+      }
+
+      .submit-card {
+        grid-template-columns: 1fr;
+        gap: 25px;
+      }
+
+      .column-head,
+      .level {
+        grid-template-columns: 36px minmax(0, 1fr) 75px 66px;
+        gap: 8px;
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .column-head {
+        font-size: 9px;
+        letter-spacing: 0;
+      }
+
+      .thumbnail {
+        width: 36px;
+        height: 36px;
+      }
+
+      .level-info {
+        gap: 8px;
+      }
+
+      .level-name {
+        font-size: 12px;
+      }
+
+      .creator {
+        font-size: 11px;
+      }
+
+      .percent-badge {
+        padding: 4px 6px;
+        font-size: 11px;
+      }
+
+      .proof-link {
+        font-size: 10px;
+      }
+
+      .approved-label {
+        font-size: 8px;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .nav-inner {
+        width: calc(100% - 24px);
+        gap: 10px;
+      }
+
+      .brand {
+        gap: 7px;
+      }
+
+      .brand-icon {
+        width: 34px;
+        height: 34px;
+      }
+
+      .brand-text {
+        font-size: 12px;
+        letter-spacing: 0.5px;
+      }
+
+      .main-nav {
+        gap: 9px;
+      }
+
+      .main-nav a {
+        font-size: 11px;
+      }
+
+      main {
+        width: calc(100% - 24px);
+      }
+
+      .search-field {
+        width: 100%;
+      }
+
+      .board-tools {
+        width: 100%;
+      }
+
+      .board-top {
+        padding: 15px 12px;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .section-tag {
+        display: none;
+      }
+
+      .footer-inner {
+        width: calc(100% - 24px);
+      }
+    }
+  </style>
 </head>
 
 <body>
-<header>
-  <div class="nav">
-    <a class="logo" href="#" aria-label="Robot Demon List home">
-      <div class="logo-icon">R</div>
-      <div class="logo-text">ROBOT <span>DEMON LIST</span></div>
-    </a>
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="brand" href="#home" aria-label="Robot Demon List home">
+        <span class="brand-icon" aria-hidden="true">R</span>
+        <span class="brand-text">ROBOT <span>DEMON LIST</span></span>
+      </a>
 
-    <nav class="main-nav" aria-label="Main navigation">
-  <a href="#levels">
-    <span class="nav-icon">▦</span>
-    <span>Levels</span>
-  </a>
-
-  <a class="active" href="#leaderboard">
-    <span class="nav-icon">🏆</span>
-    <span>Leaderboard</span>
-  </a>
-
-  <a href="#submit">
-    <span class="nav-icon">↗</span>
-    <span>Submit</span>
-  </a>
-
-  <a href="#community">
-    <span class="nav-icon">♧</span>
-    <span>Community</span>
-  </a>
-</nav>
-
-    <div class="nav-status">
-      <span class="status-dot"></span>
-      Community project
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="#leaderboard">Leaderboard</a>
+        <a href="#about">About</a>
+        <a class="nav-submit" href="#submit">Submit record</a>
+      </nav>
     </div>
-  </div>
-</header>
+  </header>
 
-<main>
-  <div class="breadcrumb">RDL / <span>Leaderboard</span></div>
+  <main id="home">
+    <section class="hero">
+      <span class="eyebrow">The community leaderboard</span>
 
-  <div class="page-heading">
-    <div>
-      <div class="eyebrow">Geometry Dash · Robot challenge</div>
-      <h1>Leaderboard</h1>
-      <p class="subtitle">
-        The hardest levels beaten with GD Robot, ranked in one place.
+      <h1>ROBOT <span>DEMON LIST</span></h1>
+
+      <p>
+        Track robot challenge records, discover players, and submit your
+        achievements. Every public leaderboard entry must be approved.
       </p>
-    </div>
-    <span class="beta-badge">EARLY ACCESS</span>
-  </div>
 
-  <section class="stats" aria-label="Leaderboard statistics">
-    <div class="stat">
-      <div class="stat-label">Matching levels</div>
-      <strong class="stat-value" id="levelCount">5</strong>
-      <div class="stat-foot">Shown in this list</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Difficulty range</div>
-      <strong class="stat-value">ALL</strong>
-      <div class="stat-foot">All listed difficulties</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Leaderboard</div>
-      <strong class="stat-value">RDL</strong>
-      <div class="stat-foot">Robot Demon List</div>
-    </div>
-  </section>
+      <div class="hero-actions">
+        <a class="button button-primary" href="#leaderboard">
+          View leaderboard
+        </a>
+        <a class="button" href="#submit">Submit a record</a>
+      </div>
+    </section>
 
-  <section class="board" id="leaderboard">
-    <div id="levels"></div>
-    <div class="board-top">
+    <section class="stats" aria-label="Leaderboard statistics">
+      <div class="stat-card">
+        <span class="stat-value" id="levelCount">—</span>
+        <span class="stat-label">Approved records</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-value" id="playerCount">—</span>
+        <span class="stat-label">Players</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-value" id="resultCount">—</span>
+        <span class="stat-label">Records shown</span>
+      </div>
+    </section>
+
+    <section class="section" id="leaderboard">
+      <div class="section-heading">
+        <div>
+          <h2>The <span>Leaderboard</span></h2>
+          <p>Approved records ranked by completion percentage.</p>
+        </div>
+        <span class="section-tag">LIVE RECORDS</span>
+      </div>
+
+      <div class="board">
+        <div class="board-top">
+          <div class="board-title">
+            RDL <span>/</span> All approved records
+          </div>
+
+          <div class="board-tools">
+            <input
+              class="field search-field"
+              id="search"
+              type="search"
+              placeholder="Search players or levels..."
+              aria-label="Search players or levels"
+              maxlength="150"
+            >
+
+            <button class="button" id="clear" type="button">
+              Clear
+            </button>
+
+            <button class="button" id="refresh" type="button">
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="column-head" aria-hidden="true">
+          <span>Rank</span>
+          <span>Level / Player</span>
+          <span>Progress</span>
+          <span>Proof</span>
+        </div>
+
+        <!-- Keep exactly one element with this ID. -->
+        <div id="levels" aria-live="polite">
+          <div class="empty">
+            <strong>Loading leaderboard...</strong>
+            <span>Connecting to the records database.</span>
+          </div>
+        </div>
+
+        <div class="board-bottom">
+          <span>Showing <strong id="footerCount">0</strong> records</span>
+          <span>Only approved submissions are displayed.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="submit">
+      <div class="submit-card">
+        <div class="submit-intro">
+          <span class="eyebrow">Your achievement</span>
+
+          <h2>Submit a <span>Record</span></h2>
+
+          <p>
+            Completed a challenge? Send your record to the RDL review queue.
+            Include a link to your proof so it can be checked.
+          </p>
+
+          <div class="submit-note">
+            <strong>Important:</strong> submitting a record does not publish
+            it immediately. New records stay pending until they are reviewed
+            and approved.
+          </div>
+        </div>
+
+        <form class="submit-form" id="submissionForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="playerName">Player name *</label>
+              <input
+                class="field"
+                id="playerName"
+                name="player_name"
+                type="text"
+                placeholder="Your username"
+                maxlength="40"
+                required
+                autocomplete="nickname"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="levelName">Level name *</label>
+              <input
+                class="field"
+                id="levelName"
+                name="level_name"
+                type="text"
+                placeholder="Level you completed"
+                maxlength="100"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="percent">Completion percentage *</label>
+            <input
+              class="field"
+              id="percent"
+              name="percent"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              placeholder="100"
+              required
+            >
+            <small>Enter a whole number from 0 to 100.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="proofUrl">Proof link *</label>
+            <input
+              class="field"
+              id="proofUrl"
+              name="proof_url"
+              type="url"
+              placeholder="https://..."
+              maxlength="2048"
+              required
+            >
+            <small>A link to your video or other verifiable proof.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="notes">Notes (optional)</label>
+            <textarea
+              class="field"
+              id="notes"
+              name="notes"
+              placeholder="Additional information for the reviewers..."
+              maxlength="1000"
+            ></textarea>
+          </div>
+
+          <div
+            class="form-message"
+            id="formMessage"
+            role="status"
+            aria-live="polite"
+          ></div>
+
+          <button
+            class="button button-primary"
+            id="submitButton"
+            type="submit"
+          >
+            Submit for review
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <section class="section" id="about">
+      <div class="section-heading">
+        <div>
+          <h2>About <span>RDL</span></h2>
+          <p>A community leaderboard for robot challenges.</p>
+        </div>
+      </div>
+
+      <div class="board" style="padding: 24px;">
+        <p style="margin-top: 0; color: var(--muted);">
+          Robot Demon List collects player-submitted records. Submissions
+          are stored for review and appear on the public leaderboard only
+          after approval.
+        </p>
+        <p style="margin-bottom: 0; color: var(--muted);">
+          Geometry Dash is a game by RobTop Games. Robot Demon List is a
+          community project and is not an official RobTop Games website.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
       <div>
-        <div class="board-title">Level Rankings</div>
-        <div class="board-subtitle">Browse and filter the current level list.</div>
-      </div>
-      <div class="list-count"><strong id="resultCount">5</strong> results</div>
-    </div>
-
-    <div class="toolbar">
-      <div class="search-wrap">
-        <span class="search-icon" aria-hidden="true">⌕</span>
-        <input id="search" type="search"
-          placeholder="Search levels or creators..."
-          aria-label="Search levels or creators">
+        <strong>ROBOT DEMON LIST</strong>
+        <span> · Community leaderboard</span>
       </div>
 
-      <select id="difficulty" aria-label="Filter by difficulty">
-        <option value="all">All difficulties</option>
-        <option value="Extreme Demon">Extreme Demon</option>
-        <option value="Insane Demon">Insane Demon</option>
-        <option value="Hard Demon">Hard Demon</option>
-        <option value="Other">Other</option>
-      </select>
+      <div class="footer-links">
+        <a href="#leaderboard">Leaderboard</a>
+        <a href="#submit">Submit</a>
+        <a href="#home">Back to top ↑</a>
+      </div>
 
-      <button class="clear-btn" id="clear" type="button">Reset</button>
+      <div>Community project · Not affiliated with RobTop Games</div>
     </div>
+  </footer>
 
-    <div class="column-head">
-      <span>Rank</span>
-      <span>Level</span>
-      <span>Difficulty</span>
-      <span style="text-align:right">Status</span>
-    </div>
+  <!-- Load Supabase before the code that uses it. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <div id="levels" aria-live="polite"></div>
-  </section>
+  <script>
+    "use strict";
 
-  <div class="info-grid">
-    <section class="info-card" id="about">
-      <div class="info-title">About RDL</div>
-      <p>
-        Robot Demon List is a community leaderboard for Geometry Dash
-        levels beaten using GD Robot. The current entries are placeholders,
-        not verified records.
-      </p>
-    </section>
+    // --------------------------------------------------
+    // SUPABASE CONFIGURATION
+    // This is the publishable browser key, not a secret key.
+    // Never put a service_role or secret key in this file.
+    // --------------------------------------------------
 
-    <section class="info-card" id="submit">
-      <div class="info-title">Submit a record</div>
-      <p>
-        Record submissions and verification are not available yet.
-        Submission tools and verification rules will be added in a future update.
-      </p>
-    </section>
-  </div>
-</main>
+    const SUPABASE_URL =
+      "https://jcdzinddbqdygfewzotp.supabase.co";
 
-<footer>
-  <span><strong>RDL</strong> · Robot Demon List</span>
-  <span>Community project · Unofficial</span>
-</footer>
+    const SUPABASE_PUBLISHABLE_KEY =
+      "sb_publishable_sQgdgYJOfGcqr1l6X-xs1g_L1FRgAl1";
 
-<script>
-
-<script>
-const search = document.getElementById("search");
-const difficulty = document.getElementById("difficulty");
-const levels = document.getElementById("levels");
-
-let records = [];
-
-function makeElement(tag, className = "", text = "") {
-  const element = document.createElement(tag);
-  if (className) element.className = className;
-  element.textContent = text;
-  return element;
-}
-
-function difficultyClass(difficulty) {
-  return String(difficulty || "Other")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-");
-}
-
-function render() {
-  const query = search.value.trim().toLowerCase();
-  const filter = difficulty.value;
-
-  const filtered = records.filter(record => {
-    const matchesSearch =
-      (record.player_name + " " + record.level_name)
-        .toLowerCase().includes(query);
-
-    // RDL records don't currently have a difficulty column.
-    // Keep the existing filter usable by showing all records
-    // for "all" and "Other".
-    const matchesDifficulty =
-      filter === "all" || filter === "Other";
-
-    return matchesSearch && matchesDifficulty;
-  });
-
-  document.getElementById("levelCount").textContent = filtered.length;
-  document.getElementById("resultCount").textContent = filtered.length;
-  levels.replaceChildren();
-
-  if (filtered.length === 0) {
-    const empty = makeElement("div", "empty");
-    empty.append(
-      makeElement("strong", "", "No approved records yet"),
-      makeElement("span", "", "Approved RDL records will appear here.")
-    );
-    levels.appendChild(empty);
-    return;
-  }
-
-  filtered.forEach((record, index) => {
-    const row = makeElement("article", "level");
-
-    const rank = makeElement(
-      "span",
-      "rank" + (index < 3 ? " top-three" : ""),
-      "#" + (index + 1)
+    const rdlSupabase = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
     );
 
-    const info = makeElement("div", "level-info");
-    const thumbnail = makeElement("div", "thumbnail");
-    thumbnail.setAttribute("aria-hidden", "true");
-    thumbnail.appendChild(makeElement("span", "", "RDL"));
+    // --------------------------------------------------
+    // LEADERBOARD
+    // --------------------------------------------------
 
-    const details = makeElement("div", "level-details");
-    details.append(
-      makeElement("div", "level-name", record.level_name),
-      makeElement("div", "creator", "by " + record.player_name)
-    );
+    const levelsElement = document.getElementById("levels");
+    const searchInput = document.getElementById("search");
+    const clearButton = document.getElementById("clear");
+    const refreshButton = document.getElementById("refresh");
 
-    info.append(thumbnail, details);
+    const levelCountElement = document.getElementById("levelCount");
+    const playerCountElement = document.getElementById("playerCount");
+    const resultCountElement = document.getElementById("resultCount");
+    const footerCountElement = document.getElementById("footerCount");
 
-    const badge = makeElement(
-      "span",
-      "difficulty other",
-      record.percent + "%"
-    );
+    let records = [];
+    let loadingRecords = false;
 
-    const score = makeElement("div", "level-score");
-    const proof = document.createElement("a");
-    proof.textContent = "PROOF";
-    proof.href = record.proof_url;
-    proof.target = "_blank";
-    proof.rel = "noopener noreferrer";
-    proof.className = "proof-link";
+    function makeElement(tag, className = "", text = "") {
+      const element = document.createElement(tag);
 
-    const status = makeElement("small", "", "APPROVED");
-    score.append(proof, status);
+      if (className) {
+        element.className = className;
+      }
 
-    row.append(rank, info, badge, score);
-    levels.appendChild(row);
-  });
-}
+      if (text !== undefined && text !== null) {
+        element.textContent = String(text);
+      }
 
-async function loadRecords() {
-  levels.replaceChildren(
-    makeElement("div", "empty", "Loading approved records...")
-  );
+      return element;
+    }
 
-  const { data, error } = await rdlSupabase
-    .from("record_submissions")
-    .select("id, player_name, level_name, percent, proof_url, submitted_at")
-    .eq("status", "approved")
-    .order("percent", { ascending: false });
+    function setLoadingMessage(title, description = "") {
+      const empty = makeElement("div", "empty");
+      empty.appendChild(makeElement("strong", "", title));
 
-  if (error) {
-    console.error("RDL Supabase error:", error);
-    levels.replaceChildren(
-      makeElement("div", "empty", "Couldn't load records. Please try again later.")
-    );
-    document.getElementById("levelCount").textContent = "0";
-    document.getElementById("resultCount").textContent = "0";
-    return;
-  }
+      if (description) {
+        empty.appendChild(makeElement("span", "", description));
+      }
 
-  records = data || [];
-  render();
-}
+      levelsElement.replaceChildren(empty);
+    }
 
-search.addEventListener("input", render);
-difficulty.addEventListener("change", render);
+    function safeHttpUrl(value) {
+      try {
+        const url = new URL(value);
 
-document.getElementById("clear").addEventListener("click", () => {
-  search.value = "";
-  difficulty.value = "all";
-  render();
-  search.focus();
-});
+        if (url.protocol === "https:" || url.protocol === "http:") {
+          return url.href;
+        }
+      } catch {
+        // Invalid URLs are rejected.
+      }
 
-loadRecords();
-</script>
+      return null;
+    }
 
+    function updateStatistics(filteredRecords) {
+      const uniquePlayers = new Set(
+        records.map(record =>
+          String(record.player_name || "").trim().toLowerCase()
+        )
+      );
 
-const levels = document.getElementById("levels");
-const search = document.getElementById("search");
-const difficulty = document.getElementById("difficulty");
+      levelCountElement.textContent = String(records.length);
+      playerCountElement.textContent = String(uniquePlayers.size);
+      resultCountElement.textContent = String(filteredRecords.length);
+      footerCountElement.textContent = String(filteredRecords.length);
+    }
 
-function difficultyClass(value) {
-  if (value === "Insane Demon") return "insane";
-  if (value === "Hard Demon") return "hard";
-  if (value === "Other") return "other";
-  return "";
-}
+    function renderLeaderboard() {
+      const query = searchInput.value.trim().toLowerCase();
 
-function makeElement(tag, className, text) {
-  const element = document.createElement(tag);
-  if (className) element.className = className;
-  if (text !== undefined) element.textContent = text;
-  return element;
-}
+      const filteredRecords = records.filter(record => {
+        const player = String(record.player_name || "").toLowerCase();
+        const level = String(record.level_name || "").toLowerCase();
 
-function render() {
-  const query = search.value.trim().toLowerCase();
-  const filter = difficulty.value;
+        return player.includes(query) || level.includes(query);
+      });
 
-  const filtered = demoLevels.filter(level => {
-    const matchesSearch =
-      (level.name + " " + level.creator).toLowerCase().includes(query);
+      updateStatistics(filteredRecords);
+      levelsElement.replaceChildren();
 
-    const matchesDifficulty =
-      filter === "all" ||
-      (filter === "Other"
-        ? !["Extreme Demon", "Insane Demon", "Hard Demon"]
-            .includes(level.difficulty)
-        : level.difficulty === filter);
+      if (filteredRecords.length === 0) {
+        const empty = makeElement("div", "empty");
 
-    return matchesSearch && matchesDifficulty;
-  });
+        if (records.length === 0) {
+          empty.append(
+            makeElement("strong", "", "No approved records yet"),
+            makeElement(
+              "span",
+              "",
+              "Submit a record above. Approved records will appear here."
+            )
+          );
+        } else {
+          empty.append(
+            makeElement("strong", "", "No matching records"),
+            makeElement(
+              "span",
+              "",
+              "Try a different player or level name."
+            )
+          );
+        }
 
-  document.getElementById("levelCount").textContent = filtered.length;
-  document.getElementById("resultCount").textContent = filtered.length;
-  levels.replaceChildren();
+        levelsElement.appendChild(empty);
+        return;
+      }
 
-  if (filtered.length === 0) {
-    const empty = makeElement("div", "empty");
-    empty.append(
-      makeElement("strong", "", "No matching levels"),
-      makeElement("span", "", "Try another search or difficulty filter.")
-    );
-    levels.appendChild(empty);
-    return;
-  }
+      filteredRecords.forEach((record, index) => {
+        const row = makeElement("article", "level");
 
-  filtered.forEach((level, index) => {
-    const row = makeElement("article", "level");
+        const rank = makeElement(
+          "span",
+          "rank" + (index < 3 ? " top-three" : ""),
+          "#" + (index + 1)
+        );
 
-    const rank = makeElement(
-      "span",
-      "rank" + (index < 3 ? " top-three" : ""),
-      "#" + (index + 1)
-    );
+        const info = makeElement("div", "level-info");
 
-    const info = makeElement("div", "level-info");
-    const thumbnail = makeElement("div", "thumbnail");
-    thumbnail.setAttribute("aria-hidden", "true");
-    thumbnail.appendChild(makeElement("span", "", "RDL"));
+        const thumbnail = makeElement("div", "thumbnail", "RDL");
+        thumbnail.setAttribute("aria-hidden", "true");
 
-    const details = makeElement("div", "level-details");
-    details.append(
-      makeElement("div", "level-name", level.name),
-      makeElement("div", "creator", "by " + level.creator)
-    );
+        const details = makeElement("div", "level-details");
+        details.append(
+          makeElement("div", "level-name", record.level_name),
+          makeElement("div", "creator", "by " + record.player_name)
+        );
 
-    info.append(thumbnail, details);
+        info.append(thumbnail, details);
 
-    const badge = makeElement(
-      "span",
-      "difficulty " + difficultyClass(level.difficulty),
-      level.difficulty.toUpperCase()
-    );
+        const percent = Number(record.percent);
+        const percentBadge = makeElement(
+          "span",
+          "percent-badge",
+          Number.isFinite(percent) ? percent + "%" : "—"
+        );
 
-    const status = makeElement("div", "level-score");
-    status.append(
-      makeElement("span", "", "DEMO"),
-      makeElement("small", "", "UNVERIFIED")
-    );
+        const score = makeElement("div", "level-score");
+        const proofUrl = safeHttpUrl(String(record.proof_url || ""));
 
-    row.append(rank, info, badge, status);
-    levels.appendChild(row);
-  });
-}
+        if (proofUrl) {
+          const proof = makeElement("a", "proof-link", "VIEW PROOF");
+          proof.href = proofUrl;
+          proof.target = "_blank";
+          proof.rel = "noopener noreferrer";
+          score.appendChild(proof);
+        } else {
+          score.appendChild(
+            makeElement("span", "proof-link", "NO VALID LINK")
+          );
+        }
 
-search.addEventListener("input", render);
-difficulty.addEventListener("change", render);
+        score.appendChild(
+          makeElement("span", "approved-label", "APPROVED")
+        );
 
-document.getElementById("clear").addEventListener("click", () => {
-  search.value = "";
-  difficulty.value = "all";
-  render();
-  search.focus();
-});
+        row.append(rank, info, percentBadge, score);
+        levelsElement.appendChild(row);
+      });
+    }
 
-render();
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-<script>
-  const SUPABASE_URL = "https://jcdzinddbqdygfewzotp.supabase.co";
-  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_sQgdgYJOfGcqr1l6X-xs1g_L1FRgAl1";
+    async function loadRecords() {
+      if (loadingRecords) return;
 
-  const rdlSupabase = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-  );
-</script>
+      loadingRecords = true;
+      refreshButton.disabled = true;
+      setLoadingMessage("Loading approved records...", "Please wait.");
 
+      try {
+        const { data, error } = await rdlSupabase
+          .from("record_submissions")
+          .select(
+            "id, player_name, level_name, percent, proof_url, submitted_at"
+          )
+          .eq("status", "approved")
+          .order("percent", { ascending: false })
+          .order("submitted_at", { ascending: true });
+
+        if (error) {
+          throw error;
+        }
+
+        records = Array.isArray(data) ? data : [];
+        renderLeaderboard();
+      } catch (error) {
+        console.error("RDL leaderboard error:", error);
+
+        records = [];
+        updateStatistics([]);
+
+        setLoadingMessage(
+          "Couldn't load the leaderboard",
+          "Check your internet connection and Supabase settings, then try Refresh."
+        );
+      } finally {
+        loadingRecords = false;
+        refreshButton.disabled = false;
+      }
+    }
+
+    searchInput.addEventListener("input", renderLeaderboard);
+
+    clearButton.addEventListener("click", () => {
+      searchInput.value = "";
+      renderLeaderboard();
+      searchInput.focus();
+    });
+
+    refreshButton.addEventListener("click", loadRecords);
+
+    // --------------------------------------------------
+    // RECORD SUBMISSION FORM
+    // New submissions use the database's default status:
+    // "pending". This form does not approve records.
+    // --------------------------------------------------
+
+    const submissionForm = document.getElementById("submissionForm");
+    const submitButton = document.getElementById("submitButton");
+    const formMessage = document.getElementById("formMessage");
+
+    function showFormMessage(message, type) {
+      formMessage.textContent = message;
+      formMessage.className = "form-message visible " + type;
+    }
+
+    function hideFormMessage() {
+      formMessage.textContent = "";
+      formMessage.className = "form-message";
+    }
+
+    submissionForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      hideFormMessage();
+
+      const playerName = document
+        .getElementById("playerName")
+        .value.trim();
+
+      const levelName = document
+        .getElementById("levelName")
+        .value.trim();
+
+      const percentInput = document
+        .getElementById("percent")
+        .value.trim();
+
+      const proofInput = document
+        .getElementById("proofUrl")
+        .value.trim();
+
+      const notes = document
+        .getElementById("notes")
+        .value.trim();
+
+      if (!playerName || playerName.length > 40) {
+        showFormMessage(
+          "Enter a player name between 1 and 40 characters.",
+          "error"
+        );
+        return;
+      }
+
+      if (!levelName || levelName.length > 100) {
+        showFormMessage(
+          "Enter a level name between 1 and 100 characters.",
+          "error"
+        );
+        return;
+      }
+
+      if (
+        percentInput === "" ||
+        !/^\d+$/.test(percentInput) ||
+        Number(percentInput) < 0 ||
+        Number(percentInput) > 100
+      ) {
+        showFormMessage(
+          "Completion must be a whole number from 0 to 100.",
+          "error"
+        );
+        return;
+      }
+
+      const proofUrl = safeHttpUrl(proofInput);
+
+      if (!proofUrl || proofInput.length > 2048) {
+        showFormMessage(
+          "Enter a valid proof link starting with http:// or https://.",
+          "error"
+        );
+        return;
+      }
+
+      if (notes.length > 1000) {
+        showFormMessage(
+          "Notes must be 1000 characters or fewer.",
+          "error"
+        );
+        return;
+      }
+
+      submitButton.disabled = true;
+      submitButton.textContent = "Submitting...";
+      showFormMessage("Sending your record for review...", "info");
+
+      try {
+        const submission = {
+          player_name: playerName,
+          level_name: levelName,
+          percent: Number(percentInput),
+          proof_url: proofUrl,
+          notes: notes || null
+        };
+
+        // Deliberately omit "status".
+        // Supabase sets it to "pending" by default.
+        const { error } = await rdlSupabase
+          .from("record_submissions")
+          .insert(submission);
+
+        if (error) {
+          throw error;
+        }
+
+        submissionForm.reset();
+
+        showFormMessage(
+          "Record submitted successfully! It is now pending review and will only appear on the leaderboard if approved.",
+          "success"
+        );
+      } catch (error) {
+        console.error("RDL submission error:", error);
+
+        showFormMessage(
+          "Your record could not be submitted. Please check your connection and database insert policy, then try again.",
+          "error"
+        );
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Submit for review";
+      }
+    });
+
+    // Load the real records when the page starts.
+    loadRecords();
+  </script>
 </body>
 </html>
