@@ -899,21 +899,10 @@ textarea.field { min-height: 90px; resize: vertical; }
   </section>
 
   <section class="section" id="leaderboard">
-    <div class="section-heading">
-      <div>
-        <h2>The <span>Leaderboard</span></h2>
-        <p>Approved records ranked by completion percentage.</p>
-      </div>
-      <span class="section-tag">LIVE RECORDS</span>
-    </div>
-
     <div class="board">
       <div class="board-top">
-        <div class="board-title">RDL <span>/</span> All approved records</div>
         <div class="board-tools">
           <input class="field search-field" id="search" type="search" placeholder="Search players or levels..." aria-label="Search players or levels" maxlength="150">
-          <button class="button" id="clear" type="button">Clear</button>
-          <button class="button" id="refresh" type="button">Refresh</button>
         </div>
       </div>
       <div class="column-head" aria-hidden="true">
@@ -1050,8 +1039,6 @@ const refreshPendingButton = document.getElementById("refreshPending");
 
 const levelsElement = document.getElementById("levels");
 const searchInput = document.getElementById("search");
-const clearButton = document.getElementById("clear");
-const refreshButton = document.getElementById("refresh");
 const levelCountElement = document.getElementById("levelCount");
 const playerCountElement = document.getElementById("playerCount");
 const resultCountElement = document.getElementById("resultCount");
@@ -1687,7 +1674,6 @@ async function loadRecords() {
   if (loadingRecords) return;
 
   loadingRecords = true;
-  refreshButton.disabled = true;
   setLoadingMessage("Loading approved records...", "Please wait.");
 
   try {
@@ -1714,23 +1700,14 @@ async function loadRecords() {
     updateStatistics([]);
     setLoadingMessage(
       "Couldn't load the leaderboard",
-      "Check your connection and Supabase settings, then try Refresh."
+      "Check your connection and Supabase settings, then reload the page."
     );
   } finally {
     loadingRecords = false;
-    refreshButton.disabled = false;
   }
 }
 
 searchInput.addEventListener("input", renderLeaderboard);
-
-clearButton.addEventListener("click", () => {
-  searchInput.value = "";
-  renderLeaderboard();
-  searchInput.focus();
-});
-
-refreshButton.addEventListener("click", loadRecords);
 
 /* SUBMISSION FORM */
 function showFormMessage(message, type) {
