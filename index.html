@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -422,13 +421,12 @@
       align-items: center;
       gap: 13px;
       min-width: 0;
-    }
-
-    .thumbnail {
+          .thumbnail {
       display: grid;
       flex-shrink: 0;
       place-items: center;
-      width: 45px;
+    }
+            width: 45px;
       height: 45px;
       border: 1px solid #54452a;
       border-radius: 8px;
@@ -680,6 +678,81 @@
       color: var(--gold);
     }
 
+    /* Account authentication */
+    .account-card {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: clamp(22px, 5vw, 36px);
+      border: 1px solid #514328;
+      border-radius: 13px;
+      background: radial-gradient(ellipse at top left, rgba(232, 184, 77, 0.09), transparent 60%), var(--surface);
+    }
+
+    .account-card h2 {
+      margin: 0;
+      font-size: clamp(25px, 4vw, 34px);
+    }
+
+    .account-card h2 span {
+      color: var(--gold);
+    }
+
+    .account-copy {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .auth-form {
+      display: grid;
+      gap: 13px;
+      margin-top: 20px;
+    }
+
+    .auth-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .auth-actions .button,
+    .auth-form > .button {
+      width: 100%;
+    }
+
+    .auth-message {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .auth-message.error {
+      color: var(--red);
+    }
+
+    .auth-message.success {
+      color: var(--green);
+    }
+
+    .account-status {
+      padding: 13px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.025);
+      overflow-wrap: anywhere;
+      font-size: 13px;
+    }
+
+    .account-status strong {
+      color: var(--gold);
+    }
+
+    @media (max-width: 520px) {
+      .auth-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (max-width: 720px) {
       .nav-inner {
         min-height: 68px;
@@ -842,12 +915,12 @@
       <nav class="main-nav" aria-label="Main navigation">
         <a href="#leaderboard">Leaderboard</a>
         <a href="#about">About</a>
+        <a href="#account">Account</a>
         <a class="nav-submit" href="#submit">Submit record</a>
       </nav>
     </div>
   </header>
-
-  <main id="home">
+    <main id="home">
     <section class="hero">
       <span class="eyebrow">The community leaderboard</span>
 
@@ -863,6 +936,51 @@
           View leaderboard
         </a>
         <a class="button" href="#submit">Submit a record</a>
+      </div>
+    </section>
+
+    <section class="section" id="account">
+      <div class="section-heading">
+        <div>
+          <h2>Your <span>Account</span></h2>
+          <p>Create an RDL account or sign in.</p>
+        </div>
+        <span class="section-tag">SUPABASE AUTH</span>
+      </div>
+
+      <div class="account-card">
+        <div id="accountSignedOut">
+          <h2>Join the <span>RDL community</span></h2>
+          <p class="account-copy">Use email and password, or continue with Google. If email confirmation is enabled, check your inbox after signing up.</p>
+          <form class="auth-form" id="authForm">
+            <div class="form-group">
+              <label for="authEmail">Email address</label>
+              <input class="field" id="authEmail" type="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
+            </div>
+            <div class="form-group">
+              <label for="authPassword">Password</label>
+              <input class="field" id="authPassword" type="password" autocomplete="current-password" minlength="6" maxlength="128" placeholder="At least 6 characters" required>
+            </div>
+            <div class="auth-actions">
+              <button class="button button-primary" id="signInButton" type="button">Log in</button>
+              <button class="button" id="signUpButton" type="button">Create account</button>
+            </div>
+            <button class="button" id="googleSignInButton" type="button">Continue with Google</button>
+          </form>
+        </div>
+
+        <div id="accountSignedIn" hidden>
+          <h2>You're <span>signed in</span></h2>
+          <p class="account-copy">Your current account:</p>
+          <div class="account-status">
+            <strong id="accountEmail">Signed-in account</strong>
+          </div>
+          <div style="margin-top: 16px;">
+            <button class="button" id="signOutButton" type="button">Log out</button>
+          </div>
+        </div>
+
+        <div class="auth-message" id="authMessage" role="status" aria-live="polite"></div>
       </div>
     </section>
 
@@ -925,7 +1043,6 @@
           <span>Proof</span>
         </div>
 
-        <!-- Keep exactly one element with this ID. -->
         <div id="levels" aria-live="polite">
           <div class="empty">
             <strong>Loading leaderboard...</strong>
@@ -1079,6 +1196,7 @@
 
       <div class="footer-links">
         <a href="#leaderboard">Leaderboard</a>
+        <a href="#account">Account</a>
         <a href="#submit">Submit</a>
         <a href="#home">Back to top ↑</a>
       </div>
@@ -1087,17 +1205,10 @@
     </div>
   </footer>
 
-  <!-- Load Supabase before the code that uses it. -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
     "use strict";
-
-    // --------------------------------------------------
-    // SUPABASE CONFIGURATION
-    // This is the publishable browser key, not a secret key.
-    // Never put a service_role or secret key in this file.
-    // --------------------------------------------------
 
     const SUPABASE_URL =
       "https://jcdzinddbqdygfewzotp.supabase.co";
@@ -1110,9 +1221,187 @@
       SUPABASE_PUBLISHABLE_KEY
     );
 
-    // --------------------------------------------------
+    const accountSignedOut = document.getElementById("accountSignedOut");
+    const accountSignedIn = document.getElementById("accountSignedIn");
+    const accountEmail = document.getElementById("accountEmail");
+    const authMessage = document.getElementById("authMessage");
+    const authEmail = document.getElementById("authEmail");
+    const authPassword = document.getElementById("authPassword");
+    const signInButton = document.getElementById("signInButton");
+    const signUpButton = document.getElementById("signUpButton");
+    const googleSignInButton = document.getElementById("googleSignInButton");
+    const signOutButton = document.getElementById("signOutButton");
+
+    function showAuthMessage(message, type = "") {
+      authMessage.textContent = message;
+      authMessage.className = "auth-message" + (type ? " " + type : "");
+    }
+
+    function setAuthBusy(busy) {
+      signInButton.disabled = busy;
+      signUpButton.disabled = busy;
+      googleSignInButton.disabled = busy;
+      signOutButton.disabled = busy;
+    }
+
+    function renderAuthSession(session) {
+      const user = session && session.user;
+      accountSignedOut.hidden = Boolean(user);
+      accountSignedIn.hidden = !user;
+      accountEmail.textContent = user ? (user.email || "Signed in") : "";
+
+      if (user) {
+        authPassword.value = "";
+        showAuthMessage("You're signed in.", "success");
+      }
+    }
+
+    function getAuthCredentials() {
+      const email = authEmail.value.trim();
+      const password = authPassword.value;
+
+      if (!email) {
+        throw new Error("Enter your email address.");
+      }
+
+      if (!password || password.length < 6) {
+        throw new Error("Enter a password with at least 6 characters.");
+      }
+
+      return { email, password };
+    }
+
+    signInButton.addEventListener("click", async () => {
+      let credentials;
+
+      try {
+        credentials = getAuthCredentials();
+      } catch (error) {
+        showAuthMessage(error.message, "error");
+        return;
+      }
+
+      setAuthBusy(true);
+      showAuthMessage("Logging in...");
+
+      try {
+        const { error } = await rdlSupabase.auth.signInWithPassword(credentials);
+        if (error) throw error;
+        showAuthMessage("Login successful.", "success");
+      } catch (error) {
+        console.error("RDL login error:", error);
+        showAuthMessage(
+          error.message || "Login failed. Check your email and password.",
+          "error"
+        );
+      } finally {
+        setAuthBusy(false);
+      }
+    });
+
+    signUpButton.addEventListener("click", async () => {
+      let credentials;
+
+      try {
+        credentials = getAuthCredentials();
+      } catch (error) {
+        showAuthMessage(error.message, "error");
+        return;
+      }
+
+      setAuthBusy(true);
+      showAuthMessage("Creating your account...");
+            try {
+        const { data, error } = await rdlSupabase.auth.signUp({
+          ...credentials,
+          options: {
+            emailRedirectTo: "https://robotdemonlist.com"
+          }
+        });
+
+        if (error) throw error;
+
+        if (data.session) {
+          showAuthMessage(
+            "Account created and you're signed in.",
+            "success"
+          );
+        } else {
+          showAuthMessage(
+            "Account created! Check your email for a confirmation link before logging in.",
+            "success"
+          );
+        }
+      } catch (error) {
+        console.error("RDL signup error:", error);
+        showAuthMessage(
+          error.message || "Couldn't create your account. Please try again.",
+          "error"
+        );
+      } finally {
+        setAuthBusy(false);
+      }
+    });
+
+    googleSignInButton.addEventListener("click", async () => {
+      setAuthBusy(true);
+      showAuthMessage("Opening Google sign-in...");
+
+      try {
+        const { error } = await rdlSupabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: "https://robotdemonlist.com"
+          }
+        });
+
+        if (error) throw error;
+      } catch (error) {
+        console.error("RDL Google login error:", error);
+        showAuthMessage(
+          error.message || "Google sign-in couldn't start. Check Supabase provider settings.",
+          "error"
+        );
+        setAuthBusy(false);
+      }
+    });
+
+    signOutButton.addEventListener("click", async () => {
+      setAuthBusy(true);
+      showAuthMessage("Logging out...");
+
+      try {
+        const { error } = await rdlSupabase.auth.signOut();
+        if (error) throw error;
+        showAuthMessage("You've logged out.", "success");
+      } catch (error) {
+        console.error("RDL logout error:", error);
+        showAuthMessage(
+          error.message || "Couldn't log out. Please try again.",
+          "error"
+        );
+      } finally {
+        setAuthBusy(false);
+      }
+    });
+
+    rdlSupabase.auth.onAuthStateChange((_event, session) => {
+      renderAuthSession(session);
+    });
+
+    rdlSupabase.auth.getSession().then(({ data, error }) => {
+      if (error) {
+        showAuthMessage(
+          "Couldn't check your current login status.",
+          "error"
+        );
+        return;
+      }
+
+      renderAuthSession(data.session);
+    });
+
     // LEADERBOARD
-    // --------------------------------------------------
 
     const levelsElement = document.getElementById("levels");
     const searchInput = document.getElementById("search");
@@ -1277,7 +1566,10 @@
 
       loadingRecords = true;
       refreshButton.disabled = true;
-      setLoadingMessage("Loading approved records...", "Please wait.");
+      setLoadingMessage(
+        "Loading approved records...",
+        "Please wait."
+      );
 
       try {
         const { data, error } = await rdlSupabase
@@ -1289,9 +1581,7 @@
           .order("percent", { ascending: false })
           .order("submitted_at", { ascending: true });
 
-        if (error) {
-          throw error;
-        }
+        if (error) throw error;
 
         records = Array.isArray(data) ? data : [];
         renderLeaderboard();
@@ -1321,11 +1611,7 @@
 
     refreshButton.addEventListener("click", loadRecords);
 
-    // --------------------------------------------------
     // RECORD SUBMISSION FORM
-    // New submissions use the database's default status:
-    // "pending". This form does not approve records.
-    // --------------------------------------------------
 
     const submissionForm = document.getElementById("submissionForm");
     const submitButton = document.getElementById("submitButton");
@@ -1414,7 +1700,10 @@
 
       submitButton.disabled = true;
       submitButton.textContent = "Submitting...";
-      showFormMessage("Sending your record for review...", "info");
+      showFormMessage(
+        "Sending your record for review...",
+        "info"
+      );
 
       try {
         const submission = {
@@ -1431,9 +1720,7 @@
           .from("record_submissions")
           .insert(submission);
 
-        if (error) {
-          throw error;
-        }
+        if (error) throw error;
 
         submissionForm.reset();
 
@@ -1454,8 +1741,8 @@
       }
     });
 
-    // Load the real records when the page starts.
     loadRecords();
   </script>
 </body>
 </html>
+    
