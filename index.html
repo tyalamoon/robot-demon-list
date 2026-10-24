@@ -811,6 +811,16 @@ textarea.field { min-height: 90px; resize: vertical; }
   .level .rank-controls { margin-left: 0; }
 }
 
+
+/* Keep the public page focused on the leaderboard for now.
+   Existing auth, submission, and admin wiring stays intact for future changes. */
+#account,
+.stats,
+#submit,
+#about {
+  display: none !important;
+}
+
 </style>
 </head>
 
