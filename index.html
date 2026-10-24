@@ -4,254 +4,856 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Robot Demon List</title>
+<meta name="theme-color" content="#101112">
+<title>Robot Demon List | RDL</title>
+<meta name="description" content="The Robot Demon List — a community leaderboard for Geometry Dash levels beaten using GD Robot.">
+
 <style>
 :root {
   --bg: #101112;
-  --panel: #181a1c;
+  --header: #151617;
+  --panel: #191b1d;
+  --panel-hover: #222427;
   --border: #303337;
-  --text: #e8e8e8;
-  --muted: #96999e;
-  --accent: #e8bd54;
+  --text: #eeeeef;
+  --muted: #92969c;
+  --gold: #e8bd54;
+  --gold-soft: rgba(232,189,84,.10);
+  --green: #91d6a0;
+  --red: #ff8585;
 }
+
 * { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 14px;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
 }
+
+a { color: inherit; }
+
+button, input, select { font: inherit; }
+
+button, select { cursor: pointer; }
+
 header {
-  background: #171819;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(21,22,23,.96);
   border-bottom: 1px solid var(--border);
-  padding: 18px 20px;
+  backdrop-filter: blur(12px);
 }
+
 .nav {
-  max-width: 1050px;
+  max-width: 1120px;
+  min-height: 65px;
+  padding: 0 22px;
   margin: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 24px;
 }
-.logo { font-size: 23px; font-weight: 900; letter-spacing: -1px; }
-.logo span { color: var(--accent); }
-nav { display: flex; gap: 18px; flex-wrap: wrap; }
-nav a { color: #c5c6c8; text-decoration: none; }
-nav a:hover { color: var(--accent); }
-main { max-width: 1000px; margin: 35px auto; padding: 0 16px; }
-h1 { font-size: 28px; margin: 0 0 8px; }
-.subtitle { color: var(--muted); margin: 0 0 24px; line-height: 1.5; }
-.stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-}
-.stat {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  padding: 16px;
-  border-radius: 5px;
-}
-.stat strong { display: block; font-size: 22px; margin-bottom: 5px; }
-.stat span { color: var(--muted); font-size: 12px; }
-.toolbar {
+
+.logo {
   display: flex;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-input, select {
-  background: #1b1d1f;
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 11px 12px;
-  border-radius: 4px;
-  font-size: 14px;
-}
-input { flex: 1; min-width: 0; }
-select { max-width: 180px; }
-.list {
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  overflow: hidden;
-}
-.list-heading {
-  display: grid;
-  grid-template-columns: 55px 1fr 145px;
-  gap: 12px;
-  background: #202224;
-  color: var(--muted);
-  padding: 12px 16px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: .7px;
-}
-.level {
-  display: grid;
-  grid-template-columns: 55px 1fr 145px;
-  gap: 12px;
   align-items: center;
-  padding: 15px 16px;
-  border-top: 1px solid #292b2e;
-  transition: background .15s;
+  gap: 10px;
+  text-decoration: none;
+  white-space: nowrap;
 }
-.level:hover { background: #202224; }
-.rank { color: var(--accent); font-weight: bold; font-size: 16px; }
-.level-name { font-weight: bold; margin-bottom: 5px; }
-.creator { color: var(--muted); font-size: 12px; }
-.difficulty {
-  justify-self: start;
-  padding: 5px 8px;
-  border: 1px solid #684b4b;
-  background: #352426;
-  color: #ffaaaa;
-  border-radius: 3px;
-  font-size: 11px;
-  font-weight: bold;
+
+.logo-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  background: var(--gold);
+  color: #171717;
+  border-radius: 7px;
+  font-size: 17px;
+  font-weight: 950;
 }
-.note {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  color: var(--muted);
+
+.logo-text {
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: -.6px;
+}
+
+.logo-text span { color: var(--gold); }
+
+nav {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+nav a {
+  color: #b8bbc0;
+  text-decoration: none;
+  padding: 9px 12px;
   border-radius: 5px;
-  padding: 14px;
-  margin-top: 16px;
-  line-height: 1.6;
+  transition: .15s;
 }
-footer {
-  text-align: center;
-  color: #777b80;
-  padding: 25px 12px 35px;
+
+nav a:hover, nav a.active {
+  color: var(--gold);
+  background: var(--gold-soft);
+}
+
+.nav-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+}
+
+main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 30px 22px 55px;
+}
+
+.breadcrumb {
+  color: var(--muted);
+  font-size: 11px;
+  margin-bottom: 17px;
+}
+
+.breadcrumb span { color: var(--gold); }
+
+.page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  margin-bottom: 23px;
+}
+
+.eyebrow {
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.7px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+h1 {
+  font-size: clamp(25px, 4vw, 32px);
+  line-height: 1.15;
+  letter-spacing: -1.1px;
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin: 0;
   font-size: 12px;
 }
-@media (max-width: 550px) {
-  .nav { align-items: flex-start; flex-direction: column; }
+
+.beta-badge {
+  flex-shrink: 0;
+  color: var(--gold);
+  border: 1px solid #66542f;
+  background: var(--gold-soft);
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .7px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.stat {
+  position: relative;
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 15px 17px;
+}
+
+.stat::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--gold);
+  opacity: .75;
+}
+
+.stat-label {
+  color: var(--muted);
+  text-transform: uppercase;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .8px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 23px;
+  font-weight: 850;
+  letter-spacing: -.5px;
+  margin-top: 3px;
+}
+
+.stat-foot {
+  color: #73777d;
+  font-size: 10px;
+  margin-top: 2px;
+}
+
+.board {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.board-top {
+  padding: 17px 18px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.board-title {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -.2px;
+}
+
+.board-subtitle {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.list-count {
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.list-count strong { color: var(--text); }
+
+.toolbar {
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-bottom: 1px solid var(--border);
+}
+
+.search-wrap {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+  font-size: 15px;
+}
+
+input, select {
+  height: 36px;
+  color: var(--text);
+  background: #111213;
+  border: 1px solid #35383d;
+  border-radius: 4px;
+  outline: none;
+}
+
+input {
+  width: 100%;
+  padding: 0 12px 0 34px;
+}
+
+select { padding: 0 30px 0 10px; }
+
+input:focus, select:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold-soft);
+}
+
+input::placeholder { color: #777b81; }
+
+.clear-btn {
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #202225;
+  color: #c6c8cc;
+  padding: 0 12px;
+}
+
+.clear-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.column-head, .level {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) 145px 75px;
+  align-items: center;
+  gap: 13px;
+}
+
+.column-head {
+  padding: 10px 18px;
+  background: #202225;
+  color: #858991;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.level {
+  min-height: 76px;
+  padding: 10px 18px;
+  border-top: 1px solid #292c2f;
+  transition: background .15s;
+}
+
+.level:hover { background: var(--panel-hover); }
+
+.rank {
+  color: #a9adb3;
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.rank.top-three { color: var(--gold); }
+
+.level-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.thumbnail {
+  width: 52px;
+  height: 43px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #474039;
+  border-radius: 4px;
+  background:
+    linear-gradient(135deg, transparent 45%, rgba(232,189,84,.14) 46%, transparent 70%),
+    linear-gradient(45deg, #29251d, #161719 65%);
+}
+
+.thumbnail::before {
+  content: "";
+  width: 15px;
+  height: 15px;
+  border: 2px solid var(--gold);
+  transform: rotate(45deg);
+  box-shadow: 0 0 12px rgba(232,189,84,.2);
+}
+
+.thumbnail span {
+  position: absolute;
+  right: 4px;
+  bottom: 1px;
+  color: #b9a77d;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.level-details { min-width: 0; }
+
+.level-name {
+  font-size: 13px;
+  font-weight: 750;
+  color: #ededee;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+
+.creator {
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.difficulty {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid #684848;
+  border-radius: 3px;
+  padding: 4px 6px;
+  background: #302020;
+  color: #ffaaaa;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
+
+.difficulty.insane {
+  color: #ffca78;
+  background: #302719;
+  border-color: #6a5231;
+}
+
+.difficulty.hard {
+  color: #d3a0ff;
+  background: #291f32;
+  border-color: #554064;
+}
+
+.difficulty.other {
+  color: #b9c4cf;
+  background: #222930;
+  border-color: #3d4b59;
+}
+
+.level-score {
+  text-align: right;
+  color: #b5b8bd;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.level-score small {
+  display: block;
+  margin-top: 3px;
+  color: #747980;
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.empty {
+  text-align: center;
+  padding: 45px 15px;
+  color: var(--muted);
+}
+
+.empty strong {
+  display: block;
+  color: var(--text);
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 17px;
+}
+
+.info-card {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+}
+
+.info-title {
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.info-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.info-card a {
+  color: var(--gold);
+  text-decoration: none;
+}
+
+footer {
+  max-width: 1080px;
+  margin: auto;
+  padding: 18px 22px 30px;
+  border-top: 1px solid #26282b;
+  color: #73777d;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+footer strong { color: #b5b8bd; }
+
+@media (max-width: 680px) {
+  .nav {
+    padding: 12px 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  nav {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  nav a { padding: 7px 9px; }
+
+  .nav-status { margin-left: auto; }
+
+  main { padding: 23px 12px 35px; }
+
+  .page-heading { align-items: flex-start; }
+
   .stats { gap: 7px; }
-  .stat { padding: 11px; }
-  .stat strong { font-size: 18px; }
-  .list-heading, .level { grid-template-columns: 35px 1fr 85px; gap: 8px; padding: 12px 9px; }
-  .difficulty { font-size: 9px; padding: 4px; }
-  .toolbar { flex-direction: column; }
-  select { max-width: none; }
+
+  .stat { padding: 12px 10px; }
+
+  .stat-value { font-size: 19px; }
+
+  .stat-label { font-size: 8px; }
+
+  .column-head, .level {
+    grid-template-columns: 29px minmax(0, 1fr) 94px;
+    gap: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .column-head span:last-child { display: none; }
+
+  .level-score { display: none; }
+
+  .thumbnail {
+    width: 42px;
+    height: 38px;
+  }
+
+  .level-info { gap: 8px; }
+
+  .level-name { font-size: 12px; }
+
+  .difficulty {
+    font-size: 8px;
+    padding: 4px;
+  }
+
+  .toolbar {
+    padding: 10px;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap { flex-basis: 100%; }
+
+  .toolbar select { flex: 1; min-width: 0; }
+
+  .info-grid { grid-template-columns: 1fr; }
+
+  footer { padding-left: 12px; padding-right: 12px; }
+}
+
+@media (max-width: 360px) {
+  .column-head, .level {
+    grid-template-columns: 24px minmax(0, 1fr) 78px;
+    gap: 6px;
+  }
+
+  .thumbnail { display: none; }
 }
 </style>
 </head>
+
 <body>
 <header>
   <div class="nav">
-    <div class="logo">ROBOT <span>DEMON LIST</span></div>
-    <nav>
-      <a href="#leaderboard">Leaderboard</a>
-      <a href="#about">About RDL</a>
+    <a class="logo" href="#" aria-label="Robot Demon List home">
+      <div class="logo-icon">R</div>
+      <div class="logo-text">ROBOT <span>DEMON LIST</span></div>
+    </a>
+
+    <nav aria-label="Main navigation">
+      <a class="active" href="#leaderboard">Leaderboard</a>
+      <a href="#about">About</a>
       <a href="#submit">Submit a record</a>
     </nav>
+
+    <div class="nav-status">
+      <span class="status-dot"></span>
+      Community project
+    </div>
   </div>
 </header>
 
 <main>
-  <h1>Leaderboard</h1>
-  <p class="subtitle">The levels beaten with GD Robot, ranked in one place.</p>
+  <div class="breadcrumb">RDL / <span>Leaderboard</span></div>
 
-  <section class="stats">
-    <div class="stat"><strong id="levelCount">5</strong><span>Listed levels (demo)</span></div>
-    <div class="stat"><strong>ALL</strong><span>Difficulties allowed</span></div>
-    <div class="stat"><strong>RDL</strong><span>Robot Demon List</span></div>
+  <div class="page-heading">
+    <div>
+      <div class="eyebrow">Geometry Dash · Robot challenge</div>
+      <h1>Leaderboard</h1>
+      <p class="subtitle">
+        The hardest levels beaten with GD Robot, ranked in one place.
+      </p>
+    </div>
+    <span class="beta-badge">EARLY ACCESS</span>
+  </div>
+
+  <section class="stats" aria-label="Leaderboard statistics">
+    <div class="stat">
+      <div class="stat-label">Matching levels</div>
+      <strong class="stat-value" id="levelCount">5</strong>
+      <div class="stat-foot">Shown in this list</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Difficulty range</div>
+      <strong class="stat-value">ALL</strong>
+      <div class="stat-foot">All listed difficulties</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Leaderboard</div>
+      <strong class="stat-value">RDL</strong>
+      <div class="stat-foot">Robot Demon List</div>
+    </div>
   </section>
 
-  <section id="leaderboard">
+  <section class="board" id="leaderboard">
+    <div class="board-top">
+      <div>
+        <div class="board-title">Level Rankings</div>
+        <div class="board-subtitle">Browse and filter the current level list.</div>
+      </div>
+      <div class="list-count"><strong id="resultCount">5</strong> results</div>
+    </div>
+
     <div class="toolbar">
-      <input id="search" type="search" placeholder="Search levels or creators...">
-      <select id="difficulty">
+      <div class="search-wrap">
+        <span class="search-icon" aria-hidden="true">⌕</span>
+        <input id="search" type="search"
+          placeholder="Search levels or creators..."
+          aria-label="Search levels or creators">
+      </div>
+
+      <select id="difficulty" aria-label="Filter by difficulty">
         <option value="all">All difficulties</option>
         <option value="Extreme Demon">Extreme Demon</option>
         <option value="Insane Demon">Insane Demon</option>
         <option value="Hard Demon">Hard Demon</option>
         <option value="Other">Other</option>
       </select>
+
+      <button class="clear-btn" id="clear" type="button">Reset</button>
     </div>
 
-    <div class="list">
-      <div class="list-heading">
-        <span>Rank</span><span>Level</span><span>Difficulty</span>
-      </div>
-      <div id="levels"></div>
+    <div class="column-head">
+      <span>Rank</span>
+      <span>Level</span>
+      <span>Difficulty</span>
+      <span style="text-align:right">Status</span>
     </div>
+
+    <div id="levels" aria-live="polite"></div>
   </section>
 
-  <section class="note" id="about">
-    <strong>About RDL</strong><br>
-    Robot Demon List is a community leaderboard for Geometry Dash levels
-    beaten using GD Robot. These example entries are placeholders, not verified records.
-  </section>
+  <div class="info-grid">
+    <section class="info-card" id="about">
+      <div class="info-title">About RDL</div>
+      <p>
+        Robot Demon List is a community leaderboard for Geometry Dash
+        levels beaten using GD Robot. The current entries are placeholders,
+        not verified records.
+      </p>
+    </section>
 
-  <section class="note" id="submit">
-    <strong>Want to submit a record?</strong><br>
-    Record submissions and verification are not available yet. This is the first
-    front-end prototype; account and submission features will need to be built next.
-  </section>
+    <section class="info-card" id="submit">
+      <div class="info-title">Submit a record</div>
+      <p>
+        Record submissions and verification are not available yet.
+        Submission tools and verification rules will be added in a future update.
+      </p>
+    </section>
+  </div>
 </main>
 
-<footer>ROBOT DEMON LIST · RDL · Community project</footer>
+<footer>
+  <span><strong>RDL</strong> · Robot Demon List</span>
+  <span>Community project · Unofficial</span>
+</footer>
 
 <script>
 const demoLevels = [
-  { name: "Example Level Alpha", creator: "Demo Creator", difficulty: "Extreme Demon" },
-  { name: "Example Level Beta", creator: "Demo Creator", difficulty: "Insane Demon" },
-  { name: "Example Level Gamma", creator: "Demo Creator", difficulty: "Hard Demon" },
-  { name: "Example Level Delta", creator: "Demo Creator", difficulty: "Other" },
-  { name: "Example Level Epsilon", creator: "Demo Creator", difficulty: "Extreme Demon" }
+  {
+    name: "Example Level Alpha",
+    creator: "Demo Creator",
+    difficulty: "Extreme Demon"
+  },
+  {
+    name: "Example Level Beta",
+    creator: "Demo Creator",
+    difficulty: "Insane Demon"
+  },
+  {
+    name: "Example Level Gamma",
+    creator: "Demo Creator",
+    difficulty: "Hard Demon"
+  },
+  {
+    name: "Example Level Delta",
+    creator: "Demo Creator",
+    difficulty: "Other"
+  },
+  {
+    name: "Example Level Epsilon",
+    creator: "Demo Creator",
+    difficulty: "Extreme Demon"
+  }
 ];
 
 const levels = document.getElementById("levels");
 const search = document.getElementById("search");
 const difficulty = document.getElementById("difficulty");
 
+function difficultyClass(value) {
+  if (value === "Insane Demon") return "insane";
+  if (value === "Hard Demon") return "hard";
+  if (value === "Other") return "other";
+  return "";
+}
+
+function makeElement(tag, className, text) {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (text !== undefined) element.textContent = text;
+  return element;
+}
+
 function render() {
-  const query = search.value.toLowerCase();
+  const query = search.value.trim().toLowerCase();
   const filter = difficulty.value;
-  const filtered = demoLevels.filter(level =>
-    (level.name + " " + level.creator).toLowerCase().includes(query) &&
-    (filter === "all" ||
-     (filter === "Other" ? !["Extreme Demon", "Insane Demon", "Hard Demon"].includes(level.difficulty) : level.difficulty === filter))
-  );
+
+  const filtered = demoLevels.filter(level => {
+    const matchesSearch =
+      (level.name + " " + level.creator).toLowerCase().includes(query);
+
+    const matchesDifficulty =
+      filter === "all" ||
+      (filter === "Other"
+        ? !["Extreme Demon", "Insane Demon", "Hard Demon"]
+            .includes(level.difficulty)
+        : level.difficulty === filter);
+
+    return matchesSearch && matchesDifficulty;
+  });
 
   document.getElementById("levelCount").textContent = filtered.length;
-  levels.innerHTML = "";
+  document.getElementById("resultCount").textContent = filtered.length;
+  levels.replaceChildren();
 
-  if (!filtered.length) {
-    levels.innerHTML = '<div class="level">No matching levels found.</div>';
+  if (filtered.length === 0) {
+    const empty = makeElement("div", "empty");
+    empty.append(
+      makeElement("strong", "", "No matching levels"),
+      makeElement("span", "", "Try another search or difficulty filter.")
+    );
+    levels.appendChild(empty);
     return;
   }
 
   filtered.forEach((level, index) => {
-    const row = document.createElement("div");
-    row.className = "level";
-    const rank = document.createElement("span");
-    rank.className = "rank";
-    rank.textContent = "#" + (index + 1);
+    const row = makeElement("article", "level");
 
-    const info = document.createElement("div");
-    const name = document.createElement("div");
-    name.className = "level-name";
-    name.textContent = level.name;
-    const creator = document.createElement("div");
-    creator.className = "creator";
-    creator.textContent = "by " + level.creator;
-    info.append(name, creator);
+    const rank = makeElement(
+      "span",
+      "rank" + (index < 3 ? " top-three" : ""),
+      "#" + (index + 1)
+    );
 
-    const badge = document.createElement("span");
-    badge.className = "difficulty";
-    badge.textContent = level.difficulty.toUpperCase();
+    const info = makeElement("div", "level-info");
+    const thumbnail = makeElement("div", "thumbnail");
+    thumbnail.setAttribute("aria-hidden", "true");
+    thumbnail.appendChild(makeElement("span", "", "RDL"));
 
-    row.append(rank, info, badge);
+    const details = makeElement("div", "level-details");
+    details.append(
+      makeElement("div", "level-name", level.name),
+      makeElement("div", "creator", "by " + level.creator)
+    );
+
+    info.append(thumbnail, details);
+
+    const badge = makeElement(
+      "span",
+      "difficulty " + difficultyClass(level.difficulty),
+      level.difficulty.toUpperCase()
+    );
+
+    const status = makeElement("div", "level-score");
+    status.append(
+      makeElement("span", "", "DEMO"),
+      makeElement("small", "", "UNVERIFIED")
+    );
+
+    row.append(rank, info, badge, status);
     levels.appendChild(row);
   });
 }
 
 search.addEventListener("input", render);
 difficulty.addEventListener("change", render);
+
+document.getElementById("clear").addEventListener("click", () => {
+  search.value = "";
+  difficulty.value = "all";
+  render();
+  search.focus();
+});
+
 render();
 </script>
 </body>
