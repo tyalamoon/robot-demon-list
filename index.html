@@ -69,13 +69,12 @@ select:focus-visible, textarea:focus-visible {
 .brand-icon {
   width: 42px;
   height: 42px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--gold);
-  border-radius: 10px;
-  color: var(--gold);
-  font-size: 18px;
-  background: rgba(232,184,77,.08);
+  display: block;
+  flex: 0 0 42px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid #3b82f6;
+  background: #111827;
 }
 
 .brand-text { font-size: 15px; }
@@ -958,7 +957,7 @@ body.submit-open #submit {
 <header class="site-header">
   <div class="nav-inner">
     <a class="brand" href="#home" aria-label="Robot Demon List home">
-      <span class="brand-icon" aria-hidden="true">R</span>
+      <img class="brand-icon" src="https://avatarsapi.com/youtube/@gdrobot?size=168" alt="GD ROBOT YouTube profile picture" width="42" height="42" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://www.youtube.com/s/desktop/6e4f8f5d/img/favicon_144x144.png';">
       <span class="brand-text">ROBOT <span>DEMON LIST</span></span>
     </a>
     <nav class="main-nav" aria-label="Main navigation">
