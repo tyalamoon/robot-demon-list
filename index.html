@@ -857,6 +857,9 @@ textarea.field { min-height: 90px; resize: vertical; }
 
 .player-standing:last-child { border-bottom: none; }
 .player-standing:hover { background: rgba(255,255,255,.025); }
+.player-standing[role="button"] { cursor: pointer; }
+.player-standing[role="button"]:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+#playerProfileRecords .level-modal-record { gap: 14px; }
 .player-standing-head {
   background: #141414;
   color: var(--muted);
@@ -1378,6 +1381,25 @@ body.record-submit-open #submit .record-submit-card {
         <button class="level-modal-tab" type="button" data-level-tab="discussion">Discussion</button>
       </nav>
       <div class="level-modal-tab-content" id="levelModalTabContent" aria-live="polite"></div>
+    </div>
+  </section>
+</div>
+
+<div class="level-modal-backdrop" id="playerProfileBackdrop" role="dialog" aria-modal="true" aria-labelledby="playerProfileName">
+  <section class="level-modal">
+    <header class="level-modal-top">
+      <div>
+        <div class="level-modal-kicker">Player profile</div>
+        <div class="level-modal-rank" id="playerProfileRank">#—</div>
+      </div>
+      <button class="level-modal-close" id="playerProfileClose" type="button" aria-label="Close player profile">×</button>
+    </header>
+    <div class="level-modal-body">
+      <h2 class="level-modal-title" id="playerProfileName">Player</h2>
+      <div class="level-modal-creators" id="playerProfileDiscord">Discord not linked</div>
+      <div class="level-modal-meta" id="playerProfileStats"></div>
+      <h3>Approved records</h3>
+      <div id="playerProfileRecords"></div>
     </div>
   </section>
 </div>
@@ -2105,6 +2127,81 @@ function pointsForRank(rank) {
   return Math.max(0, Number(points.toFixed(2)));
 }
 
+const playerProfileBackdrop = document.getElementById("playerProfileBackdrop");
+
+function openPlayerProfile(player, rank) {
+  document.getElementById("playerProfileRank").textContent = "#" + rank;
+  document.getElementById("playerProfileName").textContent = player.name;
+  const discordArea = document.getElementById("playerProfileDiscord");
+  discordArea.replaceChildren();
+  const normalizedName = player.name.trim().toLocaleLowerCase();
+  const verifiedProfile = verifiedDiscordProfiles.find(profile =>
+    [profile.discord_username, profile.discord_global_name]
+      .some(value => String(value || "").trim().toLocaleLowerCase() === normalizedName)
+  );
+  if (verifiedProfile) {
+    discordArea.appendChild(makeElement("span", "discord-verified", "✓ Verified Discord"));
+    const accountLink = makeElement("a", "proof-link", "Open Discord profile ↗");
+    accountLink.href = "https://discord.com/users/" + encodeURIComponent(verifiedProfile.discord_id);
+    accountLink.target = "_blank";
+    accountLink.rel = "noopener noreferrer";
+    discordArea.appendChild(document.createTextNode(" "));
+    discordArea.appendChild(accountLink);
+    if (verifiedProfile.discord_global_name && verifiedProfile.discord_global_name !== verifiedProfile.discord_username) {
+      discordArea.appendChild(makeElement("span", "", " · @" + verifiedProfile.discord_username));
+    }
+  } else {
+    discordArea.textContent = "Discord account not verified";
+  }
+
+  const stats = document.getElementById("playerProfileStats");
+  stats.replaceChildren();
+  stats.append(
+    makeElement("span", "level-modal-chip", player.records + (player.records === 1 ? " approved record" : " approved records")),
+    makeElement("span", "level-modal-chip", player.points.toFixed(2) + " points")
+  );
+  const list = document.getElementById("playerProfileRecords");
+  list.replaceChildren();
+  const ranks = getDisplayRanks(records);
+  player.recordItems.slice().sort((a, b) => {
+    const rankA = Number(ranks.get(a.id)) || Number.MAX_SAFE_INTEGER;
+    const rankB = Number(ranks.get(b.id)) || Number.MAX_SAFE_INTEGER;
+    return rankA - rankB;
+  }).forEach(record => {
+    const item = makeElement("div", "level-modal-record");
+    const details = makeElement("div");
+    details.append(
+      makeElement("strong", "", String(record.level_name || "Unknown level")),
+      makeElement("small", "", String(record.percent ?? "—") + "% · #" + (ranks.get(record.id) || "—"))
+    );
+    item.appendChild(details);
+    const linkUrl = safeHttpUrl(String(record.proof_url || ""));
+    if (linkUrl) {
+      const link = makeElement("a", "proof-link", "Proof ↗");
+      link.href = linkUrl;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      item.appendChild(link);
+    }
+    list.appendChild(item);
+  });
+  playerProfileBackdrop.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closePlayerProfile() {
+  playerProfileBackdrop.classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+document.getElementById("playerProfileClose").addEventListener("click", closePlayerProfile);
+playerProfileBackdrop.addEventListener("click", event => {
+  if (event.target === playerProfileBackdrop) closePlayerProfile();
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && playerProfileBackdrop.classList.contains("open")) closePlayerProfile();
+});
+
 function renderPlayerPointsLeaderboard() {
   if (!playerPointsElement) return;
   playerPointsElement.replaceChildren();
@@ -2127,9 +2224,10 @@ function renderPlayerPointsLeaderboard() {
     const key = name.toLocaleLowerCase();
     const rank = displayRanks.get(record.id);
     const points = pointsForRank(rank);
-    const current = totals.get(key) || { name, points: 0, records: 0 };
+    const current = totals.get(key) || { name, points: 0, records: 0, recordItems: [] };
     current.points += points;
     current.records += 1;
+    current.recordItems.push(record);
     totals.set(key, current);
   });
 
@@ -2139,6 +2237,16 @@ function renderPlayerPointsLeaderboard() {
 
   standings.forEach((player, index) => {
     const row = makeElement("article", "player-standing");
+    row.tabIndex = 0;
+    row.setAttribute("role", "button");
+    row.setAttribute("aria-label", "Open player profile for " + player.name);
+    row.addEventListener("click", () => openPlayerProfile(player, index + 1));
+    row.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openPlayerProfile(player, index + 1);
+      }
+    });
     const rank = makeElement("span", "rank" + (index < 3 ? " top-three" : ""), "#" + (index + 1));
     const info = makeElement("div", "player-standing-info");
     const nameLine = makeElement("div", "player-standing-name", player.name);
