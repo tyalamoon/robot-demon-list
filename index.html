@@ -3164,7 +3164,7 @@ function openLevelDetails(record, displayedRank) {
   activeDetailTab = "records";
   const safeName = String(record.level_name || "Untitled level");
   const isCatalogEntry = isRdlLevelCatalogEntry(record);
-  const listMatch = isCatalogEntry ? String(record.notes || "").match(/(?:^|\\| )list=([^|\\n]+)/i) : null;
+  const listMatch = isCatalogEntry ? String(record.notes || "").match(/list=([^|]+)/i) : null;
   document.getElementById("levelModalCategory").textContent = listMatch?.[1]?.trim() || "Classic";
   document.getElementById("levelModalRank").textContent = "#" + activeDetailRank;
   document.getElementById("levelModalPoints").textContent = pointsForRank(activeDetailRank).toFixed(2) + " pts";
@@ -3642,7 +3642,7 @@ async function loadRecords() {
    const { data, error } = await rdlSupabase
   .from("record_submissions")
   .select(
-    "id, player_name, level_name, percent, proof_url, submitted_at, rank_position"
+    "id, player_name, level_name, percent, proof_url, notes, submitted_at, rank_position"
   )
   .eq("status", "approved")
   .order("rank_position", {
