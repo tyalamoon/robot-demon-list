@@ -986,6 +986,12 @@ body.record-submit-open #submit .record-submit-card {
 .record-submit-card .submit-form { gap: 16px; }
 .record-submit-card .form-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .discord-link-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; }
+.discord-account-panel { margin-top: 20px; padding: 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-light); }
+.discord-account-panel > strong { color: var(--gold); }
+.discord-account-panel .auth-actions { margin-top: 12px; }
+.discord-verified { display: inline-flex; align-items: center; gap: 5px; margin-left: 7px; padding: 2px 7px; border: 1px solid rgba(119,217,154,.35); border-radius: 999px; color: var(--green); font-size: 10px; font-weight: 800; vertical-align: middle; white-space: nowrap; }
+.discord-verified a { color: inherit; text-decoration: none; }
+.discord-verified a:hover { text-decoration: underline; }
 .captcha-panel {
   display: grid;
   grid-template-columns: minmax(0,1fr) minmax(120px,.7fr) auto;
@@ -1155,6 +1161,14 @@ body.record-submit-open #submit .record-submit-card {
         <h2>You're <span>signed in</span></h2>
         <p class="account-copy">Your current account:</p>
         <div class="account-status"><strong id="accountEmail">Signed-in account</strong></div>
+        <div class="discord-account-panel">
+          <strong>Discord verification</strong>
+          <p class="account-copy" id="discordAccountStatus">Link your Discord account to verify your identity on RDL.</p>
+          <div class="auth-actions">
+            <button class="button button-primary" id="linkDiscordAccountButton" type="button">Link Discord</button>
+            <button class="button" id="unlinkDiscordAccountButton" type="button" hidden>Unlink Discord</button>
+          </div>
+        </div>
         <div style="margin-top:16px">
           <button class="button" id="signOutButton" type="button">Log out</button>
         </div>
@@ -1272,10 +1286,10 @@ body.record-submit-open #submit .record-submit-card {
         <div class="form-group">
           <label for="discordName">Discord *</label>
           <div class="discord-link-row">
-            <input class="field" id="discordName" type="text" value="Tyalamoon" maxlength="80" required>
-            <a class="button" href="https://discord.com/app" target="_blank" rel="noopener noreferrer">Link Discord</a>
+            <input class="field" id="discordName" type="text" placeholder="Your Discord username" maxlength="80" required>
+            <button class="button" id="submissionLinkDiscordButton" type="button">Link Discord</button>
           </div>
-          <small>Opening Discord does not verify or link the account on this site.</small>
+          <small id="submissionDiscordStatus">Optional verification: sign in to your RDL account and link Discord to show a verified badge. Unlinked submissions can still use a manually entered name.</small>
         </div>
 
         <div class="form-group">
@@ -1522,6 +1536,10 @@ let loadingPending = false;
 let loadingRecords = false;
 let adminRequestVersion = 0;
 let records = [];
+let verifiedDiscordProfiles = [];
+let currentAuthUser = null;
+let currentDiscordIdentity = null;
+let discordAutoFilledSubmission = false;
 
 function showAuthMessage(message, type = "") {
   authMessage.textContent = message;
@@ -1551,16 +1569,106 @@ function safeHttpUrl(value) {
   return null;
 }
 
+function getDiscordIdentity(user) {
+  return (user?.identities || []).find(identity => identity.provider === "discord") || null;
+}
+
+function getDiscordIdentityDetails(identity) {
+  const data = identity?.identity_data || {};
+  return {
+    id: String(data.sub || identity?.id || ""),
+    username: String(data.username || data.user_name || data.name || data.full_name || ""),
+    globalName: String(data.global_name || data.full_name || data.name || "")
+  };
+}
+
+function renderDiscordLinkState(session) {
+  currentAuthUser = session?.user || null;
+  currentDiscordIdentity = getDiscordIdentity(currentAuthUser);
+  const details = getDiscordIdentityDetails(currentDiscordIdentity);
+  const accountStatus = document.getElementById("discordAccountStatus");
+  const linkAccountButton = document.getElementById("linkDiscordAccountButton");
+  const unlinkAccountButton = document.getElementById("unlinkDiscordAccountButton");
+  const submissionStatus = document.getElementById("submissionDiscordStatus");
+  const submissionLinkButton = document.getElementById("submissionLinkDiscordButton");
+  const discordNameInput = document.getElementById("discordName");
+
+  if (accountStatus) {
+    accountStatus.textContent = currentDiscordIdentity
+      ? "Verified as " + (details.globalName && details.globalName !== details.username ? details.globalName + " (@" + details.username + ")" : "@" + details.username) + ". This identity was authorized through Discord."
+      : "No Discord account is linked yet. Link it to verify your identity on RDL.";
+  }
+  if (linkAccountButton) {
+    linkAccountButton.hidden = Boolean(currentDiscordIdentity);
+    linkAccountButton.textContent = currentAuthUser ? "Link Discord" : "Sign in to link Discord";
+  }
+  if (unlinkAccountButton) unlinkAccountButton.hidden = !currentDiscordIdentity;
+
+  if (discordNameInput) {
+    if (currentDiscordIdentity && details.username) {
+      discordNameInput.value = details.username;
+      discordNameInput.readOnly = true;
+      discordAutoFilledSubmission = true;
+    } else {
+      if (discordAutoFilledSubmission) discordNameInput.value = "";
+      discordNameInput.readOnly = false;
+      discordAutoFilledSubmission = false;
+    }
+  }
+  if (submissionStatus) {
+    submissionStatus.textContent = currentDiscordIdentity
+      ? "Verified Discord linked: @" + details.username + ". Your submission will use this verified username."
+      : currentAuthUser
+        ? "Your Discord is not linked yet. Link it to verify your identity; manual names remain allowed for existing submission flow."
+        : "Sign in to your RDL account to link Discord and show a verified badge. Unlinked submissions can still use a manually entered name.";
+  }
+  if (submissionLinkButton) {
+    submissionLinkButton.textContent = currentDiscordIdentity ? "Discord verified" : "Link Discord";
+    submissionLinkButton.disabled = Boolean(currentDiscordIdentity);
+  }
+}
+
 function renderAuthSession(session) {
   const user = session?.user || null;
   accountSignedOut.hidden = Boolean(user);
   accountSignedIn.hidden = !user;
   accountEmail.textContent = user?.email || "Signed-in account";
+  renderDiscordLinkState(session);
 
   if (!user) {
     isRdlOwner = false;
     adminPanel.hidden = true;
   }
+}
+
+async function syncDiscordProfile(session = null) {
+  const user = session?.user || currentAuthUser;
+  if (!user) return;
+  try {
+    const { data, error } = await rdlSupabase.functions.invoke("sync-discord-profile", { body: {} });
+    if (error) throw error;
+    if (!data?.success) throw new Error(data?.error || "Discord profile sync failed.");
+    await loadVerifiedDiscordProfiles();
+  } catch (error) {
+    console.error("RDL Discord profile sync error:", error);
+    if (currentDiscordIdentity) {
+      showAuthMessage("Discord is linked to your login, but the public verified badge could not be updated. Check the Supabase Discord profile setup.", "error");
+    }
+  }
+}
+
+async function loadVerifiedDiscordProfiles() {
+  try {
+    const { data, error } = await rdlSupabase
+      .from("rdl_discord_profiles")
+      .select("discord_id, discord_username, discord_global_name");
+    if (error) throw error;
+    verifiedDiscordProfiles = Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error("RDL verified Discord profiles unavailable:", error);
+    verifiedDiscordProfiles = [];
+  }
+  renderPlayerPointsLeaderboard();
 }
 
 async function runAuthAction(action, successMessage) {
@@ -1617,6 +1725,51 @@ googleSignInButton.addEventListener("click", () => {
     }),
     "Redirecting to Google..."
   );
+});
+
+async function startDiscordLink() {
+  if (!currentAuthUser) {
+    showAuthMessage("Sign in to your RDL account first, then link Discord.", "error");
+    document.body.classList.remove("submit-open", "players-open");
+    document.body.classList.add("account-open");
+    document.getElementById("account")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  if (currentDiscordIdentity) {
+    showAuthMessage("Your Discord account is already linked and verified.", "success");
+    return;
+  }
+  try {
+    const { error } = await rdlSupabase.auth.linkIdentity({
+      provider: "discord",
+      options: { redirectTo: window.location.origin + window.location.pathname }
+    });
+    if (error) throw error;
+    showAuthMessage("Redirecting to Discord to verify your account...", "success");
+  } catch (error) {
+    console.error("RDL Discord linking error:", error);
+    showAuthMessage("Couldn't start Discord linking. Make sure Discord OAuth is enabled in Supabase and manual identity linking is allowed. " + (error?.message || ""), "error");
+  }
+}
+
+document.getElementById("linkDiscordAccountButton")?.addEventListener("click", startDiscordLink);
+document.getElementById("submissionLinkDiscordButton")?.addEventListener("click", startDiscordLink);
+
+document.getElementById("unlinkDiscordAccountButton")?.addEventListener("click", async () => {
+  if (!currentDiscordIdentity) return;
+  const confirmed = window.confirm("Unlink Discord from your RDL account? Your public verified badge will be removed.");
+  if (!confirmed) return;
+  try {
+    const { error } = await rdlSupabase.auth.unlinkIdentity(currentDiscordIdentity);
+    if (error) throw error;
+    const { data } = await rdlSupabase.auth.getSession();
+    renderAuthSession(data.session);
+    await syncDiscordProfile(data.session);
+    showAuthMessage("Discord has been unlinked.", "success");
+  } catch (error) {
+    console.error("RDL Discord unlinking error:", error);
+    showAuthMessage("Couldn't unlink Discord. " + (error?.message || ""), "error");
+  }
 });
 
 signOutButton.addEventListener("click", async () => {
@@ -1678,7 +1831,10 @@ async function refreshAdminPanel(session) {
 
 rdlSupabase.auth.onAuthStateChange((_event, session) => {
   renderAuthSession(session);
-  queueMicrotask(() => refreshAdminPanel(session));
+  queueMicrotask(() => {
+    refreshAdminPanel(session);
+    if (session?.user) syncDiscordProfile(session);
+  });
 });
 
 rdlSupabase.auth.getSession().then(({ data, error }) => {
@@ -1688,6 +1844,7 @@ rdlSupabase.auth.getSession().then(({ data, error }) => {
   }
   renderAuthSession(data.session);
   refreshAdminPanel(data.session);
+  if (data.session?.user) syncDiscordProfile(data.session);
 });
 
 /* PENDING SUBMISSIONS */
@@ -1984,8 +2141,24 @@ function renderPlayerPointsLeaderboard() {
     const row = makeElement("article", "player-standing");
     const rank = makeElement("span", "rank" + (index < 3 ? " top-three" : ""), "#" + (index + 1));
     const info = makeElement("div", "player-standing-info");
+    const nameLine = makeElement("div", "player-standing-name", player.name);
+    const normalizedName = player.name.trim().toLocaleLowerCase();
+    const verifiedProfile = verifiedDiscordProfiles.find(profile =>
+      [profile.discord_username, profile.discord_global_name]
+        .some(value => String(value || "").trim().toLocaleLowerCase() === normalizedName)
+    );
+    if (verifiedProfile) {
+      const verifiedBadge = makeElement("span", "discord-verified", "✓ Verified Discord");
+      const discordProfileLink = makeElement("a", "", " ↗");
+      discordProfileLink.href = "https://discord.com/users/" + encodeURIComponent(verifiedProfile.discord_id);
+      discordProfileLink.target = "_blank";
+      discordProfileLink.rel = "noopener noreferrer";
+      discordProfileLink.setAttribute("aria-label", "Open verified Discord profile for " + player.name);
+      verifiedBadge.appendChild(discordProfileLink);
+      nameLine.appendChild(verifiedBadge);
+    }
     info.append(
-      makeElement("div", "player-standing-name", player.name),
+      nameLine,
       makeElement("div", "creator", player.records + (player.records === 1 ? " approved record" : " approved records"))
     );
     const points = makeElement("strong", "player-points-total", player.points.toFixed(2) + " pts");
@@ -2513,6 +2686,7 @@ async function loadRecords() {
     if (error) throw error;
 
     records = Array.isArray(data) ? data : [];
+    await loadVerifiedDiscordProfiles();
     populateSubmissionLevels(submissionLevelSearch?.value || "");
     renderLeaderboard();
   } catch (error) {
