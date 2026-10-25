@@ -1192,7 +1192,6 @@ body.record-submit-open #submit .record-submit-card {
     <div class="submit-card record-submit-card" id="recordSubmissionCard" hidden>
       <header class="record-submit-header">
         <div>
-          <span class="eyebrow">Robot Demon List</span>
           <h2>Submit <span>Record</span></h2>
         </div>
         <button class="level-modal-close" id="closeRecordSubmission" type="button" aria-label="Close submit record form">×</button>
@@ -1295,16 +1294,12 @@ body.record-submit-open #submit .record-submit-card {
           <textarea class="field" id="notes" name="notes" placeholder="Optional comments..." maxlength="1000"></textarea>
         </div>
 
-        <div class="captcha-panel">
+        <div class="captcha-panel recaptcha-panel">
           <div>
-            <strong>CAPTCHA</strong>
-            <p id="captchaQuestion">Answer the quick check to continue.</p>
+            <strong>I'm not a robot</strong>
+            <p>Complete the CAPTCHA check before submitting your record.</p>
           </div>
-          <div class="form-group">
-            <label for="captchaAnswer">Your answer *</label>
-            <input class="field" id="captchaAnswer" type="number" inputmode="numeric" step="1" required autocomplete="off" placeholder="Answer">
-          </div>
-          <button class="button" id="refreshCaptchaButton" type="button">New challenge</button>
+          <div class="g-recaptcha" data-sitekey="YOUR_RECAPTCHA_V2_SITE_KEY"></div>
         </div>
 
         <div class="form-message" id="formMessage" role="status" aria-live="polite"></div>
@@ -1347,6 +1342,7 @@ body.record-submit-open #submit .record-submit-card {
 
 
 
+<script src="https://www.google.com/recaptcha/api.js?onload=onRdlRecaptchaLoaded&render=explicit" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <div class="level-modal-backdrop" id="levelModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="levelModalTitle">
@@ -1428,7 +1424,7 @@ function openRecordSubmission(levelName = "") {
   }
   document.body.style.overflow = "hidden";
   refreshSubmissionMinimum();
-  refreshCaptcha();
+  if (window.grecaptcha?.reset) window.grecaptcha.reset();
   setTimeout(() => document.getElementById("submissionLevelSearch")?.focus(), 0);
 }
 
@@ -2434,9 +2430,7 @@ async function setLevelRank(recordId, selectedRank, buttonElement) {
 const submissionLevelSearch = document.getElementById("submissionLevelSearch");
 const submissionLevelSelect = document.getElementById("submissionLevel");
 const submissionMinimumHint = document.getElementById("submissionMinimumHint");
-const captchaAnswerInput = document.getElementById("captchaAnswer");
-const captchaQuestion = document.getElementById("captchaQuestion");
-let captchaExpectedAnswer = null;
+let captchaWidgetLoaded = false;
 
 function populateSubmissionLevels(filter = "") {
   if (!submissionLevelSelect) return;
@@ -2472,18 +2466,12 @@ function refreshSubmissionMinimum() {
     : "No minimum record percentage is available for this level.";
 }
 
-function refreshCaptcha() {
-  if (!captchaQuestion || !captchaAnswerInput) return;
-  const a = Math.floor(Math.random() * 8) + 2;
-  const b = Math.floor(Math.random() * 8) + 1;
-  captchaExpectedAnswer = a + b;
-  captchaQuestion.textContent = "What is " + a + " + " + b + "?";
-  captchaAnswerInput.value = "";
-}
+window.onRdlRecaptchaLoaded = () => {
+  captchaWidgetLoaded = true;
+};
 
 submissionLevelSearch?.addEventListener("input", () => populateSubmissionLevels(submissionLevelSearch.value));
 submissionLevelSelect?.addEventListener("change", refreshSubmissionMinimum);
-document.getElementById("refreshCaptchaButton")?.addEventListener("click", refreshCaptcha);
 
 async function loadRecords() {
   if (loadingRecords) return;
@@ -2546,7 +2534,7 @@ submissionForm.addEventListener("submit", async event => {
   const proofInput = document.getElementById("proofUrl").value.trim();
   const rawFootageInput = document.getElementById("rawFootageUrl").value.trim();
   const comments = document.getElementById("notes").value.trim();
-  const captchaInput = captchaAnswerInput?.value.trim() || "";
+  const captchaToken = window.grecaptcha?.getResponse?.() || "";
 
   if (!playerName || playerName.length > 80) {
     showFormMessage("Enter a Discord name between 1 and 80 characters.", "error");
@@ -2579,9 +2567,13 @@ submissionForm.addEventListener("submit", async event => {
     showFormMessage("Comments must be 1000 characters or fewer.", "error");
     return;
   }
-  if (!Number.isInteger(Number(captchaInput)) || Number(captchaInput) !== captchaExpectedAnswer) {
-    showFormMessage("CAPTCHA answer is incorrect. Please try the new challenge.", "error");
-    refreshCaptcha();
+  if (!captchaToken) {
+    showFormMessage("Please complete the I'm not a robot CAPTCHA.", "error");
+    return;
+  }
+
+  if (!captchaWidgetLoaded) {
+    showFormMessage("CAPTCHA is not configured yet. The site owner must add a valid reCAPTCHA site key and server-side verification before submissions can be protected.", "error");
     return;
   }
 
@@ -2633,7 +2625,7 @@ submissionForm.addEventListener("submit", async event => {
       "Record submitted successfully! It is now pending review and will only appear on the leaderboard if approved.",
       "success"
     );
-    refreshCaptcha();
+    if (window.grecaptcha?.reset) window.grecaptcha.reset();
   } catch (error) {
     console.error("RDL submission error:", error);
     showFormMessage(
