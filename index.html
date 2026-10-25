@@ -1068,6 +1068,71 @@ body.record-submit-open #submit .record-submit-card {
   .level-modal-actions .button { flex: 1 1 100%; }
 }
 
+
+
+/* Full-screen Suggest a Level modal */
+.level-suggest-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, .86);
+  backdrop-filter: blur(8px);
+}
+.level-suggest-backdrop[hidden] { display: none !important; }
+.level-suggest-dialog {
+  width: min(720px, 100%);
+  max-height: calc(100vh - 36px);
+  overflow-y: auto;
+  padding: clamp(20px, 4vw, 32px);
+  border: 1px solid #3a3a3a;
+  border-radius: 14px;
+  background: #181818;
+  box-shadow: 0 28px 90px rgba(0,0,0,.65);
+}
+.level-suggest-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.level-suggest-header h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(26px, 4vw, 34px);
+  line-height: 1.2;
+}
+.level-suggest-close {
+  display: grid;
+  flex: 0 0 40px;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #202020;
+  color: var(--text);
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+.level-suggest-close:hover { border-color: var(--gold); color: var(--gold); }
+.level-suggest-dialog .submit-form { gap: 16px; }
+.level-suggest-dialog .form-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.level-suggest-dialog .button { width: 100%; }
+body.level-suggest-open { overflow: hidden; }
+@media (max-width: 560px) {
+  .level-suggest-backdrop { padding: 10px; align-items: flex-start; }
+  .level-suggest-dialog { max-height: calc(100vh - 20px); padding: 18px; }
+  .level-suggest-dialog .form-row { grid-template-columns: 1fr; }
+}
+
 </style>
 </head>
 
@@ -1404,6 +1469,57 @@ body.record-submit-open #submit .record-submit-card {
   </section>
 </div>
 
+
+<div class="level-suggest-backdrop" id="levelSuggestModal" hidden aria-hidden="true">
+  <section class="level-suggest-dialog" role="dialog" aria-modal="true" aria-labelledby="levelSuggestTitle">
+    <header class="level-suggest-header">
+      <h2 id="levelSuggestTitle">Submit Level</h2>
+      <button class="level-suggest-close" id="closeLevelSuggest" type="button" aria-label="Close Submit Level form">×</button>
+    </header>
+    <form class="submit-form" id="levelSuggestionForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="suggestedLevelName">Level name *</label>
+          <input class="field" id="suggestedLevelName" name="level_name" required maxlength="120" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="suggestedLevelAuthor">Author *</label>
+          <input class="field" id="suggestedLevelAuthor" name="author" required maxlength="120" autocomplete="off">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="suggestedLevelVerifier">Verifier *</label>
+          <input class="field" id="suggestedLevelVerifier" name="verifier" required maxlength="120" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="suggestedLevelList">List *</label>
+          <select class="field" id="suggestedLevelList" name="list" required>
+            <option value="Classic" selected>Classic</option>
+            <option value="Platformer List">Platformer List</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="suggestedLevelPosition">Desired Position (#) *</label>
+          <input class="field" id="suggestedLevelPosition" name="desired_position" type="number" min="1" step="1" required>
+        </div>
+        <div class="form-group">
+          <label for="suggestedLevelId">Level ID *</label>
+          <input class="field" id="suggestedLevelId" name="level_id" inputmode="numeric" pattern="[0-9]+" required maxlength="20">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="suggestedLevelYoutube">YouTube link *</label>
+        <input class="field" id="suggestedLevelYoutube" name="youtube_link" type="url" placeholder="https://www.youtube.com/watch?v=..." required>
+      </div>
+      <div class="form-message" id="levelSuggestionMessage" role="status" aria-live="polite"></div>
+      <button class="button button-primary" type="submit">Submit Level</button>
+    </form>
+  </section>
+</div>
+
 <script>
 "use strict";
 
@@ -1431,6 +1547,50 @@ const recordSubmissionCard = document.getElementById("recordSubmissionCard");
 const closeRecordSubmissionButton = document.getElementById("closeRecordSubmission");
 const cancelRecordSubmissionButton = document.getElementById("cancelRecordSubmission");
 const levelModalSubmitButton = document.getElementById("levelModalSubmit");
+
+const levelSuggestModal = document.getElementById("levelSuggestModal");
+const levelSuggestionForm = document.getElementById("levelSuggestionForm");
+const levelSuggestionMessage = document.getElementById("levelSuggestionMessage");
+
+function openLevelSuggestion() {
+  if (!levelSuggestModal) return;
+  if (contributeDropdown) contributeDropdown.hidden = true;
+  contributeLink?.setAttribute("aria-expanded", "false");
+  document.body.classList.remove("account-open", "players-open", "submit-open", "record-submit-open");
+  document.body.classList.add("level-suggest-open");
+  levelSuggestModal.hidden = false;
+  levelSuggestModal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  levelSuggestionMessage?.classList.remove("visible", "success", "error", "info");
+  setTimeout(() => document.getElementById("suggestedLevelName")?.focus(), 0);
+}
+
+function closeLevelSuggestion() {
+  if (!levelSuggestModal) return;
+  levelSuggestModal.hidden = true;
+  levelSuggestModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("level-suggest-open");
+  document.body.style.overflow = "";
+}
+
+document.getElementById("closeLevelSuggest")?.addEventListener("click", closeLevelSuggestion);
+levelSuggestModal?.addEventListener("click", (event) => {
+  if (event.target === levelSuggestModal) closeLevelSuggestion();
+});
+levelSuggestModal?.querySelector(".level-suggest-dialog")?.addEventListener("click", (event) => event.stopPropagation());
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && document.body.classList.contains("level-suggest-open")) {
+    closeLevelSuggestion();
+  }
+});
+levelSuggestionForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (!levelSuggestionForm.reportValidity()) return;
+  if (levelSuggestionMessage) {
+    levelSuggestionMessage.textContent = "The form is ready, but level-suggestion delivery has not been connected yet.";
+    levelSuggestionMessage.className = "form-message visible info";
+  }
+});
 
 function openRecordSubmission(levelName = "") {
   if (!recordSubmissionCard) return;
@@ -1470,6 +1630,8 @@ contributeChoiceButtons.forEach((button) => {
     });
     if (button.dataset.contributeChoice === "record") {
       openRecordSubmission();
+    } else if (button.dataset.contributeChoice === "level") {
+      openLevelSuggestion();
     }
   });
 });
