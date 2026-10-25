@@ -1258,7 +1258,7 @@ contributeOptions.forEach((option) => {
   option.addEventListener("click", () => {
     selectedContributionType = option.dataset.contributeType || "";
     const isRecord = selectedContributionType === "record";
-    contributeChooser.hidden = !isRecord;
+    contributeChooser.hidden = true;
     contributeSuggestion.hidden = isRecord;
     recordSubmissionCard.hidden = !isRecord;
     if (!isRecord) {
