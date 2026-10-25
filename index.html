@@ -1133,6 +1133,105 @@ body.level-suggest-open { overflow: hidden; }
   .level-suggest-dialog .form-row { grid-template-columns: 1fr; }
 }
 
+
+
+/* Full-screen Propose Pack modal */
+.pack-suggest-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, .86);
+  backdrop-filter: blur(8px);
+}
+.pack-suggest-backdrop[hidden] { display: none !important; }
+.pack-suggest-dialog {
+  width: min(760px, 100%);
+  max-height: calc(100vh - 36px);
+  overflow-y: auto;
+  padding: clamp(20px, 4vw, 32px);
+  border: 1px solid #3a3a3a;
+  border-radius: 14px;
+  background: #181818;
+  box-shadow: 0 28px 90px rgba(0,0,0,.65);
+}
+.pack-suggest-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.pack-suggest-header h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(26px, 4vw, 34px);
+  line-height: 1.2;
+}
+.pack-suggest-close {
+  display: grid;
+  flex: 0 0 40px;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #202020;
+  color: var(--text);
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+.pack-suggest-close:hover { border-color: var(--gold); color: var(--gold); }
+.pack-suggest-dialog .submit-form { gap: 18px; }
+.pack-levels-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.pack-levels-count { color: var(--text); font-weight: 700; }
+.pack-levels-actions { display: flex; align-items: center; gap: 8px; }
+.pack-levels-actions button {
+  border: 0; background: transparent; color: var(--gold);
+  font: inherit; cursor: pointer; padding: 4px 6px;
+}
+.pack-levels-actions button:hover { text-decoration: underline; }
+.pack-level-rows { display: grid; gap: 10px; }
+.pack-level-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, .45fr) 36px;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #121212;
+}
+.pack-level-row .field { min-width: 0; }
+.pack-level-remove {
+  width: 34px; height: 34px; border-radius: 7px;
+  border: 1px solid var(--border); background: #202020;
+  color: var(--text); cursor: pointer; font-size: 20px;
+}
+.pack-level-remove:hover { border-color: #d86b6b; color: #ff8585; }
+.pack-level-hint { display: block; color: var(--muted, #aaa); font-size: 13px; margin-top: 8px; }
+body.pack-suggest-open { overflow: hidden; }
+@media (max-width: 560px) {
+  .pack-suggest-backdrop { padding: 10px; align-items: flex-start; }
+  .pack-suggest-dialog { max-height: calc(100vh - 20px); padding: 18px; }
+  .pack-level-row { grid-template-columns: minmax(0, 1fr) 36px; }
+  .pack-level-row .pack-level-id { grid-column: 1; }
+  .pack-level-remove { grid-column: 2; grid-row: 1 / span 2; }
+}
+
 </style>
 </head>
 
@@ -1520,6 +1619,40 @@ body.level-suggest-open { overflow: hidden; }
   </section>
 </div>
 
+
+<div class="pack-suggest-backdrop" id="packSuggestModal" hidden aria-hidden="true">
+  <section class="pack-suggest-dialog" role="dialog" aria-modal="true" aria-labelledby="packSuggestTitle">
+    <header class="pack-suggest-header">
+      <h2 id="packSuggestTitle">Propose Pack</h2>
+      <button class="pack-suggest-close" id="closePackSuggest" type="button" aria-label="Close Propose Pack form">×</button>
+    </header>
+    <form class="submit-form" id="packSuggestionForm">
+      <div class="form-group">
+        <label for="proposedPackName">Pack name *</label>
+        <input class="field" id="proposedPackName" name="pack_name" required maxlength="120" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="proposedPackDescription">Description (optional)</label>
+        <textarea class="field" id="proposedPackDescription" name="description" maxlength="2000" rows="3" placeholder="Describe this pack..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Select Levels (min 3) *</label>
+        <div class="pack-levels-toolbar">
+          <span class="pack-levels-count" id="packSelectedCount" aria-live="polite">Selected: 0</span>
+          <div class="pack-levels-actions">
+            <button type="button" id="addPackLevel">+ Add Level</button>
+            <button type="button" id="clearPackLevels">Clear</button>
+          </div>
+        </div>
+        <div class="pack-level-rows" id="packLevelRows"></div>
+        <small class="pack-level-hint">Add at least three levels. Enter each level name and its Geometry Dash level ID.</small>
+      </div>
+      <div class="form-message" id="packSuggestionMessage" role="status" aria-live="polite"></div>
+      <button class="button button-primary" type="submit">Propose Pack</button>
+    </form>
+  </section>
+</div>
+
 <script>
 "use strict";
 
@@ -1592,6 +1725,118 @@ levelSuggestionForm?.addEventListener("submit", (event) => {
   }
 });
 
+const packSuggestModal = document.getElementById("packSuggestModal");
+const packSuggestionForm = document.getElementById("packSuggestionForm");
+const packLevelRows = document.getElementById("packLevelRows");
+const packSelectedCount = document.getElementById("packSelectedCount");
+const packSuggestionMessage = document.getElementById("packSuggestionMessage");
+
+function refreshPackLevelCount() {
+  if (!packLevelRows || !packSelectedCount) return 0;
+  const rows = Array.from(packLevelRows.querySelectorAll(".pack-level-row"));
+  const count = rows.filter(row => {
+    const name = row.querySelector(".pack-level-name")?.value.trim();
+    const id = row.querySelector(".pack-level-id")?.value.trim();
+    return Boolean(name && id && /^[0-9]+$/.test(id));
+  }).length;
+  packSelectedCount.textContent = "Selected: " + count;
+  return count;
+}
+
+function addPackLevelRow(name = "", id = "") {
+  if (!packLevelRows) return;
+  const row = document.createElement("div");
+  row.className = "pack-level-row";
+  const nameInput = document.createElement("input");
+  nameInput.className = "field pack-level-name";
+  nameInput.type = "text";
+  nameInput.maxLength = 120;
+  nameInput.autocomplete = "off";
+  nameInput.placeholder = "Level name";
+  nameInput.setAttribute("aria-label", "Pack level name");
+  nameInput.value = name;
+  const idInput = document.createElement("input");
+  idInput.className = "field pack-level-id";
+  idInput.type = "text";
+  idInput.inputMode = "numeric";
+  idInput.pattern = "[0-9]+";
+  idInput.maxLength = 20;
+  idInput.placeholder = "Level ID";
+  idInput.setAttribute("aria-label", "Geometry Dash level ID");
+  idInput.value = id;
+  const remove = document.createElement("button");
+  remove.className = "pack-level-remove";
+  remove.type = "button";
+  remove.textContent = "×";
+  remove.setAttribute("aria-label", "Remove level");
+  remove.addEventListener("click", () => {
+    row.remove();
+    refreshPackLevelCount();
+  });
+  nameInput.addEventListener("input", refreshPackLevelCount);
+  idInput.addEventListener("input", refreshPackLevelCount);
+  row.append(nameInput, idInput, remove);
+  packLevelRows.appendChild(row);
+  refreshPackLevelCount();
+  nameInput.focus();
+}
+
+function openPackSuggestion() {
+  if (!packSuggestModal) return;
+  if (contributeDropdown) contributeDropdown.hidden = true;
+  contributeLink?.setAttribute("aria-expanded", "false");
+  document.body.classList.remove("account-open", "players-open", "submit-open", "record-submit-open", "level-suggest-open");
+  document.body.classList.add("pack-suggest-open");
+  packSuggestModal.hidden = false;
+  packSuggestModal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  packSuggestionMessage?.classList.remove("visible", "success", "error", "info");
+  setTimeout(() => document.getElementById("proposedPackName")?.focus(), 0);
+}
+
+function closePackSuggestion() {
+  if (!packSuggestModal) return;
+  packSuggestModal.hidden = true;
+  packSuggestModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("pack-suggest-open");
+  document.body.style.overflow = "";
+}
+
+document.getElementById("closePackSuggest")?.addEventListener("click", closePackSuggestion);
+document.getElementById("addPackLevel")?.addEventListener("click", () => addPackLevelRow());
+document.getElementById("clearPackLevels")?.addEventListener("click", () => {
+  if (packLevelRows) packLevelRows.replaceChildren();
+  refreshPackLevelCount();
+  packSuggestionMessage?.classList.remove("visible", "success", "error", "info");
+});
+packSuggestModal?.addEventListener("click", event => {
+  if (event.target === packSuggestModal) closePackSuggestion();
+});
+packSuggestModal?.querySelector(".pack-suggest-dialog")?.addEventListener("click", event => event.stopPropagation());
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && document.body.classList.contains("pack-suggest-open")) closePackSuggestion();
+});
+packSuggestionForm?.addEventListener("submit", event => {
+  event.preventDefault();
+  if (!packSuggestionForm.reportValidity()) return;
+  const rows = Array.from(packLevelRows?.querySelectorAll(".pack-level-row") || []);
+  const selectedLevels = rows.map(row => ({
+    name: row.querySelector(".pack-level-name")?.value.trim() || "",
+    id: row.querySelector(".pack-level-id")?.value.trim() || ""
+  })).filter(level => level.name && /^[0-9]+$/.test(level.id));
+  if (selectedLevels.length < 3) {
+    if (packSuggestionMessage) {
+      packSuggestionMessage.textContent = "Please add at least 3 valid levels before proposing your pack.";
+      packSuggestionMessage.className = "form-message visible error";
+    }
+    return;
+  }
+  if (packSuggestionMessage) {
+    packSuggestionMessage.textContent = "Your pack details are complete, but pack proposal submission has not been connected yet.";
+    packSuggestionMessage.className = "form-message visible info";
+  }
+});
+
 function openRecordSubmission(levelName = "") {
   if (!recordSubmissionCard) return;
   document.body.classList.remove("account-open", "players-open");
@@ -1632,6 +1877,8 @@ contributeChoiceButtons.forEach((button) => {
       openRecordSubmission();
     } else if (button.dataset.contributeChoice === "level") {
       openLevelSuggestion();
+    } else if (button.dataset.contributeChoice === "pack") {
+      openPackSuggestion();
     }
   });
 });
