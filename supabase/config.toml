@@ -1,2 +1,5 @@
 [functions.submit-record-with-captcha]
 verify_jwt = false
+
+[functions.sync-discord-profile]
+verify_jwt = true
