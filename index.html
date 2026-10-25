@@ -2734,12 +2734,13 @@ async function loadPendingSubmissions() {
         card.appendChild(makeElement("p", "", `Submitted: ${Number.isNaN(date.getTime()) ? contribution.created_at : date.toLocaleString()}`));
       }
       const actions = makeElement("div", "admin-actions");
-      const approveButton = makeElement("button", "button admin-approve", "Mark reviewed");
+      const isLevelSuggestion = contribution.contribution_type === "level_suggestion";
+      const approveButton = makeElement("button", "button admin-approve", isLevelSuggestion ? "Add level to list" : "Mark reviewed");
       approveButton.type = "button";
-      approveButton.addEventListener("click", () => moderateContribution(contribution.id, "approved"));
+      approveButton.addEventListener("click", () => moderateContribution(contribution, "approved"));
       const rejectButton = makeElement("button", "button admin-reject", "Reject");
       rejectButton.type = "button";
-      rejectButton.addEventListener("click", () => moderateContribution(contribution.id, "rejected"));
+      rejectButton.addEventListener("click", () => moderateContribution(contribution, "rejected"));
       actions.append(approveButton, rejectButton);
       card.appendChild(actions);
       pendingList.appendChild(card);
@@ -2753,22 +2754,52 @@ async function loadPendingSubmissions() {
   }
 }
 
-async function moderateContribution(id, status) {
+async function moderateContribution(contribution, status) {
   if (!isRdlOwner) {
     setAdminStatus("Only the RDL owner can review contributions.");
     return;
   }
+
+  const id = contribution?.id;
+  if (id === undefined || id === null) {
+    setAdminStatus("Couldn't identify this contribution. Refresh the inbox and try again.");
+    return;
+  }
+
+  setAdminStatus(status === "approved" && contribution.contribution_type === "level_suggestion"
+    ? "Adding level to the list..."
+    : status === "approved" ? "Marking contribution reviewed..." : "Rejecting contribution...");
+
   try {
-    const { error } = await rdlSupabase
+    if (status === "approved" && contribution.contribution_type === "level_suggestion") {
+      const { error } = await rdlSupabase.rpc("approve_rdl_level_suggestion", {
+        p_contribution_id: id
+      });
+      if (error) throw error;
+      setAdminStatus("Level added to the public list!");
+      await loadPendingSubmissions();
+      await loadRecords();
+      return;
+    }
+
+    const { data, error } = await rdlSupabase
       .from("rdl_contributions")
       .update({ status })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("status", "pending")
+      .select("id");
     if (error) throw error;
+    if (!data || data.length === 0) {
+      throw new Error("No pending contribution was updated. It may already have been reviewed.");
+    }
     setAdminStatus(status === "approved" ? "Contribution marked reviewed." : "Contribution rejected.");
     await loadPendingSubmissions();
   } catch (error) {
     console.error("RDL contribution moderation error:", error);
-    setAdminStatus("Couldn't update this contribution. Check the owner-only UPDATE policy. " + (error?.message || ""));
+    setAdminStatus("Couldn't process this contribution: " + (error?.message || "Unknown Supabase error") +
+      (contribution.contribution_type === "level_suggestion" && status === "approved"
+        ? " If the RPC function is missing, run the updated supabase/rdl_contributions.sql in Supabase SQL Editor."
+        : ""));
   }
 }
 
@@ -3097,9 +3128,15 @@ let activeDetailRecords = [];
 let activeDetailRank = "—";
 let activeDetailTab = "records";
 
+function isRdlLevelCatalogEntry(record) {
+  return String(record?.notes || "").startsWith("RDL_LEVEL_SUGGESTION:");
+}
+
 function getLevelGroup(record) {
   const key = String(record.level_name || "").trim().toLocaleLowerCase();
-  return records.filter(item => String(item.level_name || "").trim().toLocaleLowerCase() === key);
+  const matching = records.filter(item => String(item.level_name || "").trim().toLocaleLowerCase() === key);
+  const realRecords = matching.filter(item => !isRdlLevelCatalogEntry(item));
+  return realRecords.length ? realRecords : matching;
 }
 
 function getYouTubeVideoId(url) {
@@ -3126,15 +3163,21 @@ function openLevelDetails(record, displayedRank) {
   activeDetailRank = displayedRank || "—";
   activeDetailTab = "records";
   const safeName = String(record.level_name || "Untitled level");
-  document.getElementById("levelModalCategory").textContent = "Classic";
+  const isCatalogEntry = isRdlLevelCatalogEntry(record);
+  const listMatch = isCatalogEntry ? String(record.notes || "").match(/(?:^|\\| )list=([^|\\n]+)/i) : null;
+  document.getElementById("levelModalCategory").textContent = listMatch?.[1]?.trim() || "Classic";
   document.getElementById("levelModalRank").textContent = "#" + activeDetailRank;
   document.getElementById("levelModalPoints").textContent = pointsForRank(activeDetailRank).toFixed(2) + " pts";
   document.getElementById("levelModalTitle").textContent = safeName;
   const creators = Array.from(new Set(activeDetailRecords.map(item => String(item.player_name || "Unknown").trim()).filter(Boolean)));
-  document.getElementById("levelModalCreators").textContent = "by " + (creators.join(", ") || "Unknown") + " · RDL community record";
+  document.getElementById("levelModalCreators").textContent = "by " + (creators.join(", ") || "Unknown") + (isCatalogEntry ? " · RDL level entry" : " · RDL community record");
   const meta = document.getElementById("levelModalMeta");
   meta.replaceChildren();
-  [activeDetailRecord.percent === 100 ? "100% completion" : String(activeDetailRecord.percent ?? "—") + "% completion", "Robot Demon List"].forEach(label => {
+  const hasRealRecords = activeDetailRecords.some(item => !isRdlLevelCatalogEntry(item));
+  const metaLabels = isCatalogEntry && !hasRealRecords
+    ? ["Added to RDL · no player records yet", "Robot Demon List"]
+    : [activeDetailRecord.percent === 100 ? "100% completion" : String(activeDetailRecord.percent ?? "—") + "% completion", "Robot Demon List"];
+  metaLabels.forEach(label => {
     meta.appendChild(makeElement("span", "level-modal-chip", label));
   });
   document.getElementById("levelModalId").textContent = "RDL ID: " + String(record.id);
@@ -3190,12 +3233,16 @@ function renderLevelDetailsTab() {
   if (!activeDetailRecord) return;
   levelModalTabContent.replaceChildren();
   if (activeDetailTab === "records") {
-    if (!activeDetailRecords.length) {
-      levelModalTabContent.appendChild(makeElement("p", "level-modal-empty", "No approved records yet."));
+    const realRecords = activeDetailRecords.filter(item => !isRdlLevelCatalogEntry(item));
+    if (!realRecords.length) {
+      levelModalTabContent.appendChild(makeElement("p", "level-modal-empty",
+        isRdlLevelCatalogEntry(activeDetailRecord)
+          ? "This level is on the RDL list. No player records have been submitted for it yet."
+          : "No approved records yet."));
       return;
     }
     const ranks = getDisplayRanks(records);
-    activeDetailRecords.slice().sort((a, b) => Number(b.percent) - Number(a.percent)).forEach(item => {
+    realRecords.slice().sort((a, b) => Number(b.percent) - Number(a.percent)).forEach(item => {
       const row = makeElement("div", "level-modal-record");
       const info = makeElement("div");
       info.append(
