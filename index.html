@@ -952,6 +952,58 @@ body.submit-open #submit {
   display: block !important;
 }
 
+.submit-card[hidden] { display: none !important; }
+body.record-submit-open #submit {
+  position: fixed !important;
+  inset: 0;
+  z-index: 1500;
+  display: flex !important;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 24px 14px;
+  background: rgba(0,0,0,.82);
+  backdrop-filter: blur(7px);
+}
+body.record-submit-open #submit .record-submit-card {
+  display: block;
+  width: min(760px, 100%);
+  max-height: none;
+  margin: auto;
+  padding: clamp(18px, 4vw, 30px);
+  border-color: var(--border);
+  background: var(--surface);
+}
+.record-submit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.record-submit-header .eyebrow { margin-bottom: 7px; }
+.record-submit-header h2 { margin: 0; font-size: clamp(26px, 4vw, 34px); }
+.record-submit-card .submit-form { gap: 16px; }
+.record-submit-card .form-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.discord-link-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; }
+.captcha-panel {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(120px,.7fr) auto;
+  align-items: end;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-light);
+}
+.captcha-panel p { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+.record-submit-actions { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; }
+@media (max-width: 600px) {
+  body.record-submit-open #submit { padding: 10px; }
+  .record-submit-card .form-row, .captcha-panel { grid-template-columns: 1fr; }
+  .discord-link-row { grid-template-columns: 1fr; }
+  .record-submit-actions { grid-template-columns: 1fr; }
+}
 
 /* Level details inspired by community demon-list detail pages. */
 .level { cursor: pointer; }
@@ -1137,47 +1189,129 @@ body.submit-open #submit {
         <button class="button" id="contributeBackButton" type="button">Back to options</button>
       </form>
     </div>
-    <div class="submit-card" id="recordSubmissionCard" hidden>
-      <div class="submit-intro">
-        <span class="eyebrow">Your achievement</span>
-        <h2>Submit a <span>Record</span></h2>
-        <p>Completed a challenge? Send your record to the RDL review queue. Include a link to your proof so it can be checked.</p>
-        <div class="submit-note">
-          <strong>Important:</strong> submitting a record does not publish it immediately. New records stay pending until they are reviewed and approved.
+    <div class="submit-card record-submit-card" id="recordSubmissionCard" hidden>
+      <header class="record-submit-header">
+        <div>
+          <span class="eyebrow">Robot Demon List</span>
+          <h2>Submit <span>Record</span></h2>
         </div>
-      </div>
+        <button class="level-modal-close" id="closeRecordSubmission" type="button" aria-label="Close submit record form">×</button>
+      </header>
 
       <form class="submit-form" id="submissionForm">
+        <div class="form-group">
+          <label for="submissionMode">Submit Mode *</label>
+          <select class="field" id="submissionMode" required>
+            <option value="Single record" selected>Single record</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="submissionLevelSearch">Level *</label>
+          <input class="field" id="submissionLevelSearch" type="search" placeholder="Search level..." autocomplete="off">
+          <select class="field" id="submissionLevel" name="level_name" required>
+            <option value="">-- Select level --</option>
+          </select>
+          <small id="submissionMinimumHint">Select level to see minimum record percent.</small>
+        </div>
+
         <div class="form-row">
           <div class="form-group">
-            <label for="playerName">Player name *</label>
-            <input class="field" id="playerName" name="player_name" type="text" placeholder="Your username" maxlength="40" required autocomplete="nickname">
+            <label for="submissionList">List *</label>
+            <select class="field" id="submissionList" required>
+              <option value="Classic" selected>Classic</option>
+              <option value="Platformer">Platformer</option>
+            </select>
           </div>
           <div class="form-group">
-            <label for="levelName">Level name *</label>
-            <input class="field" id="levelName" name="level_name" type="text" placeholder="Level you completed" maxlength="100" required>
+            <label for="submissionType">Submission Type *</label>
+            <select class="field" id="submissionType" required>
+              <option value="Record" selected>Record</option>
+              <option value="Run">Run</option>
+            </select>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="percent">Completion percentage *</label>
-          <input class="field" id="percent" name="percent" type="number" min="0" max="100" step="1" placeholder="100" required>
-          <small>Enter a whole number from 0 to 100.</small>
-        </div>
-
-        <div class="form-group">
-          <label for="proofUrl">Proof link *</label>
+          <label for="proofUrl">Video Link *</label>
           <input class="field" id="proofUrl" name="proof_url" type="url" placeholder="https://..." maxlength="2048" required>
-          <small>A link to your video or other verifiable proof.</small>
         </div>
 
         <div class="form-group">
-          <label for="notes">Notes (optional)</label>
-          <textarea class="field" id="notes" name="notes" placeholder="Additional information for the reviewers..." maxlength="1000"></textarea>
+          <label for="percent">Progress % *</label>
+          <input class="field" id="percent" name="percent" type="number" min="0" max="100" step="1" placeholder="e.g. 92" required>
+        </div>
+
+        <div class="form-group">
+          <label for="rawFootageUrl">Raw Footage Link</label>
+          <input class="field" id="rawFootageUrl" type="url" placeholder="https://..." maxlength="2048">
+          <small>Raw footage is optional for this level.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="opinionOnRank">Opinion on Rank</label>
+          <input class="field" id="opinionOnRank" type="text" maxlength="300" placeholder="Optional opinion on the level's rank">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="audioTracks">Audio Tracks *</label>
+            <select class="field" id="audioTracks" required>
+              <option value="">-- Select --</option>
+              <option value="Allowed">Allowed</option>
+              <option value="No added tracks">No added tracks</option>
+              <option value="Not applicable">Not applicable</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="submissionPlatform">Platform *</label>
+            <select class="field" id="submissionPlatform" required>
+              <option value="PC" selected>PC</option>
+              <option value="Mobile">Mobile</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="usedCbf">Used CBF? *</label>
+          <select class="field" id="usedCbf" required>
+            <option value="No" selected>No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="discordName">Discord *</label>
+          <div class="discord-link-row">
+            <input class="field" id="discordName" type="text" value="Tyalamoon" maxlength="80" required>
+            <a class="button" href="https://discord.com/app" target="_blank" rel="noopener noreferrer">Link Discord</a>
+          </div>
+          <small>Opening Discord does not verify or link the account on this site.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="notes">Comments</label>
+          <textarea class="field" id="notes" name="notes" placeholder="Optional comments..." maxlength="1000"></textarea>
+        </div>
+
+        <div class="captcha-panel">
+          <div>
+            <strong>CAPTCHA</strong>
+            <p id="captchaQuestion">Answer the quick check to continue.</p>
+          </div>
+          <div class="form-group">
+            <label for="captchaAnswer">Your answer *</label>
+            <input class="field" id="captchaAnswer" type="number" inputmode="numeric" step="1" required autocomplete="off" placeholder="Answer">
+          </div>
+          <button class="button" id="refreshCaptchaButton" type="button">New challenge</button>
         </div>
 
         <div class="form-message" id="formMessage" role="status" aria-live="polite"></div>
-        <button class="button button-primary" id="submitButton" type="submit">Submit for review</button>
+        <div class="record-submit-actions">
+          <button class="button button-primary" id="submitButton" type="submit">Submit Record</button>
+          <button class="button" id="cancelRecordSubmission" type="button">Cancel</button>
+        </div>
       </form>
     </div>
   </section>
@@ -1267,19 +1401,69 @@ const contributeDropdown = document.getElementById("contributeDropdown");
 const contributeChoiceButtons = document.querySelectorAll("[data-contribute-choice]");
 contributeLink?.addEventListener("click", (event) => {
   event.preventDefault();
+  event.stopImmediatePropagation();
   const willOpen = contributeDropdown?.hidden ?? false;
   if (contributeDropdown) contributeDropdown.hidden = !willOpen;
   contributeLink.setAttribute("aria-expanded", String(willOpen));
 });
+const recordSubmissionCard = document.getElementById("recordSubmissionCard");
+const closeRecordSubmissionButton = document.getElementById("closeRecordSubmission");
+const cancelRecordSubmissionButton = document.getElementById("cancelRecordSubmission");
+const levelModalSubmitButton = document.getElementById("levelModalSubmit");
+
+function openRecordSubmission(levelName = "") {
+  if (!recordSubmissionCard) return;
+  document.body.classList.remove("account-open", "players-open");
+  document.body.classList.add("submit-open", "record-submit-open");
+  if (contributeDropdown) contributeDropdown.hidden = true;
+  contributeLink?.setAttribute("aria-expanded", "false");
+  const suggestion = document.getElementById("contributeSuggestion");
+  if (suggestion) suggestion.hidden = true;
+  recordSubmissionCard.hidden = false;
+  document.getElementById("submissionLevel")?.value && (document.getElementById("submissionLevel").value = "");
+  const levelSelect = document.getElementById("submissionLevel");
+  if (levelSelect && levelName) {
+    const match = Array.from(levelSelect.options).find(option => option.value.toLowerCase() === levelName.toLowerCase());
+    if (match) levelSelect.value = match.value;
+  }
+  document.body.style.overflow = "hidden";
+  refreshSubmissionMinimum();
+  refreshCaptcha();
+  setTimeout(() => document.getElementById("submissionLevelSearch")?.focus(), 0);
+}
+
+function closeRecordSubmission() {
+  document.body.classList.remove("record-submit-open", "submit-open");
+  if (recordSubmissionCard) recordSubmissionCard.hidden = true;
+  document.body.style.overflow = "";
+}
+
+closeRecordSubmissionButton?.addEventListener("click", closeRecordSubmission);
+cancelRecordSubmissionButton?.addEventListener("click", closeRecordSubmission);
+
 contributeChoiceButtons.forEach((button) => {
   button.addEventListener("click", () => {
     contributeChoiceButtons.forEach((item) => {
       item.classList.toggle("selected", item === button);
       item.setAttribute("aria-pressed", String(item === button));
     });
-    // Selection only for now; no form or follow-up action is triggered.
+    if (button.dataset.contributeChoice === "record") {
+      openRecordSubmission();
+    }
   });
 });
+
+levelModalSubmitButton?.addEventListener("click", () => {
+  const selectedLevelName = activeDetailRecord?.level_name || "";
+  closeLevelDetails();
+  openRecordSubmission(selectedLevelName);
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && document.body.classList.contains("record-submit-open")) {
+    closeRecordSubmission();
+  }
+});
+
 document.addEventListener("click", (event) => {
   if (!event.target.closest(".contribute-menu-wrap")) {
     if (contributeDropdown) contributeDropdown.hidden = true;
@@ -2247,6 +2431,60 @@ async function setLevelRank(recordId, selectedRank, buttonElement) {
     buttonElement.textContent = previousText;
   }
 }
+const submissionLevelSearch = document.getElementById("submissionLevelSearch");
+const submissionLevelSelect = document.getElementById("submissionLevel");
+const submissionMinimumHint = document.getElementById("submissionMinimumHint");
+const captchaAnswerInput = document.getElementById("captchaAnswer");
+const captchaQuestion = document.getElementById("captchaQuestion");
+let captchaExpectedAnswer = null;
+
+function populateSubmissionLevels(filter = "") {
+  if (!submissionLevelSelect) return;
+  const current = submissionLevelSelect.value;
+  const query = String(filter || "").trim().toLowerCase();
+  const names = Array.from(new Set(records.map(item => String(item.level_name || "").trim()).filter(Boolean)))
+    .sort((a, b) => a.localeCompare(b));
+  submissionLevelSelect.replaceChildren(new Option("-- Select level --", ""));
+  names.filter(name => name.toLowerCase().includes(query)).forEach(name => {
+    submissionLevelSelect.add(new Option(name, name));
+  });
+  if (names.includes(current) && names.filter(name => name.toLowerCase().includes(query)).includes(current)) {
+    submissionLevelSelect.value = current;
+  }
+  refreshSubmissionMinimum();
+}
+
+function refreshSubmissionMinimum() {
+  if (!submissionMinimumHint || !submissionLevelSelect) return;
+  const name = submissionLevelSelect.value;
+  if (!name) {
+    submissionMinimumHint.textContent = "Select level to see minimum record percent.";
+    return;
+  }
+  const levelRecords = records.filter(item => String(item.level_name || "").toLowerCase() === name.toLowerCase());
+  if (!levelRecords.length) {
+    submissionMinimumHint.textContent = "No approved records found for this level yet.";
+    return;
+  }
+  const minimum = Math.min(...levelRecords.map(item => Number(item.percent)).filter(value => Number.isFinite(value)));
+  submissionMinimumHint.textContent = Number.isFinite(minimum)
+    ? "Current lowest approved record: " + minimum + "%. This is informational."
+    : "No minimum record percentage is available for this level.";
+}
+
+function refreshCaptcha() {
+  if (!captchaQuestion || !captchaAnswerInput) return;
+  const a = Math.floor(Math.random() * 8) + 2;
+  const b = Math.floor(Math.random() * 8) + 1;
+  captchaExpectedAnswer = a + b;
+  captchaQuestion.textContent = "What is " + a + " + " + b + "?";
+  captchaAnswerInput.value = "";
+}
+
+submissionLevelSearch?.addEventListener("input", () => populateSubmissionLevels(submissionLevelSearch.value));
+submissionLevelSelect?.addEventListener("change", refreshSubmissionMinimum);
+document.getElementById("refreshCaptchaButton")?.addEventListener("click", refreshCaptcha);
+
 async function loadRecords() {
   if (loadingRecords) return;
 
@@ -2270,6 +2508,7 @@ async function loadRecords() {
     if (error) throw error;
 
     records = Array.isArray(data) ? data : [];
+    populateSubmissionLevels(submissionLevelSearch?.value || "");
     renderLeaderboard();
   } catch (error) {
     console.error("RDL leaderboard error:", error);
@@ -2301,41 +2540,65 @@ submissionForm.addEventListener("submit", async event => {
   event.preventDefault();
   hideFormMessage();
 
-  const playerName = document.getElementById("playerName").value.trim();
-  const levelName = document.getElementById("levelName").value.trim();
+  const playerName = document.getElementById("discordName").value.trim();
+  const levelName = submissionLevelSelect?.value.trim() || "";
   const percentInput = document.getElementById("percent").value.trim();
   const proofInput = document.getElementById("proofUrl").value.trim();
-  const notes = document.getElementById("notes").value.trim();
+  const rawFootageInput = document.getElementById("rawFootageUrl").value.trim();
+  const comments = document.getElementById("notes").value.trim();
+  const captchaInput = captchaAnswerInput?.value.trim() || "";
 
-  if (!playerName || playerName.length > 40) {
-    showFormMessage("Enter a player name between 1 and 40 characters.", "error");
+  if (!playerName || playerName.length > 80) {
+    showFormMessage("Enter a Discord name between 1 and 80 characters.", "error");
     return;
   }
-
   if (!levelName || levelName.length > 100) {
-    showFormMessage("Enter a level name between 1 and 100 characters.", "error");
+    showFormMessage("Select a level from the list.", "error");
     return;
   }
-
   if (
     percentInput === "" ||
-    !/^\d+$/.test(percentInput) ||
+    !/^\\d+$/.test(percentInput) ||
     Number(percentInput) < 0 ||
     Number(percentInput) > 100
   ) {
-    showFormMessage("Completion must be a whole number from 0 to 100.", "error");
+    showFormMessage("Progress must be a whole number from 0 to 100.", "error");
     return;
   }
-
   const proofUrl = safeHttpUrl(proofInput);
-
   if (!proofUrl || proofInput.length > 2048) {
-    showFormMessage("Enter a valid proof link starting with http:// or https://.", "error");
+    showFormMessage("Enter a valid video link starting with http:// or https://.", "error");
+    return;
+  }
+  const rawFootageUrl = rawFootageInput ? safeHttpUrl(rawFootageInput) : null;
+  if (rawFootageInput && (!rawFootageUrl || rawFootageInput.length > 2048)) {
+    showFormMessage("Enter a valid raw footage link or leave it blank.", "error");
+    return;
+  }
+  if (comments.length > 1000) {
+    showFormMessage("Comments must be 1000 characters or fewer.", "error");
+    return;
+  }
+  if (!Number.isInteger(Number(captchaInput)) || Number(captchaInput) !== captchaExpectedAnswer) {
+    showFormMessage("CAPTCHA answer is incorrect. Please try the new challenge.", "error");
+    refreshCaptcha();
     return;
   }
 
-  if (notes.length > 1000) {
-    showFormMessage("Notes must be 1000 characters or fewer.", "error");
+  const metadata = [
+    "Submit mode: " + document.getElementById("submissionMode").value,
+    "List: " + document.getElementById("submissionList").value,
+    "Submission type: " + document.getElementById("submissionType").value,
+    "Raw footage: " + (rawFootageUrl || "Not provided"),
+    "Opinion on rank: " + (document.getElementById("opinionOnRank").value.trim() || "Not provided"),
+    "Audio tracks: " + document.getElementById("audioTracks").value,
+    "Platform: " + document.getElementById("submissionPlatform").value,
+    "Used CBF: " + document.getElementById("usedCbf").value,
+    "Discord: " + playerName,
+    "Comments: " + (comments || "None")
+  ].join("\\n");
+  if (metadata.length > 4000) {
+    showFormMessage("Submission details are too long. Shorten the comments or rank opinion.", "error");
     return;
   }
 
@@ -2345,11 +2608,11 @@ submissionForm.addEventListener("submit", async event => {
 
   try {
     const submission = {
-      player_name: playerName,
+      player_name: playerName.slice(0, 40),
       level_name: levelName,
       percent: Number(percentInput),
       proof_url: proofUrl,
-      notes: notes || null,
+      notes: metadata,
       status: "pending"
     };
 
@@ -2360,22 +2623,26 @@ submissionForm.addEventListener("submit", async event => {
     if (error) throw error;
 
     submissionForm.reset();
-
+    document.getElementById("submissionMode").value = "Single record";
+    document.getElementById("submissionList").value = "Classic";
+    document.getElementById("submissionType").value = "Record";
+    document.getElementById("submissionPlatform").value = "PC";
+    document.getElementById("usedCbf").value = "No";
+    populateSubmissionLevels("");
     showFormMessage(
       "Record submitted successfully! It is now pending review and will only appear on the leaderboard if approved.",
       "success"
     );
+    refreshCaptcha();
   } catch (error) {
     console.error("RDL submission error:", error);
-
     showFormMessage(
-      "Your record could not be submitted: " +
-      (error?.message || "Unknown Supabase error"),
+      "Your record could not be submitted: " + (error?.message || "Unknown Supabase error"),
       "error"
     );
   } finally {
     submitButton.disabled = false;
-    submitButton.textContent = "Submit for review";
+    submitButton.textContent = "Submit Record";
   }
 });
 
