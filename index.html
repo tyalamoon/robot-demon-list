@@ -2633,33 +2633,46 @@ async function loadPendingSubmissions() {
   loadingPending = true;
   refreshPendingButton.disabled = true;
   pendingList.replaceChildren();
-  setAdminStatus("Loading pending submissions...");
+  setAdminStatus("Loading pending record and contribution submissions...");
 
   try {
-    const { data, error } = await rdlSupabase
-      .from("record_submissions")
-      .select("id, player_name, level_name, percent, proof_url, notes, submitted_at")
-      .eq("status", "pending")
-      .order("submitted_at", { ascending: true });
+    const [recordsResult, contributionsResult] = await Promise.all([
+      rdlSupabase
+        .from("record_submissions")
+        .select("id, player_name, level_name, percent, proof_url, notes, submitted_at")
+        .eq("status", "pending")
+        .order("submitted_at", { ascending: true }),
+      rdlSupabase
+        .from("rdl_contributions")
+        .select("id, contribution_type, payload, status, created_at")
+        .eq("status", "pending")
+        .order("created_at", { ascending: true })
+    ]);
 
-    if (error) throw error;
+    if (recordsResult.error) throw recordsResult.error;
+    if (contributionsResult.error) {
+      console.error("RDL contribution inbox error:", contributionsResult.error);
+      throw new Error("Couldn't load contributions. Apply the owner-only SELECT policy from supabase/rdl_contributions.sql in Supabase SQL Editor. Details: " + contributionsResult.error.message);
+    }
 
-    if (!data || data.length === 0) {
+    const recordsPending = recordsResult.data || [];
+    const contributionsPending = contributionsResult.data || [];
+    if (recordsPending.length === 0 && contributionsPending.length === 0) {
       setAdminStatus("No pending submissions. You're all caught up!");
       return;
     }
 
-    setAdminStatus(`${data.length} submission(s) awaiting review.`);
+    setAdminStatus(`${recordsPending.length} record submission(s) and ${contributionsPending.length} contribution(s) awaiting review.`);
 
-    for (const record of data) {
+    for (const record of recordsPending) {
       const card = makeElement("article", "admin-record");
       card.appendChild(makeElement("h3", "", record.level_name || "Unnamed level"));
+      card.appendChild(makeElement("p", "", `Type: Record submission`));
       card.appendChild(makeElement("p", "", `Player: ${record.player_name || "Unknown"}`));
       card.appendChild(makeElement("p", "", `Progress: ${record.percent}%`));
 
       const proof = makeElement("p");
       const proofUrl = safeHttpUrl(String(record.proof_url || ""));
-
       if (proofUrl) {
         const link = makeElement("a", "", "Open proof");
         link.href = proofUrl;
@@ -2669,52 +2682,93 @@ async function loadPendingSubmissions() {
       } else {
         proof.textContent = "No valid proof link";
       }
-
       card.appendChild(proof);
-
-      if (record.notes) {
-        card.appendChild(makeElement("p", "", `Notes: ${record.notes}`));
-      }
-
+      if (record.notes) card.appendChild(makeElement("p", "", `Notes: ${record.notes}`));
       if (record.submitted_at) {
         const date = new Date(record.submitted_at);
-        card.appendChild(makeElement(
-          "p",
-          "",
-          `Submitted: ${Number.isNaN(date.getTime()) ? record.submitted_at : date.toLocaleString()}`
-        ));
+        card.appendChild(makeElement("p", "", `Submitted: ${Number.isNaN(date.getTime()) ? record.submitted_at : date.toLocaleString()}`));
       }
-
       const actions = makeElement("div", "admin-actions");
-
       const approveButton = makeElement("button", "button admin-approve", "Approve");
       approveButton.type = "button";
-      approveButton.addEventListener("click", () => {
-        moderateSubmission(record.id, "approved");
-      });
-
+      approveButton.addEventListener("click", () => moderateSubmission(record.id, "approved"));
       const rejectButton = makeElement("button", "button admin-reject", "Reject");
       rejectButton.type = "button";
-      rejectButton.addEventListener("click", () => {
-        moderateSubmission(record.id, "rejected");
-      });
-
+      rejectButton.addEventListener("click", () => moderateSubmission(record.id, "rejected"));
       const deleteButton = makeElement("button", "button admin-delete-level", "Delete permanently");
       deleteButton.type = "button";
-      deleteButton.addEventListener("click", () => {
-        deleteLevel(record.id, record.level_name);
-      });
-
+      deleteButton.addEventListener("click", () => deleteLevel(record.id, record.level_name));
       actions.append(approveButton, rejectButton, deleteButton);
       card.appendChild(actions);
       pendingList.appendChild(card);
     }
+
+    const contributionLabels = {
+      general_suggestion: "General suggestion",
+      level_suggestion: "Suggest a level",
+      level_pack_suggestion: "Suggest a Level Pack",
+      list_change_suggestion: "Suggest a list change",
+      idea: "Share an idea"
+    };
+    for (const contribution of contributionsPending) {
+      const card = makeElement("article", "admin-record");
+      const label = contributionLabels[contribution.contribution_type] || contribution.contribution_type || "Contribution";
+      card.appendChild(makeElement("h3", "", label));
+      const payload = contribution.payload && typeof contribution.payload === "object" ? contribution.payload : {};
+      const friendlyLabels = {
+        level_name: "Level name", author: "Author", verifier: "Verifier", list: "List",
+        desired_position: "Desired position", level_id: "Level ID", youtube_link: "YouTube link",
+        pack_name: "Pack name", description: "Description", levels: "Selected levels",
+        target_level: "Target level", new_name: "New name", new_author: "New author",
+        new_verifier: "New verifier", new_position: "New position", new_id: "New ID",
+        new_youtube_link: "New YouTube link", reason: "Reason", idea_title: "Idea title",
+        category: "Category", details: "Details"
+      };
+      for (const [key, value] of Object.entries(payload)) {
+        if (value === null || value === undefined || value === "") continue;
+        const displayValue = Array.isArray(value) ? value.join(", ") : String(value);
+        card.appendChild(makeElement("p", "", `${friendlyLabels[key] || key}: ${displayValue}`));
+      }
+      if (contribution.created_at) {
+        const date = new Date(contribution.created_at);
+        card.appendChild(makeElement("p", "", `Submitted: ${Number.isNaN(date.getTime()) ? contribution.created_at : date.toLocaleString()}`));
+      }
+      const actions = makeElement("div", "admin-actions");
+      const approveButton = makeElement("button", "button admin-approve", "Mark reviewed");
+      approveButton.type = "button";
+      approveButton.addEventListener("click", () => moderateContribution(contribution.id, "approved"));
+      const rejectButton = makeElement("button", "button admin-reject", "Reject");
+      rejectButton.type = "button";
+      rejectButton.addEventListener("click", () => moderateContribution(contribution.id, "rejected"));
+      actions.append(approveButton, rejectButton);
+      card.appendChild(actions);
+      pendingList.appendChild(card);
+    }
   } catch (error) {
-    console.error("RDL pending submissions error:", error);
-    setAdminStatus("Couldn't load submissions. Check your Supabase SELECT policy.");
+    console.error("RDL admin inbox error:", error);
+    setAdminStatus(error?.message || "Couldn't load submissions. Check the Supabase admin SELECT policies.");
   } finally {
     loadingPending = false;
     refreshPendingButton.disabled = false;
+  }
+}
+
+async function moderateContribution(id, status) {
+  if (!isRdlOwner) {
+    setAdminStatus("Only the RDL owner can review contributions.");
+    return;
+  }
+  try {
+    const { error } = await rdlSupabase
+      .from("rdl_contributions")
+      .update({ status })
+      .eq("id", id);
+    if (error) throw error;
+    setAdminStatus(status === "approved" ? "Contribution marked reviewed." : "Contribution rejected.");
+    await loadPendingSubmissions();
+  } catch (error) {
+    console.error("RDL contribution moderation error:", error);
+    setAdminStatus("Couldn't update this contribution. Check the owner-only UPDATE policy. " + (error?.message || ""));
   }
 }
 
