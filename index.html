@@ -1200,13 +1200,6 @@ body.record-submit-open #submit .record-submit-card {
 
       <form class="submit-form" id="submissionForm">
         <div class="form-group">
-          <label for="submissionMode">Submit Mode *</label>
-          <select class="field" id="submissionMode" required>
-            <option value="Single record" selected>Single record</option>
-          </select>
-        </div>
-
-        <div class="form-group">
           <label for="submissionLevelSearch">Level *</label>
           <input class="field" id="submissionLevelSearch" type="search" placeholder="Search level..." autocomplete="off">
           <select class="field" id="submissionLevel" name="level_name" required>
@@ -2588,7 +2581,6 @@ submissionForm.addEventListener("submit", async event => {
   }
 
   const metadata = [
-    "Submit mode: " + document.getElementById("submissionMode").value,
     "List: " + document.getElementById("submissionList").value,
     "Submission type: " + document.getElementById("submissionType").value,
     "Raw footage: " + (rawFootageUrl || "Not provided"),
@@ -2627,7 +2619,6 @@ submissionForm.addEventListener("submit", async event => {
     if (!data?.success) throw new Error(data?.error || "The submission service rejected the record.");
 
     submissionForm.reset();
-    document.getElementById("submissionMode").value = "Single record";
     document.getElementById("submissionList").value = "Classic";
     document.getElementById("submissionType").value = "Record";
     document.getElementById("submissionPlatform").value = "PC";
