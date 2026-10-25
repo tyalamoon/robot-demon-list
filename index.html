@@ -2608,11 +2608,13 @@ submissionForm.addEventListener("submit", async event => {
       status: "pending"
     };
 
-    const { error } = await rdlSupabase
-      .from("record_submissions")
-      .insert(submission);
+    const { data, error } = await rdlSupabase.functions.invoke(
+      "submit-record-with-captcha",
+      { body: { submission, captchaToken } }
+    );
 
     if (error) throw error;
+    if (!data?.success) throw new Error(data?.error || "The submission service rejected the record.");
 
     submissionForm.reset();
     document.getElementById("submissionMode").value = "Single record";
