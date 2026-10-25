@@ -2240,9 +2240,12 @@ function renderPlayerPointsLeaderboard() {
     row.tabIndex = 0;
     row.setAttribute("role", "button");
     row.setAttribute("aria-label", "Open player profile for " + player.name);
-    row.addEventListener("click", () => openPlayerProfile(player, index + 1));
+    row.addEventListener("click", event => {
+      if (event.target.closest("a, button, input, select, textarea")) return;
+      openPlayerProfile(player, index + 1);
+    });
     row.addEventListener("keydown", event => {
-      if (event.key === "Enter" || event.key === " ") {
+      if ((event.key === "Enter" || event.key === " ") && !event.target.closest("a, button, input, select, textarea")) {
         event.preventDefault();
         openPlayerProfile(player, index + 1);
       }
