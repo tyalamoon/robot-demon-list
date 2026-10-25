@@ -951,6 +951,10 @@ body.players-open #playerLeaderboard {
   display: block !important;
 }
 
+body.about-open #about {
+  display: block !important;
+}
+
 body.submit-open #submit {
   display: block !important;
 }
@@ -2169,12 +2173,30 @@ document.addEventListener("click", (event) => {
 
 const submitNavLink = document.querySelector('.main-nav a[href="#submit"]');
 const playersNavLink = document.querySelector('.main-nav a[href="#playerLeaderboard"]');
+const aboutNavLink = document.querySelector('.main-nav a[href="#about"]');
+
+aboutNavLink?.addEventListener("click", (event) => {
+  event.preventDefault();
+  const wasOpen = document.body.classList.contains("about-open");
+  document.body.classList.remove("account-open", "submit-open", "players-open");
+  document.body.classList.toggle("about-open", !wasOpen);
+  if (!wasOpen) {
+    document.getElementById("about")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  } else {
+    document.getElementById("leaderboard")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+});
 
 accountNavLink?.addEventListener("click", (event) => {
   event.preventDefault();
-  document.body.classList.remove("submit-open", "players-open");
-  document.body.classList.add("account-open");
-  document.getElementById("account")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const wasOpen = document.body.classList.contains("account-open");
+  document.body.classList.remove("submit-open", "players-open", "about-open");
+  document.body.classList.toggle("account-open", !wasOpen);
+  if (!wasOpen) {
+    document.getElementById("account")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  } else {
+    document.getElementById("leaderboard")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 });
 
 submitNavLink?.addEventListener("click", (event) => {
@@ -2192,13 +2214,14 @@ submitNavLink?.addEventListener("click", (event) => {
 
 playersNavLink?.addEventListener("click", (event) => {
   event.preventDefault();
-  document.body.classList.remove("account-open", "submit-open");
-  document.body.classList.add("players-open");
-  document.getElementById("playerLeaderboard")?.scrollIntoView({ behavior: "smooth", block: "start" });
-});
-
-leaderboardNavLink?.addEventListener("click", (event) => {
-  document.body.classList.remove("account-open", "submit-open", "players-open");
+  const wasOpen = document.body.classList.contains("players-open");
+  document.body.classList.remove("account-open", "submit-open", "about-open");
+  document.body.classList.toggle("players-open", !wasOpen);
+  if (!wasOpen) {
+    document.getElementById("playerLeaderboard")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  } else {
+    document.getElementById("leaderboard")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 });
 
 const accountSignedOut = document.getElementById("accountSignedOut");
