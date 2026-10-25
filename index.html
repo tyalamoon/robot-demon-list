@@ -1817,6 +1817,44 @@ const rdlSupabase = window.supabase.createClient(
   SUPABASE_PUBLISHABLE_KEY
 );
 
+async function sendRdlContribution(type, payload, messageElement, formElement, closeModal) {
+  const submitButton = formElement?.querySelector('button[type="submit"]');
+  const originalLabel = submitButton?.textContent || "Submit";
+  if (submitButton) { submitButton.disabled = true; submitButton.textContent = "Sending..."; }
+  if (messageElement) {
+    messageElement.textContent = "Sending your contribution for review...";
+    messageElement.className = "form-message visible info";
+  }
+  try {
+    const { error } = await rdlSupabase.from("rdl_contributions").insert({
+      contribution_type: type,
+      payload,
+      status: "pending"
+    });
+    if (error) throw error;
+    if (messageElement) {
+      messageElement.textContent = "Sent successfully! Your contribution has been delivered to the RDL submissions inbox for review.";
+      messageElement.className = "form-message visible success";
+    }
+    formElement?.reset();
+    if (type === "level_pack_suggestion" && packLevelRows) {
+      packLevelRows.replaceChildren();
+      addPackLevelRow();
+      addPackLevelRow();
+      addPackLevelRow();
+    }
+    window.setTimeout(() => closeModal?.(), 1800);
+  } catch (error) {
+    console.error("RDL contribution delivery error:", error);
+    if (messageElement) {
+      messageElement.textContent = "Could not send your contribution. " + (error?.message || "Please try again later.");
+      messageElement.className = "form-message visible error";
+    }
+  } finally {
+    if (submitButton) { submitButton.disabled = false; submitButton.textContent = originalLabel; }
+  }
+}
+
 const accountNavLink = document.querySelector('.main-nav a[href="#account"]');
 const leaderboardNavLink = document.querySelector('.main-nav a[href="#leaderboard"]');
 const contributeLink = document.querySelector('.main-nav a[href="#submit"]');
@@ -1869,13 +1907,18 @@ document.addEventListener("keydown", (event) => {
     closeLevelSuggestion();
   }
 });
-levelSuggestionForm?.addEventListener("submit", (event) => {
+levelSuggestionForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!levelSuggestionForm.reportValidity()) return;
-  if (levelSuggestionMessage) {
-    levelSuggestionMessage.textContent = "The form is ready, but level-suggestion delivery has not been connected yet.";
-    levelSuggestionMessage.className = "form-message visible info";
-  }
+  await sendRdlContribution("level_suggestion", {
+    level_name: document.getElementById("suggestedLevelName").value.trim(),
+    author: document.getElementById("suggestedLevelAuthor").value.trim(),
+    verifier: document.getElementById("suggestedLevelVerifier").value.trim(),
+    list: document.getElementById("suggestedLevelList").value,
+    desired_position: Number(document.getElementById("suggestedLevelPosition").value),
+    level_id: document.getElementById("suggestedLevelId").value.trim(),
+    youtube_link: document.getElementById("suggestedLevelYoutube").value.trim()
+  }, levelSuggestionMessage, levelSuggestionForm, closeLevelSuggestion);
 });
 
 const packSuggestModal = document.getElementById("packSuggestModal");
@@ -1989,17 +2032,20 @@ changeSuggestModal?.querySelector(".change-suggest-dialog")?.addEventListener("c
 document.addEventListener("keydown", event => {
   if (event.key === "Escape" && document.body.classList.contains("change-suggest-open")) closeChangeSuggestion();
 });
-changeSuggestionForm?.addEventListener("submit", event => {
+changeSuggestionForm?.addEventListener("submit", async event => {
   event.preventDefault();
   if (!changeSuggestionForm.reportValidity()) return;
-  if (!changeTargetLevel?.value) {
-    changeTargetLevel?.focus();
-    return;
-  }
-  if (changeSuggestionMessage) {
-    changeSuggestionMessage.textContent = "Your change proposal is complete, but proposal submission has not been connected yet.";
-    changeSuggestionMessage.className = "form-message visible info";
-  }
+  if (!changeTargetLevel?.value) { changeTargetLevel?.focus(); return; }
+  await sendRdlContribution("list_change_suggestion", {
+    target_level: changeTargetLevel.value,
+    new_name: document.getElementById("changeNewName").value.trim(),
+    new_author: document.getElementById("changeNewAuthor").value.trim(),
+    new_verifier: document.getElementById("changeNewVerifier").value.trim(),
+    new_position: document.getElementById("changeNewPosition").value ? Number(document.getElementById("changeNewPosition").value) : null,
+    new_id: document.getElementById("changeNewId").value.trim(),
+    new_youtube_link: document.getElementById("changeNewYoutube").value.trim(),
+    reason: document.getElementById("changeReason").value.trim()
+  }, changeSuggestionMessage, changeSuggestionForm, closeChangeSuggestion);
 });
 
 
@@ -2037,13 +2083,14 @@ ideaSuggestModal?.querySelector(".idea-suggest-dialog")?.addEventListener("click
 document.addEventListener("keydown", event => {
   if (event.key === "Escape" && document.body.classList.contains("idea-suggest-open")) closeIdeaSuggestion();
 });
-ideaSuggestionForm?.addEventListener("submit", event => {
+ideaSuggestionForm?.addEventListener("submit", async event => {
   event.preventDefault();
   if (!ideaSuggestionForm.reportValidity()) return;
-  if (ideaSuggestionMessage) {
-    ideaSuggestionMessage.textContent = "Your idea is filled out, but idea submissions are not connected yet.";
-    ideaSuggestionMessage.className = "form-message visible info";
-  }
+  await sendRdlContribution("idea", {
+    idea_title: document.getElementById("ideaTitle").value.trim(),
+    category: document.getElementById("ideaCategory").value,
+    description: document.getElementById("ideaDescription").value.trim()
+  }, ideaSuggestionMessage, ideaSuggestionForm, closeIdeaSuggestion);
 });
 
 function openPackSuggestion() {
@@ -2081,13 +2128,11 @@ packSuggestModal?.querySelector(".pack-suggest-dialog")?.addEventListener("click
 document.addEventListener("keydown", event => {
   if (event.key === "Escape" && document.body.classList.contains("pack-suggest-open")) closePackSuggestion();
 });
-packSuggestionForm?.addEventListener("submit", event => {
+packSuggestionForm?.addEventListener("submit", async event => {
   event.preventDefault();
   if (!packSuggestionForm.reportValidity()) return;
   const rows = Array.from(packLevelRows?.querySelectorAll(".pack-level-row") || []);
-  const selectedLevels = rows
-    .map(row => row.querySelector(".pack-level-select")?.value.trim() || "")
-    .filter(Boolean);
+  const selectedLevels = rows.map(row => row.querySelector(".pack-level-select")?.value.trim() || "").filter(Boolean);
   const uniqueLevels = new Set(selectedLevels.map(name => name.toLocaleLowerCase()));
   if (selectedLevels.length < 3 || uniqueLevels.size < 3) {
     if (packSuggestionMessage) {
@@ -2096,10 +2141,11 @@ packSuggestionForm?.addEventListener("submit", event => {
     }
     return;
   }
-  if (packSuggestionMessage) {
-    packSuggestionMessage.textContent = "Your pack details are complete, but pack proposal submission has not been connected yet.";
-    packSuggestionMessage.className = "form-message visible info";
-  }
+  await sendRdlContribution("level_pack_suggestion", {
+    pack_name: document.getElementById("proposedPackName").value.trim(),
+    description: document.getElementById("proposedPackDescription").value.trim(),
+    levels: selectedLevels
+  }, packSuggestionMessage, packSuggestionForm, closePackSuggestion);
 });
 
 function openRecordSubmission(levelName = "") {
