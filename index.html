@@ -1223,6 +1223,40 @@ body.level-suggest-open { overflow: hidden; }
 }
 .pack-level-remove:hover { border-color: #d86b6b; color: #ff8585; }
 .pack-level-hint { display: block; color: var(--muted, #aaa); font-size: 13px; margin-top: 8px; }
+
+/* Full-screen Propose Changes modal */
+.change-suggest-backdrop {
+  position: fixed; inset: 0; z-index: 10001;
+  display: flex; align-items: center; justify-content: center;
+  padding: 18px; overflow-y: auto;
+  background: rgba(0,0,0,.86); backdrop-filter: blur(8px);
+}
+.change-suggest-backdrop[hidden] { display: none !important; }
+.change-suggest-dialog {
+  width: min(760px, 100%); max-height: calc(100vh - 36px); overflow-y: auto;
+  padding: clamp(20px,4vw,32px); border: 1px solid #3a3a3a;
+  border-radius: 14px; background: #181818; box-shadow: 0 28px 90px rgba(0,0,0,.65);
+}
+.change-suggest-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 18px; margin-bottom: 24px;
+}
+.change-suggest-header h2 { margin: 0; color: var(--text); font-size: clamp(26px,4vw,34px); line-height: 1.2; }
+.change-suggest-close {
+  display: grid; flex: 0 0 40px; place-items: center; width: 40px; height: 40px;
+  padding: 0; border: 1px solid var(--border); border-radius: 8px;
+  background: #202020; color: var(--text); font-size: 28px; line-height: 1; cursor: pointer;
+}
+.change-suggest-close:hover { border-color: var(--gold); color: var(--gold); }
+.change-suggest-dialog .submit-form { gap: 16px; }
+.change-suggest-dialog .form-row { align-items: start; }
+body.change-suggest-open { overflow: hidden; }
+@media (max-width: 560px) {
+  .change-suggest-backdrop { padding: 10px; align-items: flex-start; }
+  .change-suggest-dialog { max-height: calc(100vh - 20px); padding: 18px; }
+  .change-suggest-dialog .form-row { grid-template-columns: 1fr; }
+}
+
 body.pack-suggest-open { overflow: hidden; }
 @media (max-width: 560px) {
   .pack-suggest-backdrop { padding: 10px; align-items: flex-start; }
@@ -1652,6 +1686,55 @@ body.pack-suggest-open { overflow: hidden; }
   </section>
 </div>
 
+<div class="change-suggest-backdrop" id="changeSuggestModal" hidden aria-hidden="true">
+  <section class="change-suggest-dialog" role="dialog" aria-modal="true" aria-labelledby="changeSuggestTitle">
+    <header class="change-suggest-header">
+      <h2 id="changeSuggestTitle">Propose Changes</h2>
+      <button class="change-suggest-close" id="closeChangeSuggest" type="button" aria-label="Close Propose Changes form">×</button>
+    </header>
+    <form class="submit-form" id="changeSuggestionForm">
+      <div class="form-group">
+        <label for="changeTargetLevel">Target Level *</label>
+        <select class="field" id="changeTargetLevel" name="target_level" required>
+          <option value="">-- Select level --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="changeNewName">New Name</label>
+        <input class="field" id="changeNewName" name="new_name" maxlength="120" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="changeNewAuthor">New Author</label>
+        <input class="field" id="changeNewAuthor" name="new_author" maxlength="120" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="changeNewVerifier">New Verifier</label>
+        <input class="field" id="changeNewVerifier" name="new_verifier" maxlength="120" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="changeNewPosition">New Position (#)</label>
+          <input class="field" id="changeNewPosition" name="new_position" type="number" min="1" step="1">
+        </div>
+        <div class="form-group">
+          <label for="changeNewId">New ID</label>
+          <input class="field" id="changeNewId" name="new_id" inputmode="numeric" pattern="[0-9]+" maxlength="20">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="changeNewYoutube">New YouTube Link</label>
+        <input class="field" id="changeNewYoutube" name="new_youtube_link" type="url" placeholder="https://www.youtube.com/watch?v=...">
+      </div>
+      <div class="form-group">
+        <label for="changeReason">Reason *</label>
+        <textarea class="field" id="changeReason" name="reason" required maxlength="2000" rows="4" placeholder="Explain why this change should be made..."></textarea>
+      </div>
+      <div class="form-message" id="changeSuggestionMessage" role="status" aria-live="polite"></div>
+      <button class="button button-primary" type="submit">Propose Changes</button>
+    </form>
+  </section>
+</div>
+
 <script>
 "use strict";
 
@@ -1790,6 +1873,64 @@ function addPackLevelRow(selectedName = "") {
   select.focus();
 }
 
+const changeSuggestModal = document.getElementById("changeSuggestModal");
+const changeSuggestionForm = document.getElementById("changeSuggestionForm");
+const changeTargetLevel = document.getElementById("changeTargetLevel");
+const changeSuggestionMessage = document.getElementById("changeSuggestionMessage");
+
+function populateChangeTargetLevels() {
+  if (!changeTargetLevel) return;
+  const current = changeTargetLevel.value;
+  const names = Array.from(new Set(records.map(record => String(record.level_name || "").trim()).filter(Boolean)))
+    .sort((a, b) => a.localeCompare(b));
+  changeTargetLevel.replaceChildren(new Option("-- Select level --", ""));
+  names.forEach(name => changeTargetLevel.add(new Option(name, name)));
+  if (names.includes(current)) changeTargetLevel.value = current;
+}
+
+function openChangeSuggestion() {
+  if (!changeSuggestModal) return;
+  if (contributeDropdown) contributeDropdown.hidden = true;
+  contributeLink?.setAttribute("aria-expanded", "false");
+  document.body.classList.remove("account-open", "players-open", "submit-open", "record-submit-open", "level-suggest-open", "pack-suggest-open");
+  document.body.classList.add("change-suggest-open");
+  populateChangeTargetLevels();
+  changeSuggestModal.hidden = false;
+  changeSuggestModal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  changeSuggestionMessage?.classList.remove("visible", "success", "error", "info");
+  setTimeout(() => changeTargetLevel?.focus(), 0);
+}
+
+function closeChangeSuggestion() {
+  if (!changeSuggestModal) return;
+  changeSuggestModal.hidden = true;
+  changeSuggestModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("change-suggest-open");
+  document.body.style.overflow = "";
+}
+
+document.getElementById("closeChangeSuggest")?.addEventListener("click", closeChangeSuggestion);
+changeSuggestModal?.addEventListener("click", event => {
+  if (event.target === changeSuggestModal) closeChangeSuggestion();
+});
+changeSuggestModal?.querySelector(".change-suggest-dialog")?.addEventListener("click", event => event.stopPropagation());
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && document.body.classList.contains("change-suggest-open")) closeChangeSuggestion();
+});
+changeSuggestionForm?.addEventListener("submit", event => {
+  event.preventDefault();
+  if (!changeSuggestionForm.reportValidity()) return;
+  if (!changeTargetLevel?.value) {
+    changeTargetLevel?.focus();
+    return;
+  }
+  if (changeSuggestionMessage) {
+    changeSuggestionMessage.textContent = "Your change proposal is complete, but proposal submission has not been connected yet.";
+    changeSuggestionMessage.className = "form-message visible info";
+  }
+});
+
 function openPackSuggestion() {
   if (!packSuggestModal) return;
   if (contributeDropdown) contributeDropdown.hidden = true;
@@ -1888,6 +2029,8 @@ contributeChoiceButtons.forEach((button) => {
       openLevelSuggestion();
     } else if (button.dataset.contributeChoice === "pack") {
       openPackSuggestion();
+    } else if (button.dataset.contributeChoice === "change") {
+      openChangeSuggestion();
     }
   });
 });
@@ -3215,6 +3358,7 @@ async function loadRecords() {
     if (error) throw error;
 
     records = Array.isArray(data) ? data : [];
+    populateChangeTargetLevels();
     await loadVerifiedDiscordProfiles();
     populateSubmissionLevels(submissionLevelSearch?.value || "");
     renderLeaderboard();
