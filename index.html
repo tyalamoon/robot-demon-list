@@ -2446,19 +2446,38 @@ function populateSubmissionLevels(filter = "") {
 function refreshSubmissionMinimum() {
   if (!submissionMinimumHint || !submissionLevelSelect) return;
   const name = submissionLevelSelect.value;
+  const submissionType = document.getElementById("submissionType");
+  const runOption = submissionType?.querySelector('option[value="Run"]');
+
+  const levelRecords = name
+    ? records.filter(item => String(item.level_name || "").toLowerCase() === name.toLowerCase())
+    : [];
+  const displayRanks = getDisplayRanks(records);
+  const isTop150 = levelRecords.some(item => {
+    const rank = Number(displayRanks.get(item.id));
+    return Number.isInteger(rank) && rank >= 1 && rank <= 150;
+  });
+
+  if (runOption) runOption.disabled = !isTop150;
+  if (submissionType?.value === "Run" && !isTop150) {
+    submissionType.value = "Record";
+  }
+
   if (!name) {
-    submissionMinimumHint.textContent = "Select level to see minimum record percent.";
+    submissionMinimumHint.textContent = "Select level to see minimum record percent. Runs are available only for Top 150 levels.";
     return;
   }
-  const levelRecords = records.filter(item => String(item.level_name || "").toLowerCase() === name.toLowerCase());
   if (!levelRecords.length) {
-    submissionMinimumHint.textContent = "No approved records found for this level yet.";
+    submissionMinimumHint.textContent = "No approved records found for this level yet. Runs are available only for Top 150 levels.";
     return;
   }
   const minimum = Math.min(...levelRecords.map(item => Number(item.percent)).filter(value => Number.isFinite(value)));
-  submissionMinimumHint.textContent = Number.isFinite(minimum)
+  const minimumText = Number.isFinite(minimum)
     ? "Current lowest approved record: " + minimum + "%. This is informational."
     : "No minimum record percentage is available for this level.";
+  submissionMinimumHint.textContent = minimumText + (isTop150
+    ? " Runs are available for this Top 150 level."
+    : " Runs are available only for Top 150 levels.");
 }
 
 window.onRdlRecaptchaLoaded = () => {
@@ -2546,6 +2565,18 @@ submissionForm.addEventListener("submit", async event => {
   if (!levelName || levelName.length > 100) {
     showFormMessage("Select a level from the list.", "error");
     return;
+  }
+  if (document.getElementById("submissionType").value === "Run") {
+    const levelRecords = records.filter(item => String(item.level_name || "").toLowerCase() === levelName.toLowerCase());
+    const displayRanks = getDisplayRanks(records);
+    const isTop150 = levelRecords.some(item => {
+      const rank = Number(displayRanks.get(item.id));
+      return Number.isInteger(rank) && rank >= 1 && rank <= 150;
+    });
+    if (!isTop150) {
+      showFormMessage("Runs can only be submitted for levels ranked in the Top 150.", "error");
+      return;
+    }
   }
   if (
     percentInput === "" ||
