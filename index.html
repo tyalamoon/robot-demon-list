@@ -1207,7 +1207,7 @@ body.level-suggest-open { overflow: hidden; }
 .pack-level-rows { display: grid; gap: 10px; }
 .pack-level-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(120px, .45fr) 36px;
+  grid-template-columns: minmax(0, 1fr) 36px;
   gap: 8px;
   align-items: center;
   padding: 10px;
@@ -1228,8 +1228,7 @@ body.pack-suggest-open { overflow: hidden; }
   .pack-suggest-backdrop { padding: 10px; align-items: flex-start; }
   .pack-suggest-dialog { max-height: calc(100vh - 20px); padding: 18px; }
   .pack-level-row { grid-template-columns: minmax(0, 1fr) 36px; }
-  .pack-level-row .pack-level-id { grid-column: 1; }
-  .pack-level-remove { grid-column: 2; grid-row: 1 / span 2; }
+  .pack-level-remove { grid-column: 2; grid-row: 1; }
 }
 
 </style>
@@ -1645,7 +1644,7 @@ body.pack-suggest-open { overflow: hidden; }
           </div>
         </div>
         <div class="pack-level-rows" id="packLevelRows"></div>
-        <small class="pack-level-hint">Add at least three levels. Enter each level name and its Geometry Dash level ID.</small>
+        <small class="pack-level-hint">Choose at least three different levels that already appear on the RDL leaderboard.</small>
       </div>
       <div class="form-message" id="packSuggestionMessage" role="status" aria-live="polite"></div>
       <button class="button button-primary" type="submit">Propose Pack</button>
@@ -1731,39 +1730,50 @@ const packLevelRows = document.getElementById("packLevelRows");
 const packSelectedCount = document.getElementById("packSelectedCount");
 const packSuggestionMessage = document.getElementById("packSuggestionMessage");
 
+function getListedPackLevels() {
+  const unique = new Map();
+  records.forEach(record => {
+    const name = String(record.level_name || "").trim();
+    if (name) {
+      const key = name.toLocaleLowerCase();
+      if (!unique.has(key)) unique.set(key, name);
+    }
+  });
+  return Array.from(unique.values()).sort((a, b) => a.localeCompare(b));
+}
+
 function refreshPackLevelCount() {
   if (!packLevelRows || !packSelectedCount) return 0;
-  const rows = Array.from(packLevelRows.querySelectorAll(".pack-level-row"));
-  const count = rows.filter(row => {
-    const name = row.querySelector(".pack-level-name")?.value.trim();
-    const id = row.querySelector(".pack-level-id")?.value.trim();
-    return Boolean(name && id && /^[0-9]+$/.test(id));
-  }).length;
+  const selects = Array.from(packLevelRows.querySelectorAll(".pack-level-select"));
+  const selected = selects.map(select => select.value).filter(Boolean);
+  const count = new Set(selected.map(name => name.toLocaleLowerCase())).size;
   packSelectedCount.textContent = "Selected: " + count;
+  selects.forEach(select => {
+    const selectedElsewhere = new Set(
+      selects.filter(other => other !== select && other.value).map(other => other.value.toLocaleLowerCase())
+    );
+    Array.from(select.options).forEach(option => {
+      if (!option.value) return;
+      option.disabled = selectedElsewhere.has(option.value.toLocaleLowerCase()) && option.value !== select.value;
+    });
+  });
+  const addButton = document.getElementById("addPackLevel");
+  if (addButton) addButton.disabled = selects.length >= getListedPackLevels().length;
   return count;
 }
 
-function addPackLevelRow(name = "", id = "") {
+function addPackLevelRow(selectedName = "") {
   if (!packLevelRows) return;
   const row = document.createElement("div");
   row.className = "pack-level-row";
-  const nameInput = document.createElement("input");
-  nameInput.className = "field pack-level-name";
-  nameInput.type = "text";
-  nameInput.maxLength = 120;
-  nameInput.autocomplete = "off";
-  nameInput.placeholder = "Level name";
-  nameInput.setAttribute("aria-label", "Pack level name");
-  nameInput.value = name;
-  const idInput = document.createElement("input");
-  idInput.className = "field pack-level-id";
-  idInput.type = "text";
-  idInput.inputMode = "numeric";
-  idInput.pattern = "[0-9]+";
-  idInput.maxLength = 20;
-  idInput.placeholder = "Level ID";
-  idInput.setAttribute("aria-label", "Geometry Dash level ID");
-  idInput.value = id;
+  const select = document.createElement("select");
+  select.className = "field pack-level-select";
+  select.required = true;
+  select.setAttribute("aria-label", "Choose a level already on the RDL leaderboard");
+  select.add(new Option("-- Select a listed level --", ""));
+  const listedLevels = getListedPackLevels();
+  listedLevels.forEach(name => select.add(new Option(name, name)));
+  if (selectedName && listedLevels.includes(selectedName)) select.value = selectedName;
   const remove = document.createElement("button");
   remove.className = "pack-level-remove";
   remove.type = "button";
@@ -1773,12 +1783,11 @@ function addPackLevelRow(name = "", id = "") {
     row.remove();
     refreshPackLevelCount();
   });
-  nameInput.addEventListener("input", refreshPackLevelCount);
-  idInput.addEventListener("input", refreshPackLevelCount);
-  row.append(nameInput, idInput, remove);
+  select.addEventListener("change", refreshPackLevelCount);
+  row.append(select, remove);
   packLevelRows.appendChild(row);
   refreshPackLevelCount();
-  nameInput.focus();
+  select.focus();
 }
 
 function openPackSuggestion() {
@@ -1820,13 +1829,13 @@ packSuggestionForm?.addEventListener("submit", event => {
   event.preventDefault();
   if (!packSuggestionForm.reportValidity()) return;
   const rows = Array.from(packLevelRows?.querySelectorAll(".pack-level-row") || []);
-  const selectedLevels = rows.map(row => ({
-    name: row.querySelector(".pack-level-name")?.value.trim() || "",
-    id: row.querySelector(".pack-level-id")?.value.trim() || ""
-  })).filter(level => level.name && /^[0-9]+$/.test(level.id));
-  if (selectedLevels.length < 3) {
+  const selectedLevels = rows
+    .map(row => row.querySelector(".pack-level-select")?.value.trim() || "")
+    .filter(Boolean);
+  const uniqueLevels = new Set(selectedLevels.map(name => name.toLocaleLowerCase()));
+  if (selectedLevels.length < 3 || uniqueLevels.size < 3) {
     if (packSuggestionMessage) {
-      packSuggestionMessage.textContent = "Please add at least 3 valid levels before proposing your pack.";
+      packSuggestionMessage.textContent = "Choose at least 3 different levels from the existing RDL leaderboard.";
       packSuggestionMessage.className = "form-message visible error";
     }
     return;
