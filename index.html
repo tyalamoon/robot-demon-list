@@ -1235,11 +1235,6 @@ body.record-submit-open #submit .record-submit-card {
           <input class="field" id="percent" name="percent" type="number" min="0" max="100" step="1" placeholder="e.g. 92" required>
         </div>
 
-        <div class="form-group">
-          <label for="rawFootageUrl">Raw Footage Link</label>
-          <input class="field" id="rawFootageUrl" type="url" placeholder="https://..." maxlength="2048">
-          <small>Raw footage is optional for this level.</small>
-        </div>
 
         <div class="form-group">
           <label for="opinionOnRank">Opinion on Rank</label>
@@ -2554,7 +2549,6 @@ submissionForm.addEventListener("submit", async event => {
   const levelName = submissionLevelSelect?.value.trim() || "";
   const percentInput = document.getElementById("percent").value.trim();
   const proofInput = document.getElementById("proofUrl").value.trim();
-  const rawFootageInput = document.getElementById("rawFootageUrl").value.trim();
   const comments = document.getElementById("notes").value.trim();
   const captchaToken = captchaWidgetId !== null ? (window.grecaptcha?.getResponse?.(captchaWidgetId) || "") : "";
 
@@ -2592,11 +2586,6 @@ submissionForm.addEventListener("submit", async event => {
     showFormMessage("Enter a valid video link starting with http:// or https://.", "error");
     return;
   }
-  const rawFootageUrl = rawFootageInput ? safeHttpUrl(rawFootageInput) : null;
-  if (rawFootageInput && (!rawFootageUrl || rawFootageInput.length > 2048)) {
-    showFormMessage("Enter a valid raw footage link or leave it blank.", "error");
-    return;
-  }
   if (comments.length > 1000) {
     showFormMessage("Comments must be 1000 characters or fewer.", "error");
     return;
@@ -2614,7 +2603,6 @@ submissionForm.addEventListener("submit", async event => {
   const metadata = [
     "List: " + document.getElementById("submissionList").value,
     "Submission type: " + document.getElementById("submissionType").value,
-    "Raw footage: " + (rawFootageUrl || "Not provided"),
     "Opinion on rank: " + (document.getElementById("opinionOnRank").value.trim() || "Not provided"),
     "Audio tracks: " + document.getElementById("audioTracks").value,
     "Platform: " + document.getElementById("submissionPlatform").value,
