@@ -87,7 +87,7 @@ begin
   suggested_youtube := nullif(btrim(contribution_row.payload->>'youtube_link'), '');
 
   if suggested_name is null or suggested_author is null or suggested_verifier is null
-     or suggested_level_id is null or suggested_youtube is null then
+     or suggested_list is null or suggested_level_id is null or suggested_youtube is null then
     raise exception 'The level suggestion is missing a required field.';
   end if;
 
