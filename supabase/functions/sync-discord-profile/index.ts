@@ -50,10 +50,25 @@ Deno.serve(async (req: Request) => {
     if (authError || !authData.user) return response({ error: "Your RDL session is invalid. Sign in again." }, 401, origin);
 
     const user = authData.user;
-    const discordIdentity = (user.identities || []).find(identity => identity.provider === "discord");
     const adminClient = createClient(supabaseUrl, serviceRoleKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
+
+    // The access-token user response can omit linked identities in some sessions.
+    // Read the authoritative Auth user record with the service-role client before
+    // deciding whether Discord is linked or clearing an existing public profile.
+    const { data: adminUserData, error: adminUserError } =
+      await adminClient.auth.admin.getUserById(user.id);
+    if (adminUserError || !adminUserData.user) {
+      console.error("Could not load Auth user for Discord sync:", adminUserError?.message || "User not found");
+      return response({ error: "Could not verify your linked Discord identity. Please try again." }, 500, origin);
+    }
+
+    const identities = [
+      ...(adminUserData.user.identities || []),
+      ...(user.identities || []),
+    ];
+    const discordIdentity = identities.find(identity => identity.provider === "discord");
 
     if (!discordIdentity) {
       const { error } = await adminClient.from("rdl_discord_profiles").delete().eq("user_id", user.id);
