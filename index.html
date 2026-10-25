@@ -1257,6 +1257,38 @@ body.change-suggest-open { overflow: hidden; }
   .change-suggest-dialog .form-row { grid-template-columns: 1fr; }
 }
 
+/* Full-screen Propose Idea modal */
+.idea-suggest-backdrop {
+  position: fixed; inset: 0; z-index: 10002;
+  display: flex; align-items: center; justify-content: center;
+  padding: 18px; overflow-y: auto;
+  background: rgba(0,0,0,.86); backdrop-filter: blur(8px);
+}
+.idea-suggest-backdrop[hidden] { display: none !important; }
+.idea-suggest-dialog {
+  width: min(760px, 100%); max-height: calc(100vh - 36px); overflow-y: auto;
+  padding: clamp(20px,4vw,32px); border: 1px solid #3a3a3a;
+  border-radius: 14px; background: #181818; box-shadow: 0 28px 90px rgba(0,0,0,.65);
+}
+.idea-suggest-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 18px; margin-bottom: 24px;
+}
+.idea-suggest-header h2 { margin: 0; color: var(--text); font-size: clamp(26px,4vw,34px); line-height: 1.2; }
+.idea-suggest-close {
+  display: grid; flex: 0 0 40px; place-items: center; width: 40px; height: 40px;
+  padding: 0; border: 1px solid var(--border); border-radius: 8px;
+  background: #202020; color: var(--text); font-size: 28px; line-height: 1; cursor: pointer;
+}
+.idea-suggest-close:hover { border-color: var(--gold); color: var(--gold); }
+.idea-suggest-dialog .submit-form { gap: 16px; }
+.idea-suggest-dialog textarea.field { min-height: 150px; resize: vertical; }
+body.idea-suggest-open { overflow: hidden; }
+@media (max-width: 560px) {
+  .idea-suggest-backdrop { padding: 10px; align-items: flex-start; }
+  .idea-suggest-dialog { max-height: calc(100vh - 20px); padding: 18px; }
+}
+
 body.pack-suggest-open { overflow: hidden; }
 @media (max-width: 560px) {
   .pack-suggest-backdrop { padding: 10px; align-items: flex-start; }
@@ -1735,6 +1767,41 @@ body.pack-suggest-open { overflow: hidden; }
   </section>
 </div>
 
+
+<div class="idea-suggest-backdrop" id="ideaSuggestModal" hidden aria-hidden="true">
+  <section class="idea-suggest-dialog" role="dialog" aria-modal="true" aria-labelledby="ideaSuggestTitle">
+    <header class="idea-suggest-header">
+      <h2 id="ideaSuggestTitle">Propose Idea For List</h2>
+      <button class="idea-suggest-close" id="closeIdeaSuggest" type="button" aria-label="Close Propose Idea For List form">×</button>
+    </header>
+    <form class="submit-form" id="ideaSuggestionForm">
+      <div class="form-group">
+        <label for="ideaTitle">Idea title *</label>
+        <input class="field" id="ideaTitle" name="idea_title" maxlength="120" autocomplete="off" required>
+      </div>
+      <div class="form-group">
+        <label for="ideaCategory">Category *</label>
+        <select class="field" id="ideaCategory" name="category" required>
+          <option value="">-- Select category --</option>
+          <option value="UI / Design">UI / Design</option>
+          <option value="Rules">Rules</option>
+          <option value="Features">Features</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="ideaDescription">Description *</label>
+        <textarea class="field" id="ideaDescription" name="description" maxlength="3000" required></textarea>
+      </div>
+      <div class="form-message" id="ideaSuggestionMessage" role="status" aria-live="polite"></div>
+      <div class="form-row">
+        <button class="button button-primary" type="submit">Submit Idea</button>
+        <button class="button" id="cancelIdeaSuggest" type="button">Cancel</button>
+      </div>
+    </form>
+  </section>
+</div>
+
 <script>
 "use strict";
 
@@ -1931,6 +1998,50 @@ changeSuggestionForm?.addEventListener("submit", event => {
   }
 });
 
+
+const ideaSuggestModal = document.getElementById("ideaSuggestModal");
+const ideaSuggestionForm = document.getElementById("ideaSuggestionForm");
+const ideaSuggestionMessage = document.getElementById("ideaSuggestionMessage");
+
+function openIdeaSuggestion() {
+  if (!ideaSuggestModal) return;
+  if (contributeDropdown) contributeDropdown.hidden = true;
+  contributeLink?.setAttribute("aria-expanded", "false");
+  document.body.classList.remove("account-open", "players-open", "submit-open", "record-submit-open", "level-suggest-open", "pack-suggest-open", "change-suggest-open");
+  document.body.classList.add("idea-suggest-open");
+  ideaSuggestModal.hidden = false;
+  ideaSuggestModal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  ideaSuggestionMessage?.classList.remove("visible", "success", "error", "info");
+  setTimeout(() => document.getElementById("ideaTitle")?.focus(), 0);
+}
+
+function closeIdeaSuggestion() {
+  if (!ideaSuggestModal) return;
+  ideaSuggestModal.hidden = true;
+  ideaSuggestModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("idea-suggest-open");
+  document.body.style.overflow = "";
+}
+
+document.getElementById("closeIdeaSuggest")?.addEventListener("click", closeIdeaSuggestion);
+document.getElementById("cancelIdeaSuggest")?.addEventListener("click", closeIdeaSuggestion);
+ideaSuggestModal?.addEventListener("click", event => {
+  if (event.target === ideaSuggestModal) closeIdeaSuggestion();
+});
+ideaSuggestModal?.querySelector(".idea-suggest-dialog")?.addEventListener("click", event => event.stopPropagation());
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && document.body.classList.contains("idea-suggest-open")) closeIdeaSuggestion();
+});
+ideaSuggestionForm?.addEventListener("submit", event => {
+  event.preventDefault();
+  if (!ideaSuggestionForm.reportValidity()) return;
+  if (ideaSuggestionMessage) {
+    ideaSuggestionMessage.textContent = "Your idea is filled out, but idea submissions are not connected yet.";
+    ideaSuggestionMessage.className = "form-message visible info";
+  }
+});
+
 function openPackSuggestion() {
   if (!packSuggestModal) return;
   if (contributeDropdown) contributeDropdown.hidden = true;
@@ -2031,6 +2142,9 @@ contributeChoiceButtons.forEach((button) => {
       openPackSuggestion();
     } else if (button.dataset.contributeChoice === "change") {
       openChangeSuggestion();
+    }
+    else if (button.dataset.contributeChoice === "idea") {
+      openIdeaSuggestion();
     }
   });
 });
