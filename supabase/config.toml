@@ -1,0 +1,2 @@
+[functions.submit-record-with-captcha]
+verify_jwt = false
