@@ -1859,6 +1859,19 @@ const accountNavLink = document.querySelector('.main-nav a[href="#account"]');
 const leaderboardNavLink = document.querySelector('.main-nav a[href="#leaderboard"]');
 const contributeLink = document.querySelector('.main-nav a[href="#submit"]');
 const contributeDropdown = document.getElementById("contributeDropdown");
+const contributeSuggestionForm = document.getElementById("contributeSuggestionForm");
+const contributeSuggestionMessage = document.getElementById("contributeSuggestionMessage");
+contributeSuggestionForm?.addEventListener("submit", async event => {
+  event.preventDefault();
+  if (!contributeSuggestionForm.reportValidity()) return;
+  await sendRdlContribution("general_suggestion", {
+    details: document.getElementById("contributeSuggestionDetails").value.trim()
+  }, contributeSuggestionMessage, contributeSuggestionForm, () => {
+    const panel = document.getElementById("contributeSuggestion");
+    if (panel) panel.hidden = true;
+  });
+});
+
 const contributeChoiceButtons = document.querySelectorAll("[data-contribute-choice]");
 contributeLink?.addEventListener("click", (event) => {
   event.preventDefault();
