@@ -1299,7 +1299,7 @@ body.record-submit-open #submit .record-submit-card {
             <strong>I'm not a robot</strong>
             <p>Complete the CAPTCHA check before submitting your record.</p>
           </div>
-          <div class="g-recaptcha" data-sitekey="6LeFx_8tAAAAANR1ge-r-pzKPbZZm1cj8nL_CcbL"></div>
+          <div id="rdlRecaptcha" class="g-recaptcha" data-sitekey="6LeFx_8tAAAAANR1ge-r-pzKPbZZm1cj8nL_CcbL"></div>
         </div>
 
         <div class="form-message" id="formMessage" role="status" aria-live="polite"></div>
@@ -1342,7 +1342,7 @@ body.record-submit-open #submit .record-submit-card {
 
 
 
-<script src="https://www.google.com/recaptcha/api.js?onload=onRdlRecaptchaLoaded&render=explicit" async defer></script>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <div class="level-modal-backdrop" id="levelModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="levelModalTitle">
@@ -1424,7 +1424,7 @@ function openRecordSubmission(levelName = "") {
   }
   document.body.style.overflow = "hidden";
   refreshSubmissionMinimum();
-  if (window.grecaptcha?.reset) window.grecaptcha.reset();
+  if (window.grecaptcha?.reset && captchaWidgetId !== null) window.grecaptcha.reset(captchaWidgetId);
   setTimeout(() => document.getElementById("submissionLevelSearch")?.focus(), 0);
 }
 
@@ -2431,6 +2431,7 @@ const submissionLevelSearch = document.getElementById("submissionLevelSearch");
 const submissionLevelSelect = document.getElementById("submissionLevel");
 const submissionMinimumHint = document.getElementById("submissionMinimumHint");
 let captchaWidgetLoaded = false;
+let captchaWidgetId = null;
 
 function populateSubmissionLevels(filter = "") {
   if (!submissionLevelSelect) return;
@@ -2467,7 +2468,15 @@ function refreshSubmissionMinimum() {
 }
 
 window.onRdlRecaptchaLoaded = () => {
-  captchaWidgetLoaded = true;
+  try {
+    captchaWidgetId = window.grecaptcha.render("rdlRecaptcha", {
+      sitekey: "6LeFx_8tAAAAANR1ge-r-pzKPbZZm1cj8nL_CcbL"
+    });
+    captchaWidgetLoaded = true;
+  } catch (error) {
+    captchaWidgetLoaded = false;
+    console.error("RDL reCAPTCHA render error:", error);
+  }
 };
 
 submissionLevelSearch?.addEventListener("input", () => populateSubmissionLevels(submissionLevelSearch.value));
@@ -2534,7 +2543,7 @@ submissionForm.addEventListener("submit", async event => {
   const proofInput = document.getElementById("proofUrl").value.trim();
   const rawFootageInput = document.getElementById("rawFootageUrl").value.trim();
   const comments = document.getElementById("notes").value.trim();
-  const captchaToken = window.grecaptcha?.getResponse?.() || "";
+  const captchaToken = captchaWidgetId !== null ? (window.grecaptcha?.getResponse?.(captchaWidgetId) || "") : "";
 
   if (!playerName || playerName.length > 80) {
     showFormMessage("Enter a Discord name between 1 and 80 characters.", "error");
@@ -2642,5 +2651,6 @@ submissionForm.addEventListener("submit", async event => {
 
 loadRecords();
 </script>
+<script src="https://www.google.com/recaptcha/api.js?onload=onRdlRecaptchaLoaded&render=explicit" async defer></script>
 </body>
 </html>
