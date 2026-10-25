@@ -875,6 +875,35 @@ textarea.field { min-height: 90px; resize: vertical; }
   .player-points-total { font-size: 12px; }
 }
 
+.contribute-menu-wrap { position: relative; display: inline-flex; align-items: center; }
+.contribute-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 2000;
+  width: 240px;
+  padding: 7px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #181818;
+  box-shadow: 0 14px 36px rgba(0,0,0,.5);
+}
+.contribute-dropdown[hidden] { display: none !important; }
+.contribute-dropdown-option {
+  display: block;
+  width: 100%;
+  padding: 11px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.contribute-dropdown-option:hover { background: #202b40; }
+.contribute-dropdown-option.selected { background: #1d4ed8; color: #fff; }
 .contribute-chooser, .contribute-suggestion {
   padding: 28px;
   border: 1px solid var(--border);
@@ -989,7 +1018,16 @@ body.submit-open #submit {
     </a>
     <nav class="main-nav" aria-label="Main navigation">
       <a class="nav-button" href="#playerLeaderboard">Leaderboard</a>
-      <a class="nav-submit" href="#submit">Contribute</a>
+      <div class="contribute-menu-wrap">
+        <a class="nav-submit" href="#submit" aria-expanded="false" aria-controls="contributeDropdown">Contribute</a>
+        <div class="contribute-dropdown" id="contributeDropdown" hidden>
+          <button type="button" class="contribute-dropdown-option" data-contribute-choice="record">Submit a record</button>
+          <button type="button" class="contribute-dropdown-option" data-contribute-choice="level">Suggest a level</button>
+          <button type="button" class="contribute-dropdown-option" data-contribute-choice="pack">Suggest a Level Pack</button>
+          <button type="button" class="contribute-dropdown-option" data-contribute-choice="change">Suggest a list change</button>
+          <button type="button" class="contribute-dropdown-option" data-contribute-choice="idea">Share an idea</button>
+        </div>
+      </div>
       <a class="nav-button" href="#account">Account</a>
       <a class="nav-button" href="#about">About</a>
     </nav>
@@ -1238,57 +1276,29 @@ const rdlSupabase = window.supabase.createClient(
 
 const accountNavLink = document.querySelector('.main-nav a[href="#account"]');
 const leaderboardNavLink = document.querySelector('.main-nav a[href="#leaderboard"]');
-const contributeOptions = document.querySelectorAll("[data-contribute-type]");
-const contributeChooser = document.querySelector(".contribute-chooser");
-const contributeSuggestion = document.getElementById("contributeSuggestion");
-const recordSubmissionCard = document.getElementById("recordSubmissionCard");
-const contributeSuggestionTitle = document.getElementById("contributeSuggestionTitle");
-const contributeSuggestionDescription = document.getElementById("contributeSuggestionDescription");
-const contributeSuggestionDetails = document.getElementById("contributeSuggestionDetails");
-const contributeSuggestionForm = document.getElementById("contributeSuggestionForm");
-const contributeBackButton = document.getElementById("contributeBackButton");
-let selectedContributionType = "";
-const contributionTypes = {
-  level: { title: "Suggest a level", subject: "RDL level suggestion", description: "Share the level name, creator, and why it should be considered." },
-  pack: { title: "Suggest a Level Pack", subject: "RDL Level Pack suggestion", description: "Share the pack name, its levels, and why it should be considered." },
-  change: { title: "Suggest a list change", subject: "RDL list change suggestion", description: "Describe the proposed change and include links or evidence if useful." },
-  idea: { title: "Share an idea", subject: "RDL idea or feedback", description: "Share your feedback, feature request, or idea for the Robot Demon List." }
-};
-contributeOptions.forEach((option) => {
-  option.addEventListener("click", () => {
-    selectedContributionType = option.dataset.contributeType || "";
-    const isRecord = selectedContributionType === "record";
-    contributeChooser.hidden = true;
-    contributeSuggestion.hidden = isRecord;
-    recordSubmissionCard.hidden = !isRecord;
-    if (!isRecord) {
-      const config = contributionTypes[selectedContributionType];
-      if (!config) return;
-      contributeSuggestionTitle.textContent = config.title;
-      contributeSuggestionDescription.textContent = config.description + " Submitting opens an email draft for you to review; it will not send automatically.";
-      contributeSuggestionDetails.value = "";
-    }
+const contributeLink = document.querySelector('.main-nav a[href="#submit"]');
+const contributeDropdown = document.getElementById("contributeDropdown");
+const contributeChoiceButtons = document.querySelectorAll("[data-contribute-choice]");
+contributeLink?.addEventListener("click", (event) => {
+  event.preventDefault();
+  const willOpen = contributeDropdown?.hidden ?? false;
+  if (contributeDropdown) contributeDropdown.hidden = !willOpen;
+  contributeLink.setAttribute("aria-expanded", String(willOpen));
+});
+contributeChoiceButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    contributeChoiceButtons.forEach((item) => {
+      item.classList.toggle("selected", item === button);
+      item.setAttribute("aria-pressed", String(item === button));
+    });
+    // Selection only for now; no form or follow-up action is triggered.
   });
 });
-contributeBackButton?.addEventListener("click", () => {
-  contributeChooser.hidden = false;
-  contributeSuggestion.hidden = true;
-  recordSubmissionCard.hidden = true;
-});
-contributeSuggestionForm?.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const config = contributionTypes[selectedContributionType];
-  const details = contributeSuggestionDetails.value.trim();
-  const message = document.getElementById("contributeSuggestionMessage");
-  if (!config || !details) {
-    if (message) message.textContent = "Please add some details first.";
-    return;
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".contribute-menu-wrap")) {
+    if (contributeDropdown) contributeDropdown.hidden = true;
+    contributeLink?.setAttribute("aria-expanded", "false");
   }
-  const mailto = "mailto:tyalamoon@outlook.com"
-    + "?subject=" + encodeURIComponent(config.subject)
-    + "&body=" + encodeURIComponent(details);
-  window.location.href = mailto;
-  if (message) message.textContent = "Your email draft should open in your mail app. Review it and press Send there.";
 });
 
 const submitNavLink = document.querySelector('.main-nav a[href="#submit"]');
