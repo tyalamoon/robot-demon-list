@@ -3174,8 +3174,8 @@ function openLevelDetails(record, displayedRank) {
   const meta = document.getElementById("levelModalMeta");
   meta.replaceChildren();
   const hasRealRecords = activeDetailRecords.some(item => !isRdlLevelCatalogEntry(item));
-  const metaLabels = isCatalogEntry && !hasRealRecords
-    ? ["Added to RDL · no player records yet", "Robot Demon List"]
+  const metaLabels = isCatalogEntry
+    ? [hasRealRecords ? "RDL level · player records available" : "Added to RDL · no player records yet", "Robot Demon List"]
     : [activeDetailRecord.percent === 100 ? "100% completion" : String(activeDetailRecord.percent ?? "—") + "% completion", "Robot Demon List"];
   metaLabels.forEach(label => {
     meta.appendChild(makeElement("span", "level-modal-chip", label));
@@ -3317,8 +3317,17 @@ document.getElementById("levelModalSubmit").addEventListener("click", () => {
 function renderLeaderboard() {
   renderPlayerPointsLeaderboard();
   const query = searchInput.value.trim().toLowerCase();
+  const catalogLevelNames = new Set(
+    records
+      .filter(isRdlLevelCatalogEntry)
+      .map(record => String(record.level_name || "").trim().toLocaleLowerCase())
+  );
 
   const filteredRecords = records.filter(record => {
+    const levelKey = String(record.level_name || "").trim().toLocaleLowerCase();
+    // Keep one public card for a catalogued level. Its detail panel groups any
+    // real player records, so the level does not appear twice after first clears.
+    if (!isRdlLevelCatalogEntry(record) && catalogLevelNames.has(levelKey)) return false;
     const player = String(record.player_name || "").toLowerCase();
     const level = String(record.level_name || "").toLowerCase();
     return player.includes(query) || level.includes(query);
