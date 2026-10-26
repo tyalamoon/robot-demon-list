@@ -160,3 +160,50 @@ create policy "RDL owner can add changelog entries"
     (select public.is_rdl_owner())
     and char_length(message) between 1 and 500
   );
+
+-- Automatically announce approved levels that are inserted with a manual rank.
+-- This runs before the approval RPC clears the previous occupant's rank, so
+-- the announcement can correctly name the level that was displaced.
+create or replace function public.log_rdl_rank_placement()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $function$
+declare
+  previous_level_name text;
+  changelog_message text;
+begin
+  if new.status <> 'approved' or new.rank_position is null then
+    return new;
+  end if;
+
+  select level_name
+    into previous_level_name
+    from public.record_submissions
+   where status = 'approved'
+     and rank_position = new.rank_position
+     and id <> new.id
+   order by id
+   limit 1;
+
+  if previous_level_name is not null and previous_level_name <> new.level_name then
+    changelog_message := new.level_name || ' was placed at #' || new.rank_position::text
+      || ', above ' || previous_level_name || '.';
+  else
+    changelog_message := new.level_name || ' was placed at #' || new.rank_position::text || '.';
+  end if;
+
+  insert into public.rdl_changelog (message) values (changelog_message);
+  return new;
+end;
+$function$;
+
+revoke all on function public.log_rdl_rank_placement() from public, anon, authenticated;
+
+drop trigger if exists rdl_rank_placement_changelog on public.record_submissions;
+create trigger rdl_rank_placement_changelog
+  after insert on public.record_submissions
+  for each row
+  execute function public.log_rdl_rank_placement();
+
