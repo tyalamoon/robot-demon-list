@@ -1596,6 +1596,8 @@ body.pack-suggest-open { overflow: hidden; }
     </div>
     <div class="admin-panel">
       <button class="button button-primary" id="refreshPending" type="button">Refresh pending records</button>
+      <button class="button admin-reject" id="resetChangelogButton" type="button" hidden>Reset changelog</button>
+      <p class="admin-status" id="changelogResetStatus" role="status" aria-live="polite" hidden></p>
       <p class="admin-status" id="adminStatus" role="status" aria-live="polite">Checking administrator permissions...</p>
       <div class="admin-list" id="pendingList"></div>
     </div>
@@ -2429,6 +2431,9 @@ const adminPanel = document.getElementById("adminPanel");
 const adminStatus = document.getElementById("adminStatus");
 const pendingList = document.getElementById("pendingList");
 const refreshPendingButton = document.getElementById("refreshPending");
+const resetChangelogButton = document.getElementById("resetChangelogButton");
+const changelogResetStatus = document.getElementById("changelogResetStatus");
+const RDL_CHANGELOG_ADMIN_EMAIL = "tyalamoon@outlook.com";
 
 const levelsElement = document.getElementById("levels");
 const playerPointsElement = document.getElementById("playerPoints");
@@ -2693,6 +2698,11 @@ async function refreshAdminPanel(session) {
   const requestVersion = ++adminRequestVersion;
   isRdlOwner = false;
   adminPanel.hidden = true;
+  if (resetChangelogButton) resetChangelogButton.hidden = true;
+  if (changelogResetStatus) {
+    changelogResetStatus.hidden = true;
+    changelogResetStatus.textContent = "";
+  }
   pendingList.replaceChildren();
 
   if (!session?.user) {
@@ -2725,6 +2735,10 @@ async function refreshAdminPanel(session) {
 
     isRdlOwner = true;
     adminPanel.hidden = false;
+    if (resetChangelogButton) {
+      resetChangelogButton.hidden =
+        String(session.user.email || "").trim().toLowerCase() !== RDL_CHANGELOG_ADMIN_EMAIL;
+    }
 
     renderLeaderboard();
     await loadPendingSubmissions();
@@ -2971,6 +2985,45 @@ async function moderateSubmission(recordId, newStatus) {
 }
 
 refreshPendingButton.addEventListener("click", loadPendingSubmissions);
+
+resetChangelogButton?.addEventListener("click", async () => {
+  const email = String(currentAuthUser?.email || "").trim().toLowerCase();
+  if (!isRdlOwner || email !== RDL_CHANGELOG_ADMIN_EMAIL) {
+    alert("Only the designated RDL administrator can reset the changelog.");
+    return;
+  }
+
+  const confirmed = window.confirm(
+    "RESET THE RDL CHANGELOG?\n\nThis permanently deletes all changelog entries from the database. This cannot be undone."
+  );
+  if (!confirmed) return;
+
+  resetChangelogButton.disabled = true;
+  if (changelogResetStatus) {
+    changelogResetStatus.hidden = false;
+    changelogResetStatus.textContent = "Resetting changelog...";
+  }
+
+  try {
+    const { error } = await rdlSupabase.rpc("reset_rdl_changelog");
+    if (error) throw error;
+
+    if (changelogResetStatus) {
+      changelogResetStatus.textContent = "Changelog reset successfully.";
+    }
+    if (changelogBackdrop?.classList.contains("open")) {
+      await openChangelog();
+    }
+  } catch (error) {
+    console.error("RDL changelog reset failed:", error);
+    if (changelogResetStatus) {
+      changelogResetStatus.textContent =
+        "Couldn't reset the changelog. Apply the reset_rdl_changelog SQL migration in Supabase and check its permissions.";
+    }
+  } finally {
+    resetChangelogButton.disabled = false;
+  }
+});
 
 /* DELETE A RECORD */
 async function deleteLevel(recordId, levelName) {
