@@ -3657,24 +3657,22 @@ async function setLevelRank(recordId, selectedRank, buttonElement) {
     }
   }
 
+  const targetRecord = records.find((item) => String(item.id) === String(recordId));
+  if (!targetRecord) {
+    alert("Couldn't find that level. Reload the leaderboard and try again.");
+    return;
+  }
+
+  const previousDisplayRanks = getDisplayRanks(records);
+  const previousRank = previousDisplayRanks.get(targetRecord.id);
+  const requestedRank = rankPosition === null ? null : BigInt(rankPosition).toString();
+
   buttonElement.disabled = true;
   const previousText = buttonElement.textContent;
   buttonElement.textContent = "Saving...";
 
   try {
-    const targetRecord = records.find((item) => String(item.id) === String(recordId));
-    let previousOccupantName = "";
     if (rankPosition !== null) {
-      const { data: occupant, error: occupantError } = await rdlSupabase
-        .from("record_submissions")
-        .select("level_name")
-        .eq("status", "approved")
-        .eq("rank_position", rankPosition)
-        .neq("id", recordId)
-        .limit(1)
-        .maybeSingle();
-      if (occupantError) throw occupantError;
-      previousOccupantName = occupant?.level_name || "";
       // Free this rank if another approved record currently uses it.
       const { error: clearError } = await rdlSupabase
         .from("record_submissions")
@@ -3699,20 +3697,48 @@ async function setLevelRank(recordId, selectedRank, buttonElement) {
       throw new Error("No approved record was updated. Check the owner UPDATE policy.");
     }
 
-    if (targetRecord) {
+    await loadRecords();
+
+    const updatedRecord = records.find((item) => String(item.id) === String(recordId));
+    const updatedDisplayRanks = getDisplayRanks(records);
+    const newRank = updatedRecord ? updatedDisplayRanks.get(updatedRecord.id) : null;
+    const oldRankValue = previousRank == null ? null : BigInt(String(previousRank));
+    const newRankValue = newRank == null ? null : BigInt(String(newRank));
+    const rankActuallyChanged = oldRankValue !== null && newRankValue !== null
+      ? oldRankValue !== newRankValue
+      : previousRank !== newRank;
+
+    // Don't create noise when the level's visible rank didn't actually change.
+    if (updatedRecord && rankActuallyChanged) {
       let changelogMessage;
+
       if (rankPosition === null) {
-        changelogMessage = targetRecord.level_name + "'s rank was returned to automatic ranking.";
-      } else if (previousOccupantName && previousOccupantName !== targetRecord.level_name) {
-        changelogMessage = targetRecord.level_name + " was placed at #" + rankPosition + ", above " + previousOccupantName + ".";
+        changelogMessage = updatedRecord.level_name + "'s rank was returned to automatic ranking (now #" + newRank + ").";
       } else {
-        changelogMessage = targetRecord.level_name + " was placed at #" + rankPosition + ".";
+        const orderedRecords = [...records].sort((a, b) => {
+          const rankA = BigInt(String(updatedDisplayRanks.get(a.id) || "9223372036854775807"));
+          const rankB = BigInt(String(updatedDisplayRanks.get(b.id) || "9223372036854775807"));
+          if (rankA !== rankB) return rankA < rankB ? -1 : 1;
+          return String(a.level_name || "").localeCompare(String(b.level_name || ""));
+        });
+        const targetIndex = orderedRecords.findIndex((item) => String(item.id) === String(recordId));
+        const above = targetIndex > 0 ? orderedRecords[targetIndex - 1]?.level_name : "";
+        const below = targetIndex >= 0 && targetIndex < orderedRecords.length - 1
+          ? orderedRecords[targetIndex + 1]?.level_name
+          : "";
+
+        const relationParts = [];
+        if (above && above !== updatedRecord.level_name) relationParts.push("above " + above);
+        if (below && below !== updatedRecord.level_name) relationParts.push("below " + below);
+        const relation = relationParts.length ? ", " + relationParts.join(" and ") : "";
+        changelogMessage = updatedRecord.level_name + " was moved to #" + newRank + relation + ".";
       }
-      const { error: changelogError } = await rdlSupabase.from("rdl_changelog").insert({ message: changelogMessage });
+
+      const { error: changelogError } = await rdlSupabase
+        .from("rdl_changelog")
+        .insert({ message: changelogMessage });
       if (changelogError) console.error("RDL changelog save error:", changelogError);
     }
-
-    await loadRecords();
   } catch (error) {
     console.error("RDL rank update error:", error);
     alert("Couldn't update the rank: " + (error?.message || "Unknown Supabase error"));
