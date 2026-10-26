@@ -1325,7 +1325,13 @@ body.pack-suggest-open { overflow: hidden; }
         </div>
       </div>
       <a class="nav-button" href="#account">Account</a>
-      <a class="nav-button" href="#about">News</a>
+      <div class="contribute-menu-wrap news-menu-wrap">
+        <a class="nav-button" href="#news-menu" id="newsMenuLink" aria-expanded="false" aria-controls="newsDropdown">News</a>
+        <div class="contribute-dropdown" id="newsDropdown" hidden>
+          <button type="button" class="contribute-dropdown-option" data-news-choice="changelog">Changelog</button>
+          <button type="button" class="contribute-dropdown-option" data-news-choice="news">News</button>
+        </div>
+      </div>
     </nav>
   </div>
 </header>
@@ -1848,6 +1854,26 @@ const accountNavLink = document.querySelector('.main-nav a[href="#account"]');
 const leaderboardNavLink = document.querySelector('.main-nav a[href="#leaderboard"]');
 const contributeLink = document.querySelector('.main-nav a[href="#submit"]');
 const contributeDropdown = document.getElementById("contributeDropdown");
+const newsMenuLink = document.getElementById("newsMenuLink");
+const newsDropdown = document.getElementById("newsDropdown");
+
+newsMenuLink?.addEventListener("click", (event) => {
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  const willOpen = newsDropdown?.hidden ?? false;
+  if (newsDropdown) newsDropdown.hidden = !willOpen;
+  newsMenuLink.setAttribute("aria-expanded", String(willOpen));
+  if (contributeDropdown) contributeDropdown.hidden = true;
+  contributeLink?.setAttribute("aria-expanded", "false");
+});
+
+document.querySelectorAll("[data-news-choice]").forEach((button) => {
+  button.addEventListener("click", () => {
+    if (newsDropdown) newsDropdown.hidden = true;
+    newsMenuLink?.setAttribute("aria-expanded", "false");
+    // The Changelog and News destinations will be added in the next step.
+  });
+});
 const contributeSuggestionForm = document.getElementById("contributeSuggestionForm");
 const contributeSuggestionMessage = document.getElementById("contributeSuggestionMessage");
 contributeSuggestionForm?.addEventListener("submit", async event => {
@@ -2216,6 +2242,8 @@ document.addEventListener("click", (event) => {
   if (!event.target.closest(".contribute-menu-wrap")) {
     if (contributeDropdown) contributeDropdown.hidden = true;
     contributeLink?.setAttribute("aria-expanded", "false");
+    if (newsDropdown) newsDropdown.hidden = true;
+    newsMenuLink?.setAttribute("aria-expanded", "false");
   }
 });
 
