@@ -3022,8 +3022,8 @@ resetChangelogButton?.addEventListener("click", async () => {
   } catch (error) {
     console.error("RDL changelog reset failed:", error);
     if (changelogResetStatus) {
-      changelogResetStatus.textContent =
-        "Couldn't reset the changelog. Apply the reset_rdl_changelog SQL migration in Supabase and check its permissions.";
+      const detail = String(error?.message || error?.details || error?.hint || "Unknown error");
+      changelogResetStatus.textContent = "Couldn't reset the changelog: " + detail;
     }
   } finally {
     resetChangelogButton.disabled = false;
