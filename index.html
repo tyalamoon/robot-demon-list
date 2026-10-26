@@ -3665,7 +3665,6 @@ async function setLevelRank(recordId, selectedRank, buttonElement) {
 
   const previousDisplayRanks = getDisplayRanks(records);
   const previousRank = previousDisplayRanks.get(targetRecord.id);
-  const requestedRank = rankPosition === null ? null : BigInt(rankPosition).toString();
 
   buttonElement.disabled = true;
   const previousText = buttonElement.textContent;
