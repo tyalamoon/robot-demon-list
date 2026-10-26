@@ -62,6 +62,7 @@ declare
   suggested_level_id text;
   suggested_youtube text;
   level_note text;
+  previous_level_name text;
 begin
   if not coalesce(public.is_rdl_owner(), false) then
     raise exception 'Only the RDL owner can approve level suggestions.';
@@ -110,19 +111,36 @@ begin
     || ' | level_id=' || suggested_level_id
     || ' | verifier=' || suggested_verifier;
 
+  -- Read and clear the current occupant before inserting, because the table
+  -- enforces unique approved ranks and would reject a duplicate rank at INSERT.
+  select level_name
+    into previous_level_name
+    from public.record_submissions
+   where status = 'approved'
+     and rank_position = suggested_rank
+   order by id
+   limit 1
+   for update;
+
+  update public.record_submissions
+     set rank_position = null
+   where status = 'approved'
+     and rank_position = suggested_rank;
+
   insert into public.record_submissions
     (player_name, level_name, percent, proof_url, notes, status, rank_position)
   values
     (suggested_author, suggested_name, 0, suggested_youtube, level_note, 'approved', suggested_rank)
   returning id into inserted_record_id;
 
-  -- A manual rank must be unique. Match the site's existing behavior by
-  -- returning any previous occupant of this rank to automatic ranking.
-  update public.record_submissions
-     set rank_position = null
-   where status = 'approved'
-     and rank_position = suggested_rank
-     and id <> inserted_record_id;
+  if previous_level_name is not null and previous_level_name <> suggested_name then
+    insert into public.rdl_changelog (message)
+    values (suggested_name || ' was placed at #' || suggested_rank::text
+      || ', above ' || previous_level_name || '.');
+  else
+    insert into public.rdl_changelog (message)
+    values (suggested_name || ' was placed at #' || suggested_rank::text || '.');
+  end if;
 
   update public.rdl_contributions
      set status = 'approved'
@@ -160,50 +178,3 @@ create policy "RDL owner can add changelog entries"
     (select public.is_rdl_owner())
     and char_length(message) between 1 and 500
   );
-
--- Automatically announce approved levels that are inserted with a manual rank.
--- This runs before the approval RPC clears the previous occupant's rank, so
--- the announcement can correctly name the level that was displaced.
-create or replace function public.log_rdl_rank_placement()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $function$
-declare
-  previous_level_name text;
-  changelog_message text;
-begin
-  if new.status <> 'approved' or new.rank_position is null then
-    return new;
-  end if;
-
-  select level_name
-    into previous_level_name
-    from public.record_submissions
-   where status = 'approved'
-     and rank_position = new.rank_position
-     and id <> new.id
-   order by id
-   limit 1;
-
-  if previous_level_name is not null and previous_level_name <> new.level_name then
-    changelog_message := new.level_name || ' was placed at #' || new.rank_position::text
-      || ', above ' || previous_level_name || '.';
-  else
-    changelog_message := new.level_name || ' was placed at #' || new.rank_position::text || '.';
-  end if;
-
-  insert into public.rdl_changelog (message) values (changelog_message);
-  return new;
-end;
-$function$;
-
-revoke all on function public.log_rdl_rank_placement() from public, anon, authenticated;
-
-drop trigger if exists rdl_rank_placement_changelog on public.record_submissions;
-create trigger rdl_rank_placement_changelog
-  after insert on public.record_submissions
-  for each row
-  execute function public.log_rdl_rank_placement();
-
