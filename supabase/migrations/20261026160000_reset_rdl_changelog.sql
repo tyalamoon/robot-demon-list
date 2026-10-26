@@ -14,7 +14,7 @@ begin
       using errcode = '42501';
   end if;
 
-  delete from public.rdl_changelog;
+  delete from public.rdl_changelog where true;
 end;
 $$;
 
