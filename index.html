@@ -1019,6 +1019,34 @@ body.record-submit-open #submit .record-submit-card {
   .record-submit-actions { grid-template-columns: 1fr; }
 }
 
+.changelog-backdrop {
+  position: fixed; inset: 0; z-index: 1300; display: none;
+  align-items: center; justify-content: center; padding: 20px;
+  background: rgba(0,0,0,.78); backdrop-filter: blur(7px);
+}
+.changelog-backdrop.open { display: flex; }
+.changelog-panel {
+  width: min(680px, 100%); max-height: min(86vh, 760px); overflow: hidden;
+  border: 1px solid var(--border); border-radius: 16px; background: #141414;
+  box-shadow: 0 24px 90px rgba(0,0,0,.55);
+}
+.changelog-top {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 22px 24px; border-bottom: 1px solid var(--border);
+}
+.changelog-top h2 { margin: 0; font-size: 25px; }
+.changelog-list { padding: 8px 24px 24px; overflow-y: auto; max-height: calc(min(86vh, 760px) - 82px); }
+.changelog-entry { padding: 17px 0; border-bottom: 1px solid var(--border); }
+.changelog-entry:last-child { border-bottom: 0; }
+.changelog-entry p { margin: 0; line-height: 1.6; }
+.changelog-entry time { display: block; margin-top: 7px; color: var(--muted); font-size: 12px; }
+.changelog-empty { padding: 22px 0; color: var(--muted); }
+@media (max-width: 600px) {
+  .changelog-backdrop { padding: 8px; }
+  .changelog-top { padding: 18px 16px; }
+  .changelog-list { padding: 6px 16px 18px; }
+}
+
 /* Level details inspired by community demon-list detail pages. */
 .level { cursor: pointer; }
 .level .thumbnail { cursor: pointer; }
@@ -1579,6 +1607,18 @@ body.pack-suggest-open { overflow: hidden; }
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<div class="changelog-backdrop" id="changelogBackdrop" role="dialog" aria-modal="true" aria-labelledby="changelogTitle" aria-hidden="true">
+  <section class="changelog-panel">
+    <header class="changelog-top">
+      <h2 id="changelogTitle">RDL <span>Changelog</span></h2>
+      <button class="level-modal-close" id="changelogClose" type="button" aria-label="Close changelog">×</button>
+    </header>
+    <div class="changelog-list" id="changelogList" aria-live="polite">
+      <p class="changelog-empty">Loading changelog...</p>
+    </div>
+  </section>
+</div>
+
 <div class="level-modal-backdrop" id="levelModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="levelModalTitle">
   <section class="level-modal">
     <header class="level-modal-top">
@@ -1856,7 +1896,57 @@ const contributeLink = document.querySelector('.main-nav a[href="#submit"]');
 const contributeDropdown = document.getElementById("contributeDropdown");
 const newsMenuLink = document.getElementById("newsMenuLink");
 const newsDropdown = document.getElementById("newsDropdown");
+const changelogBackdrop = document.getElementById("changelogBackdrop");
+const changelogList = document.getElementById("changelogList");
 
+async function openChangelog() {
+  if (!changelogBackdrop) return;
+  changelogBackdrop.classList.add("open");
+  changelogBackdrop.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  if (changelogList) changelogList.innerHTML = '<p class="changelog-empty">Loading changelog...</p>';
+  const { data, error } = await rdlSupabase
+    .from("rdl_changelog")
+    .select("id, message, created_at")
+    .order("created_at", { ascending: false })
+    .limit(50);
+  if (!changelogList) return;
+  if (error) {
+    console.error("RDL changelog load error:", error);
+    changelogList.innerHTML = '<p class="changelog-empty">The changelog is not available yet. Please try again later.</p>';
+    return;
+  }
+  if (!data || data.length === 0) {
+    changelogList.innerHTML = '<p class="changelog-empty">No changelog entries yet. List updates will appear here.</p>';
+    return;
+  }
+  changelogList.replaceChildren();
+  data.forEach((entry) => {
+    const article = document.createElement("article");
+    article.className = "changelog-entry";
+    const message = document.createElement("p");
+    message.textContent = entry.message;
+    const time = document.createElement("time");
+    const date = new Date(entry.created_at);
+    time.dateTime = date.toISOString();
+    time.textContent = date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+    article.append(message, time);
+    changelogList.appendChild(article);
+  });
+}
+function closeChangelog() {
+  if (!changelogBackdrop) return;
+  changelogBackdrop.classList.remove("open");
+  changelogBackdrop.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+document.getElementById("changelogClose")?.addEventListener("click", closeChangelog);
+changelogBackdrop?.addEventListener("click", (event) => {
+  if (event.target === changelogBackdrop) closeChangelog();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && changelogBackdrop?.classList.contains("open")) closeChangelog();
+});
 newsMenuLink?.addEventListener("click", (event) => {
   event.preventDefault();
   event.stopImmediatePropagation();
@@ -1866,12 +1956,11 @@ newsMenuLink?.addEventListener("click", (event) => {
   if (contributeDropdown) contributeDropdown.hidden = true;
   contributeLink?.setAttribute("aria-expanded", "false");
 });
-
 document.querySelectorAll("[data-news-choice]").forEach((button) => {
   button.addEventListener("click", () => {
     if (newsDropdown) newsDropdown.hidden = true;
     newsMenuLink?.setAttribute("aria-expanded", "false");
-    // The Changelog and News destinations will be added in the next step.
+    if (button.dataset.newsChoice === "changelog") openChangelog();
   });
 });
 const contributeSuggestionForm = document.getElementById("contributeSuggestionForm");
@@ -3549,7 +3638,19 @@ async function setLevelRank(recordId, selectedRank, buttonElement) {
   buttonElement.textContent = "Saving...";
 
   try {
+    const targetRecord = records.find((item) => String(item.id) === String(recordId));
+    let previousOccupantName = "";
     if (rankPosition !== null) {
+      const { data: occupant, error: occupantError } = await rdlSupabase
+        .from("record_submissions")
+        .select("level_name")
+        .eq("status", "approved")
+        .eq("rank_position", rankPosition)
+        .neq("id", recordId)
+        .limit(1)
+        .maybeSingle();
+      if (occupantError) throw occupantError;
+      previousOccupantName = occupant?.level_name || "";
       // Free this rank if another approved record currently uses it.
       const { error: clearError } = await rdlSupabase
         .from("record_submissions")
@@ -3572,6 +3673,19 @@ async function setLevelRank(recordId, selectedRank, buttonElement) {
 
     if (!data || data.length === 0) {
       throw new Error("No approved record was updated. Check the owner UPDATE policy.");
+    }
+
+    if (targetRecord) {
+      let changelogMessage;
+      if (rankPosition === null) {
+        changelogMessage = targetRecord.level_name + "'s rank was returned to automatic ranking.";
+      } else if (previousOccupantName && previousOccupantName !== targetRecord.level_name) {
+        changelogMessage = targetRecord.level_name + " was placed at #" + rankPosition + ", above " + previousOccupantName + ".";
+      } else {
+        changelogMessage = targetRecord.level_name + " was placed at #" + rankPosition + ".";
+      }
+      const { error: changelogError } = await rdlSupabase.from("rdl_changelog").insert({ message: changelogMessage });
+      if (changelogError) console.error("RDL changelog save error:", changelogError);
     }
 
     await loadRecords();
