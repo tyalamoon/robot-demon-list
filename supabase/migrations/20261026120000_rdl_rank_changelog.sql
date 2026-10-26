@@ -28,48 +28,114 @@ create policy "RDL owner can add changelog entries"
     and char_length(message) between 1 and 500
   );
 
--- This trigger runs when the approval RPC inserts a level with a manual rank.
--- It executes before that RPC clears the old occupant's rank, allowing the
--- changelog to name the displaced level accurately.
-create or replace function public.log_rdl_rank_placement()
-returns trigger
+-- The approval RPC clears an existing occupant before inserting the new rank,
+-- avoiding the unique approved-rank constraint and recording the event once.
+create or replace function public.approve_rdl_level_suggestion(p_contribution_id bigint)
+returns void
 language plpgsql
 security definer
 set search_path = public
 as $function$
 declare
+  contribution_row public.rdl_contributions%rowtype;
+  inserted_record_id public.record_submissions.id%type;
+  suggested_rank bigint;
+  suggested_name text;
+  suggested_author text;
+  suggested_verifier text;
+  suggested_list text;
+  suggested_level_id text;
+  suggested_youtube text;
+  level_note text;
   previous_level_name text;
-  changelog_message text;
 begin
-  if new.status <> 'approved' or new.rank_position is null then
-    return new;
+  if not coalesce(public.is_rdl_owner(), false) then
+    raise exception 'Only the RDL owner can approve level suggestions.';
   end if;
 
+  select *
+    into contribution_row
+    from public.rdl_contributions
+   where id = p_contribution_id
+     and contribution_type = 'level_suggestion'
+     and status = 'pending'
+   for update;
+
+  if not found then
+    raise exception 'This pending level suggestion was not found. Refresh the admin inbox.';
+  end if;
+
+  suggested_name := nullif(btrim(contribution_row.payload->>'level_name'), '');
+  suggested_author := nullif(btrim(contribution_row.payload->>'author'), '');
+  suggested_verifier := nullif(btrim(contribution_row.payload->>'verifier'), '');
+  suggested_list := nullif(btrim(contribution_row.payload->>'list'), '');
+  suggested_level_id := nullif(btrim(contribution_row.payload->>'level_id'), '');
+  suggested_youtube := nullif(btrim(contribution_row.payload->>'youtube_link'), '');
+
+  if suggested_name is null or suggested_author is null or suggested_verifier is null
+     or suggested_list is null or suggested_level_id is null or suggested_youtube is null then
+    raise exception 'The level suggestion is missing a required field.';
+  end if;
+
+  if suggested_list not in ('Classic', 'Platformer List') then
+    raise exception 'Unsupported RDL list: %', suggested_list;
+  end if;
+
+  begin
+    suggested_rank := (contribution_row.payload->>'desired_position')::bigint;
+  exception when others then
+    raise exception 'The suggested position must be a positive whole number.';
+  end;
+
+  if suggested_rank < 1 then
+    raise exception 'The suggested position must be a positive whole number.';
+  end if;
+
+  level_note := 'RDL_LEVEL_SUGGESTION:' || contribution_row.id::text
+    || ' | list=' || suggested_list
+    || ' | level_id=' || suggested_level_id
+    || ' | verifier=' || suggested_verifier;
+
+  -- Read and clear the current occupant before inserting, because the table
+  -- enforces unique approved ranks and would reject a duplicate rank at INSERT.
   select level_name
     into previous_level_name
     from public.record_submissions
    where status = 'approved'
-     and rank_position = new.rank_position
-     and id <> new.id
+     and rank_position = suggested_rank
    order by id
-   limit 1;
+   limit 1
+   for update;
 
-  if previous_level_name is not null and previous_level_name <> new.level_name then
-    changelog_message := new.level_name || ' was placed at #' || new.rank_position::text
-      || ', above ' || previous_level_name || '.';
+  update public.record_submissions
+     set rank_position = null
+   where status = 'approved'
+     and rank_position = suggested_rank;
+
+  insert into public.record_submissions
+    (player_name, level_name, percent, proof_url, notes, status, rank_position)
+  values
+    (suggested_author, suggested_name, 0, suggested_youtube, level_note, 'approved', suggested_rank)
+  returning id into inserted_record_id;
+
+  if previous_level_name is not null and previous_level_name <> suggested_name then
+    insert into public.rdl_changelog (message)
+    values (suggested_name || ' was placed at #' || suggested_rank::text
+      || ', above ' || previous_level_name || '.');
   else
-    changelog_message := new.level_name || ' was placed at #' || new.rank_position::text || '.';
+    insert into public.rdl_changelog (message)
+    values (suggested_name || ' was placed at #' || suggested_rank::text || '.');
   end if;
 
-  insert into public.rdl_changelog (message) values (changelog_message);
-  return new;
+  update public.rdl_contributions
+     set status = 'approved'
+   where id = contribution_row.id;
 end;
 $function$;
 
-revoke all on function public.log_rdl_rank_placement() from public, anon, authenticated;
+revoke all on function public.approve_rdl_level_suggestion(bigint) from public, anon;
+grant execute on function public.approve_rdl_level_suggestion(bigint) to authenticated;
 
+-- Replace the earlier trigger-based draft if it was installed.
 drop trigger if exists rdl_rank_placement_changelog on public.record_submissions;
-create trigger rdl_rank_placement_changelog
-  after insert on public.record_submissions
-  for each row
-  execute function public.log_rdl_rank_placement();
+drop function if exists public.log_rdl_rank_placement();
