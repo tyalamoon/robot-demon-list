@@ -1904,33 +1904,57 @@ async function openChangelog() {
   changelogBackdrop.classList.add("open");
   changelogBackdrop.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
-  if (changelogList) changelogList.innerHTML = '<p class="changelog-empty">Loading changelog...</p>';
-  const { data, error } = await rdlSupabase
-    .from("rdl_changelog")
-    .select("id, message, created_at")
-    .order("created_at", { ascending: false })
-    .limit(50);
   if (!changelogList) return;
-  if (error) {
-    console.error("RDL changelog load error:", error);
-    changelogList.innerHTML = '<p class="changelog-empty">The changelog is not available yet. Please try again later.</p>';
-    return;
-  }
-  if (!data || data.length === 0) {
-    changelogList.innerHTML = '<p class="changelog-empty">No changelog entries yet. List updates will appear here.</p>';
-    return;
-  }
   changelogList.replaceChildren();
-  data.forEach((entry) => {
+  const loading = document.createElement("p");
+  loading.className = "changelog-empty";
+  loading.textContent = "Loading changelog...";
+  changelogList.appendChild(loading);
+
+  let entries = [];
+  try {
+    const { data, error } = await rdlSupabase
+      .from("rdl_changelog")
+      .select("id, message, created_at")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    entries = Array.isArray(data) ? data : [];
+  } catch (error) {
+    // Keep the changelog useful if the optional Supabase changelog table has not
+    // been created/configured yet. Real database entries take priority.
+    console.error("RDL changelog load error:", error);
+  }
+
+  changelogList.replaceChildren();
+  if (entries.length === 0) {
+    const fallback = document.createElement("article");
+    fallback.className = "changelog-entry";
+    const message = document.createElement("p");
+    message.textContent = "Welcome to the RDL Changelog! Ranking changes will appear here when the changelog database is configured.";
+    const time = document.createElement("time");
+    time.textContent = "RDL";
+    fallback.append(message, time);
+    changelogList.appendChild(fallback);
+    return;
+  }
+
+  entries.forEach((entry) => {
     const article = document.createElement("article");
     article.className = "changelog-entry";
     const message = document.createElement("p");
-    message.textContent = entry.message;
-    const time = document.createElement("time");
-    const date = new Date(entry.created_at);
-    time.dateTime = date.toISOString();
-    time.textContent = date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
-    article.append(message, time);
+    message.textContent = String(entry.message || "RDL update");
+    article.appendChild(message);
+
+    if (entry.created_at) {
+      const date = new Date(entry.created_at);
+      if (!Number.isNaN(date.getTime())) {
+        const time = document.createElement("time");
+        time.dateTime = date.toISOString();
+        time.textContent = date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+        article.appendChild(time);
+      }
+    }
     changelogList.appendChild(article);
   });
 }
