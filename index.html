@@ -1035,6 +1035,8 @@ body.record-submit-open #submit .record-submit-card {
   padding: 22px 24px; border-bottom: 1px solid var(--border);
 }
 .changelog-top h2 { margin: 0; font-size: 25px; }
+.changelog-admin-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 14px 24px 0; }
+.changelog-admin-tools .admin-status { margin: 0; }
 .changelog-list { padding: 8px 24px 24px; overflow-y: auto; max-height: calc(min(86vh, 760px) - 82px); }
 .changelog-entry { padding: 17px 0; border-bottom: 1px solid var(--border); }
 .changelog-entry:last-child { border-bottom: 0; }
@@ -1044,6 +1046,7 @@ body.record-submit-open #submit .record-submit-card {
 @media (max-width: 600px) {
   .changelog-backdrop { padding: 8px; }
   .changelog-top { padding: 18px 16px; }
+  .changelog-admin-tools { padding: 12px 16px 0; }
   .changelog-list { padding: 6px 16px 18px; }
 }
 
@@ -1596,8 +1599,6 @@ body.pack-suggest-open { overflow: hidden; }
     </div>
     <div class="admin-panel">
       <button class="button button-primary" id="refreshPending" type="button">Refresh pending records</button>
-      <button class="button admin-reject" id="resetChangelogButton" type="button" hidden>Reset changelog</button>
-      <p class="admin-status" id="changelogResetStatus" role="status" aria-live="polite" hidden></p>
       <p class="admin-status" id="adminStatus" role="status" aria-live="polite">Checking administrator permissions...</p>
       <div class="admin-list" id="pendingList"></div>
     </div>
@@ -1616,6 +1617,10 @@ body.pack-suggest-open { overflow: hidden; }
       <h2 id="changelogTitle">RDL <span>Changelog</span></h2>
       <button class="level-modal-close" id="changelogClose" type="button" aria-label="Close changelog">×</button>
     </header>
+    <div class="changelog-admin-tools">
+      <button class="button admin-reject" id="resetChangelogButton" type="button" hidden>Reset changelog</button>
+      <p class="admin-status" id="changelogResetStatus" role="status" aria-live="polite" hidden></p>
+    </div>
     <div class="changelog-list" id="changelogList" aria-live="polite">
       <p class="changelog-empty">Loading changelog...</p>
     </div>
