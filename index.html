@@ -1399,7 +1399,7 @@ body.pack-suggest-open { overflow: hidden; }
       <div class="board-top player-board-top">
         <div>
           <div class="board-title">Verifier <span>Points</span></div>
-          <p class="player-points-rule">Verifiers earn 1 point for each newly approved 100% completion they verify. Creators remain credited separately on each record; older records do not earn verifier points.</p>
+          <p class="player-points-rule">Verifiers earn points based on the level's leaderboard rank for each newly approved 100% completion they verify. Creators are credited on records but never earn points. Older records do not earn verifier points.</p>
         </div>
       </div>
       <div class="player-standing player-standing-head" aria-hidden="true">
@@ -3419,6 +3419,7 @@ function renderPlayerPointsLeaderboard() {
   if (!playerPointsElement) return;
   playerPointsElement.replaceChildren();
 
+  const displayRanks = getDisplayRanks(records);
   const verifiedCompletions = records.filter(record =>
     Number(record.percent) === 100 &&
     Boolean(record.verifier_user_id) &&
@@ -3429,7 +3430,7 @@ function renderPlayerPointsLeaderboard() {
     const empty = makeElement("div", "empty");
     empty.append(
       makeElement("strong", "", "No verifier points yet"),
-      makeElement("span", "", "A verifier earns 1 point when a newly submitted 100% completion is approved. Existing records do not count.")
+      makeElement("span", "", "Verifiers earn the level's rank-based points for each newly approved 100% completion they verify. Creators do not earn points. Existing records do not count.")
     );
     playerPointsElement.appendChild(empty);
     return;
@@ -3448,7 +3449,8 @@ function renderPlayerPointsLeaderboard() {
       records: 0,
       recordItems: []
     };
-    current.points += 1;
+    const rank = displayRanks.get(record.id);
+    current.points += pointsForRank(rank);
     current.records += 1;
     current.recordItems.push(record);
     totals.set(key, current);
