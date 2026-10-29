@@ -356,7 +356,7 @@ begin
 
   if suggested_rank < 1 then
     raise exception 'The suggested position must be a positive whole number.';
-  end;
+  end if;
 
   level_note := 'RDL_LEVEL_SUGGESTION:' || contribution_row.id::text
     || ' | list=' || suggested_list
