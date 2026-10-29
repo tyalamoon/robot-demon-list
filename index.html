@@ -2103,10 +2103,17 @@ document.addEventListener("keydown", (event) => {
 levelSuggestionForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!levelSuggestionForm.reportValidity()) return;
+  if (!document.getElementById("suggestedLevelVerifierUserId").value) {
+    levelSuggestionMessage.textContent = "Select an existing RDL username from the verifier search results.";
+    levelSuggestionMessage.className = "form-message visible error";
+    document.getElementById("suggestedLevelVerifier").focus();
+    return;
+  }
   await sendRdlContribution("level_suggestion", {
     level_name: document.getElementById("suggestedLevelName").value.trim(),
     author: document.getElementById("suggestedLevelAuthor").value.trim(),
     verifier: document.getElementById("suggestedLevelVerifier").value.trim(),
+    verifier_user_id: document.getElementById("suggestedLevelVerifierUserId").value,
     list: document.getElementById("suggestedLevelList").value,
     desired_position: Number(document.getElementById("suggestedLevelPosition").value),
     level_id: document.getElementById("suggestedLevelId").value.trim(),
@@ -2229,11 +2236,20 @@ changeSuggestionForm?.addEventListener("submit", async event => {
   event.preventDefault();
   if (!changeSuggestionForm.reportValidity()) return;
   if (!changeTargetLevel?.value) { changeTargetLevel?.focus(); return; }
+  const typedNewVerifier = document.getElementById("changeNewVerifier").value.trim();
+  const selectedNewVerifier = document.getElementById("changeNewVerifierUserId").value;
+  if (typedNewVerifier && !selectedNewVerifier) {
+    changeSuggestionMessage.textContent = "Select an existing RDL username from the new-verifier search results, or leave the field empty.";
+    changeSuggestionMessage.className = "form-message visible error";
+    document.getElementById("changeNewVerifier").focus();
+    return;
+  }
   await sendRdlContribution("list_change_suggestion", {
     target_level: changeTargetLevel.value,
     new_name: document.getElementById("changeNewName").value.trim(),
     new_author: document.getElementById("changeNewAuthor").value.trim(),
-    new_verifier: document.getElementById("changeNewVerifier").value.trim(),
+    new_verifier: typedNewVerifier,
+    new_verifier_user_id: selectedNewVerifier || null,
     new_position: document.getElementById("changeNewPosition").value ? Number(document.getElementById("changeNewPosition").value) : null,
     new_id: document.getElementById("changeNewId").value.trim(),
     new_youtube_link: document.getElementById("changeNewYoutube").value.trim(),
@@ -2667,11 +2683,17 @@ async function loadRdlProfiles() {
     if (profileUsernameStatus) profileUsernameStatus.textContent = "Could not load usernames. Apply the RDL username SQL migration in Supabase.";
   }
   renderVerifierOptions();
+  renderRdlUsernameOptions("suggestedLevelVerifier", "suggestedLevelVerifierOptions", "suggestedLevelVerifierUserId");
+  renderRdlUsernameOptions("changeNewVerifier", "changeNewVerifierOptions", "changeNewVerifierUserId");
 }
 
 function renderVerifierOptions() {
-  const search = document.getElementById("verifierSearch");
-  const options = document.getElementById("verifierOptions");
+  renderRdlUsernameOptions("verifierSearch", "verifierOptions", "verifierUserId", "verifierSelectionStatus");
+}
+
+function renderRdlUsernameOptions(inputId, optionsId, hiddenId, statusId = "") {
+  const search = document.getElementById(inputId);
+  const options = document.getElementById(optionsId);
   if (!search || !options) return;
   const query = search.value.trim().toLocaleLowerCase();
   options.replaceChildren();
@@ -2691,9 +2713,9 @@ function renderVerifierOptions() {
       option.type = "button";
       option.setAttribute("role", "option");
       option.addEventListener("click", () => {
-        document.getElementById("verifierUserId").value = profile.user_id;
+        document.getElementById(hiddenId).value = profile.user_id;
         search.value = profile.username;
-        document.getElementById("verifierSelectionStatus").textContent = "Selected verifier: @" + profile.username;
+        if (statusId) document.getElementById(statusId).textContent = "Selected verifier: @" + profile.username;
         options.hidden = true;
       });
       options.appendChild(option);
@@ -2702,16 +2724,23 @@ function renderVerifierOptions() {
   options.hidden = false;
 }
 
-document.getElementById("verifierSearch")?.addEventListener("input", () => {
-  document.getElementById("verifierUserId").value = "";
-  document.getElementById("verifierSelectionStatus").textContent = "Select a username from the results below.";
-  renderVerifierOptions();
-});
-document.getElementById("verifierSearch")?.addEventListener("focus", renderVerifierOptions);
+function bindRdlUsernamePicker(inputId, optionsId, hiddenId, statusId = "") {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  input.addEventListener("input", () => {
+    document.getElementById(hiddenId).value = "";
+    if (statusId) document.getElementById(statusId).textContent = "Select a username from the results below.";
+    renderRdlUsernameOptions(inputId, optionsId, hiddenId, statusId);
+  });
+  input.addEventListener("focus", () => renderRdlUsernameOptions(inputId, optionsId, hiddenId, statusId));
+}
+
+bindRdlUsernamePicker("verifierSearch", "verifierOptions", "verifierUserId", "verifierSelectionStatus");
+bindRdlUsernamePicker("suggestedLevelVerifier", "suggestedLevelVerifierOptions", "suggestedLevelVerifierUserId");
+bindRdlUsernamePicker("changeNewVerifier", "changeNewVerifierOptions", "changeNewVerifierUserId");
 document.addEventListener("click", event => {
   if (!event.target.closest(".rdl-user-picker")) {
-    const options = document.getElementById("verifierOptions");
-    if (options) options.hidden = true;
+    document.querySelectorAll(".rdl-user-options").forEach(options => { options.hidden = true; });
   }
 });
 
