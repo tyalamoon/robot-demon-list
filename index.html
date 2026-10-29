@@ -3934,7 +3934,7 @@ submissionForm.addEventListener("submit", async event => {
   }
   if (
     percentInput === "" ||
-    !/^\\d+$/.test(percentInput) ||
+    !/^\d+$/.test(percentInput) ||
     Number(percentInput) < 0 ||
     Number(percentInput) > 100
   ) {
