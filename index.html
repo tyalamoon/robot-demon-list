@@ -1736,8 +1736,12 @@ body.pack-suggest-open { overflow: hidden; }
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label for="suggestedLevelVerifier">Verifier *</label>
-          <input class="field" id="suggestedLevelVerifier" name="verifier" required maxlength="120" autocomplete="off">
+          <label for="suggestedLevelVerifier">Verifier (RDL username) *</label>
+          <div class="rdl-user-picker">
+            <input class="field" id="suggestedLevelVerifier" name="verifier" required maxlength="20" autocomplete="off" placeholder="Search RDL usernames..." aria-autocomplete="list" aria-controls="suggestedLevelVerifierOptions">
+            <div class="rdl-user-options" id="suggestedLevelVerifierOptions" role="listbox" hidden></div>
+          </div>
+          <input id="suggestedLevelVerifierUserId" type="hidden" name="verifier_user_id">
         </div>
         <div class="form-group">
           <label for="suggestedLevelList">List *</label>
@@ -1823,8 +1827,12 @@ body.pack-suggest-open { overflow: hidden; }
         <input class="field" id="changeNewAuthor" name="new_author" maxlength="120" autocomplete="off">
       </div>
       <div class="form-group">
-        <label for="changeNewVerifier">New Verifier</label>
-        <input class="field" id="changeNewVerifier" name="new_verifier" maxlength="120" autocomplete="off">
+        <label for="changeNewVerifier">New Verifier (RDL username)</label>
+        <div class="rdl-user-picker">
+          <input class="field" id="changeNewVerifier" name="new_verifier" maxlength="20" autocomplete="off" placeholder="Search RDL usernames..." aria-autocomplete="list" aria-controls="changeNewVerifierOptions">
+          <div class="rdl-user-options" id="changeNewVerifierOptions" role="listbox" hidden></div>
+        </div>
+        <input id="changeNewVerifierUserId" type="hidden" name="new_verifier_user_id">
       </div>
       <div class="form-row">
         <div class="form-group">
