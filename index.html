@@ -3919,11 +3919,6 @@ submissionForm.addEventListener("submit", async event => {
     document.getElementById("verifierSearch").focus();
     return;
   }
-  if (Number(document.getElementById("percent").value) === 100 && !currentAuthUser) {
-    showFormMessage("Sign in to your RDL account before submitting a 100% completion. This prevents self-verification.", "error");
-    document.getElementById("account")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    return;
-  }
   if (currentAuthUser && verifierUserId === currentAuthUser.id) {
     showFormMessage("You cannot verify your own submission. Choose another RDL user.", "error");
     return;
