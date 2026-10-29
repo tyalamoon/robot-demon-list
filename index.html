@@ -2427,6 +2427,10 @@ const accountEmail = document.getElementById("accountEmail");
 const authMessage = document.getElementById("authMessage");
 const authEmail = document.getElementById("authEmail");
 const authPassword = document.getElementById("authPassword");
+const authUsername = document.getElementById("authUsername");
+const profileUsername = document.getElementById("profileUsername");
+const profileUsernameStatus = document.getElementById("profileUsernameStatus");
+const saveUsernameButton = document.getElementById("saveUsernameButton");
 const signInButton = document.getElementById("signInButton");
 const signUpButton = document.getElementById("signUpButton");
 const googleSignInButton = document.getElementById("googleSignInButton");
@@ -2457,6 +2461,8 @@ let loadingRecords = false;
 let adminRequestVersion = 0;
 let records = [];
 let verifiedDiscordProfiles = [];
+let rdlProfiles = [];
+let currentRdlProfile = null;
 let currentAuthUser = null;
 let currentDiscordIdentity = null;
 let discordAutoFilledSubmission = false;
@@ -2581,7 +2587,7 @@ async function loadVerifiedDiscordProfiles() {
   try {
     const { data, error } = await rdlSupabase
       .from("rdl_discord_profiles")
-      .select("discord_id, discord_username, discord_global_name");
+       .select("user_id, discord_id, discord_username, discord_global_name");
     if (error) throw error;
     verifiedDiscordProfiles = Array.isArray(data) ? data : [];
   } catch (error) {
@@ -2590,6 +2596,104 @@ async function loadVerifiedDiscordProfiles() {
   }
   renderPlayerPointsLeaderboard();
 }
+
+async function loadRdlProfiles() {
+  try {
+    const { data, error } = await rdlSupabase
+      .from("rdl_profiles")
+      .select("user_id, username")
+      .order("username", { ascending: true });
+    if (error) throw error;
+    rdlProfiles = Array.isArray(data) ? data : [];
+    currentRdlProfile = rdlProfiles.find(profile => profile.user_id === currentAuthUser?.id) || null;
+    if (currentRdlProfile && profileUsername && document.activeElement !== profileUsername) {
+      profileUsername.value = currentRdlProfile.username;
+    }
+    if (profileUsernameStatus) {
+      profileUsernameStatus.textContent = currentRdlProfile
+        ? "Your unique RDL username is @" + currentRdlProfile.username + ". You can change it whenever another name is available."
+        : currentAuthUser
+          ? "Your profile is being set up. Refresh this page if your username does not appear."
+          : "Sign in to manage your username.";
+    }
+    renderPlayerPointsLeaderboard();
+  } catch (error) {
+    console.error("RDL usernames unavailable:", error);
+    rdlProfiles = [];
+    if (profileUsernameStatus) profileUsernameStatus.textContent = "Could not load usernames. Apply the RDL username SQL migration in Supabase.";
+  }
+  renderVerifierOptions();
+}
+
+function renderVerifierOptions() {
+  const search = document.getElementById("verifierSearch");
+  const options = document.getElementById("verifierOptions");
+  if (!search || !options) return;
+  const query = search.value.trim().toLocaleLowerCase();
+  options.replaceChildren();
+  if (!query) {
+    options.hidden = true;
+    return;
+  }
+  const matches = rdlProfiles
+    .filter(profile => profile.user_id !== currentAuthUser?.id)
+    .filter(profile => profile.username.toLocaleLowerCase().includes(query))
+    .slice(0, 8);
+  if (!matches.length) {
+    options.appendChild(makeElement("div", "rdl-user-option-empty", "No matching RDL usernames. Only registered users can be selected."));
+  } else {
+    matches.forEach(profile => {
+      const option = makeElement("button", "rdl-user-option", "@" + profile.username);
+      option.type = "button";
+      option.setAttribute("role", "option");
+      option.addEventListener("click", () => {
+        document.getElementById("verifierUserId").value = profile.user_id;
+        search.value = profile.username;
+        document.getElementById("verifierSelectionStatus").textContent = "Selected verifier: @" + profile.username;
+        options.hidden = true;
+      });
+      options.appendChild(option);
+    });
+  }
+  options.hidden = false;
+}
+
+document.getElementById("verifierSearch")?.addEventListener("input", () => {
+  document.getElementById("verifierUserId").value = "";
+  document.getElementById("verifierSelectionStatus").textContent = "Select a username from the results below.";
+  renderVerifierOptions();
+});
+document.getElementById("verifierSearch")?.addEventListener("focus", renderVerifierOptions);
+document.addEventListener("click", event => {
+  if (!event.target.closest(".rdl-user-picker")) {
+    const options = document.getElementById("verifierOptions");
+    if (options) options.hidden = true;
+  }
+});
+
+saveUsernameButton?.addEventListener("click", async () => {
+  if (!currentAuthUser) {
+    showAuthMessage("Sign in before changing your RDL username.", "error");
+    return;
+  }
+  const username = profileUsername.value.trim();
+  if (!/^[A-Za-z0-9_]{3,20}$/.test(username)) {
+    profileUsernameStatus.textContent = "Use 3–20 letters, numbers, or underscores.";
+    return;
+  }
+  saveUsernameButton.disabled = true;
+  profileUsernameStatus.textContent = "Saving username...";
+  try {
+    const { data, error } = await rdlSupabase.rpc("set_rdl_username", { p_username: username });
+    if (error) throw error;
+    profileUsernameStatus.textContent = "Username saved: @" + String(data || username);
+    await loadRdlProfiles();
+  } catch (error) {
+    profileUsernameStatus.textContent = error?.message || "Could not save that username.";
+  } finally {
+    saveUsernameButton.disabled = false;
+  }
+});
 
 async function runAuthAction(action, successMessage) {
   showAuthMessage("");
@@ -2626,12 +2730,19 @@ signInButton.addEventListener("click", () => {
 });
 
 signUpButton.addEventListener("click", () => {
+  const username = authUsername.value.trim();
+  if (!/^[A-Za-z0-9_]{3,20}$/.test(username)) {
+    showAuthMessage("Choose an RDL username using 3–20 letters, numbers, or underscores.", "error");
+    authUsername.focus();
+    return;
+  }
   runAuthAction(
     () => rdlSupabase.auth.signUp({
       email: authEmail.value.trim(),
-      password: authPassword.value
+      password: authPassword.value,
+      options: { data: { rdl_username: username } }
     }),
-    "Account created. If email confirmation is enabled, check your inbox."
+    "Account created. Your RDL username is @" + username + ". If email confirmation is enabled, check your inbox."
   );
 });
 
@@ -2762,6 +2873,7 @@ rdlSupabase.auth.onAuthStateChange((_event, session) => {
   renderAuthSession(session);
   queueMicrotask(() => {
     refreshAdminPanel(session);
+    loadRdlProfiles();
     if (session?.user) syncDiscordProfile(session);
   });
 });
@@ -2773,6 +2885,7 @@ rdlSupabase.auth.getSession().then(({ data, error }) => {
   }
   renderAuthSession(data.session);
   refreshAdminPanel(data.session);
+  loadRdlProfiles();
   if (data.session?.user) syncDiscordProfile(data.session);
 });
 
@@ -3858,7 +3971,7 @@ async function loadRecords() {
    const { data, error } = await rdlSupabase
   .from("record_submissions")
   .select(
-    "id, player_name, level_name, percent, proof_url, notes, submitted_at, rank_position"
+    "id, player_name, level_name, percent, proof_url, notes, submitted_at, rank_position, verifier_user_id, submitted_by_user_id"
   )
   .eq("status", "approved")
   .order("rank_position", {
@@ -3906,6 +4019,7 @@ submissionForm.addEventListener("submit", async event => {
   hideFormMessage();
 
   const playerName = document.getElementById("discordName").value.trim();
+  const verifierUserId = document.getElementById("verifierUserId").value.trim();
   const levelName = submissionLevelSelect?.value.trim() || "";
   const percentInput = document.getElementById("percent").value.trim();
   const proofInput = document.getElementById("proofUrl").value.trim();
@@ -3914,6 +4028,20 @@ submissionForm.addEventListener("submit", async event => {
 
   if (!playerName || playerName.length > 80) {
     showFormMessage("Enter a Discord name between 1 and 80 characters.", "error");
+    return;
+  }
+  if (!verifierUserId || !rdlProfiles.some(profile => profile.user_id === verifierUserId)) {
+    showFormMessage("Search and select an existing RDL username as the verifier.", "error");
+    document.getElementById("verifierSearch").focus();
+    return;
+  }
+  if (Number(document.getElementById("percent").value) === 100 && !currentAuthUser) {
+    showFormMessage("Sign in to your RDL account before submitting a 100% completion. This prevents self-verification.", "error");
+    document.getElementById("account")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  if (currentAuthUser && verifierUserId === currentAuthUser.id) {
+    showFormMessage("You cannot verify your own submission. Choose another RDL user.", "error");
     return;
   }
   if (!levelName || levelName.length > 100) {
@@ -3986,7 +4114,8 @@ submissionForm.addEventListener("submit", async event => {
       percent: Number(percentInput),
       proof_url: proofUrl,
       notes: metadata,
-      status: "pending"
+      status: "pending",
+      verifier_user_id: verifierUserId
     };
 
     const { data, error } = await rdlSupabase.functions.invoke(
@@ -3998,6 +4127,8 @@ submissionForm.addEventListener("submit", async event => {
     if (!data?.success) throw new Error(data?.error || "The submission service rejected the record.");
 
     submissionForm.reset();
+    document.getElementById("verifierUserId").value = "";
+    document.getElementById("verifierSelectionStatus").textContent = "Search and select an existing RDL user. Free-text names are not accepted.";
     document.getElementById("submissionList").value = "Classic";
     document.getElementById("submissionType").value = "Record";
     document.getElementById("submissionPlatform").value = "PC";
@@ -4020,6 +4151,7 @@ submissionForm.addEventListener("submit", async event => {
   }
 });
 
+loadRdlProfiles();
 loadRecords();
 </script>
 <script src="https://www.google.com/recaptcha/api.js?onload=onRdlRecaptchaLoaded&render=explicit" async defer></script>
