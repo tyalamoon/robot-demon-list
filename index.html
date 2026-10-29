@@ -3279,10 +3279,7 @@ function openPlayerProfile(player, rank) {
   const discordArea = document.getElementById("playerProfileDiscord");
   discordArea.replaceChildren();
   const normalizedName = player.name.trim().toLocaleLowerCase();
-  const verifiedProfile = verifiedDiscordProfiles.find(profile =>
-    [profile.discord_username, profile.discord_global_name]
-      .some(value => String(value || "").trim().toLocaleLowerCase() === normalizedName)
-  );
+  const verifiedProfile = verifiedDiscordProfiles.find(profile => profile.user_id === player.user_id);
   if (verifiedProfile) {
     discordArea.appendChild(makeElement("span", "discord-verified", "✓ Verified Discord"));
     const accountLink = makeElement("a", "proof-link", "Open Discord profile ↗");
@@ -3301,7 +3298,7 @@ function openPlayerProfile(player, rank) {
   const stats = document.getElementById("playerProfileStats");
   stats.replaceChildren();
   stats.append(
-    makeElement("span", "level-modal-chip", player.records + (player.records === 1 ? " approved record" : " approved records")),
+    makeElement("span", "level-modal-chip", player.records + (player.records === 1 ? " verified completion" : " verified completions")),
     makeElement("span", "level-modal-chip", player.points.toFixed(2) + " points")
   );
   const list = document.getElementById("playerProfileRecords");
@@ -3316,7 +3313,7 @@ function openPlayerProfile(player, rank) {
     const details = makeElement("div");
     details.append(
       makeElement("strong", "", String(record.level_name || "Unknown level")),
-      makeElement("small", "", String(record.percent ?? "—") + "% · #" + (ranks.get(record.id) || "—"))
+      makeElement("small", "", String(record.percent ?? "—") + "% · by " + String(record.player_name || "Unknown") + " · #" + (ranks.get(record.id) || "—"))
     );
     item.appendChild(details);
     const linkUrl = safeHttpUrl(String(record.proof_url || ""));
@@ -3350,11 +3347,17 @@ function renderPlayerPointsLeaderboard() {
   if (!playerPointsElement) return;
   playerPointsElement.replaceChildren();
 
-  if (records.length === 0) {
+  const verifiedCompletions = records.filter(record =>
+    Number(record.percent) === 100 &&
+    Boolean(record.verifier_user_id) &&
+    rdlProfiles.some(profile => profile.user_id === record.verifier_user_id)
+  );
+
+  if (verifiedCompletions.length === 0) {
     const empty = makeElement("div", "empty");
     empty.append(
-      makeElement("strong", "", "No approved records yet"),
-      makeElement("span", "", "Player points will appear after records are approved.")
+      makeElement("strong", "", "No verifier points yet"),
+      makeElement("span", "", "A verifier earns 1 point when a newly submitted 100% completion is approved. Existing records do not count.")
     );
     playerPointsElement.appendChild(empty);
     return;
@@ -3363,13 +3366,18 @@ function renderPlayerPointsLeaderboard() {
   const displayRanks = getDisplayRanks(records);
   const totals = new Map();
 
-  records.forEach(record => {
-    const name = String(record.player_name || "Unknown").trim() || "Unknown";
-    const key = name.toLocaleLowerCase();
-    const rank = displayRanks.get(record.id);
-    const points = pointsForRank(rank);
-    const current = totals.get(key) || { name, points: 0, records: 0, recordItems: [] };
-    current.points += points;
+  verifiedCompletions.forEach(record => {
+    const profile = rdlProfiles.find(item => item.user_id === record.verifier_user_id);
+    if (!profile) return;
+    const key = profile.user_id;
+    const current = totals.get(key) || {
+      name: profile.username,
+      user_id: profile.user_id,
+      points: 0,
+      records: 0,
+      recordItems: []
+    };
+    current.points += 1;
     current.records += 1;
     current.recordItems.push(record);
     totals.set(key, current);
@@ -3379,242 +3387,45 @@ function renderPlayerPointsLeaderboard() {
     b.points - a.points || a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
   );
 
-  standings.forEach((player, index) => {
+  standings.forEach((verifier, index) => {
     const row = makeElement("article", "player-standing");
     row.tabIndex = 0;
     row.setAttribute("role", "button");
-    row.setAttribute("aria-label", "Open player profile for " + player.name);
+    row.setAttribute("aria-label", "Open verifier profile for " + verifier.name);
     row.addEventListener("click", event => {
       if (event.target.closest("a, button, input, select, textarea")) return;
-      openPlayerProfile(player, index + 1);
+      openPlayerProfile(verifier, index + 1);
     });
     row.addEventListener("keydown", event => {
       if ((event.key === "Enter" || event.key === " ") && !event.target.closest("a, button, input, select, textarea")) {
         event.preventDefault();
-        openPlayerProfile(player, index + 1);
+        openPlayerProfile(verifier, index + 1);
       }
     });
+
     const rank = makeElement("span", "rank" + (index < 3 ? " top-three" : ""), "#" + (index + 1));
     const info = makeElement("div", "player-standing-info");
-    const nameLine = makeElement("div", "player-standing-name", player.name);
-    const normalizedName = player.name.trim().toLocaleLowerCase();
-    const verifiedProfile = verifiedDiscordProfiles.find(profile =>
-      [profile.discord_username, profile.discord_global_name]
-        .some(value => String(value || "").trim().toLocaleLowerCase() === normalizedName)
-    );
+    const nameLine = makeElement("div", "player-standing-name", "@" + verifier.name);
+    const verifiedProfile = verifiedDiscordProfiles.find(profile => profile.user_id === verifier.user_id);
     if (verifiedProfile) {
       const verifiedBadge = makeElement("span", "discord-verified", "✓ Verified Discord");
       const discordProfileLink = makeElement("a", "", " ↗");
       discordProfileLink.href = "https://discord.com/users/" + encodeURIComponent(verifiedProfile.discord_id);
       discordProfileLink.target = "_blank";
       discordProfileLink.rel = "noopener noreferrer";
-      discordProfileLink.setAttribute("aria-label", "Open verified Discord profile for " + player.name);
+      discordProfileLink.setAttribute("aria-label", "Open verified Discord profile for " + verifier.name);
       verifiedBadge.appendChild(discordProfileLink);
       nameLine.appendChild(verifiedBadge);
     }
     info.append(
       nameLine,
-      makeElement("div", "creator", player.records + (player.records === 1 ? " approved record" : " approved records"))
+      makeElement("div", "creator", verifier.records + (verifier.records === 1 ? " approved 100% completion verified" : " approved 100% completions verified"))
     );
-    const points = makeElement("strong", "player-points-total", player.points.toFixed(2) + " pts");
+    const points = makeElement("strong", "player-points-total", verifier.points.toFixed(2) + " pts");
     row.append(rank, info, points);
     playerPointsElement.appendChild(row);
   });
 }
-
-
-const levelModalBackdrop = document.getElementById("levelModalBackdrop");
-const levelModalTabContent = document.getElementById("levelModalTabContent");
-let activeDetailRecord = null;
-let activeDetailRecords = [];
-let activeDetailRank = "—";
-let activeDetailTab = "records";
-
-function isRdlLevelCatalogEntry(record) {
-  return String(record?.notes || "").startsWith("RDL_LEVEL_SUGGESTION:");
-}
-
-function getLevelGroup(record) {
-  const key = String(record.level_name || "").trim().toLocaleLowerCase();
-  const matching = records.filter(item => String(item.level_name || "").trim().toLocaleLowerCase() === key);
-  const realRecords = matching.filter(item => !isRdlLevelCatalogEntry(item));
-  return realRecords.length ? realRecords : matching;
-}
-
-function getYouTubeVideoId(url) {
-  if (!url) return "";
-  try {
-    const address = new URL(url);
-    const host = address.hostname.toLowerCase();
-    let id = "";
-    if (host === "youtu.be") id = address.pathname.split("/").filter(Boolean)[0] || "";
-    else if (["youtube.com", "www.youtube.com", "m.youtube.com", "youtube-nocookie.com", "www.youtube-nocookie.com"].includes(host)) {
-      if (address.pathname === "/watch") id = address.searchParams.get("v") || "";
-      else {
-        const match = address.pathname.match(/^\/(?:embed|shorts)\/([^/?]+)/);
-        id = match ? match[1] : "";
-      }
-    }
-    return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : "";
-  } catch { return ""; }
-}
-
-function openLevelDetails(record, displayedRank) {
-  activeDetailRecord = record;
-  activeDetailRecords = getLevelGroup(record);
-  activeDetailRank = displayedRank || "—";
-  activeDetailTab = "records";
-  const safeName = String(record.level_name || "Untitled level");
-  const isCatalogEntry = isRdlLevelCatalogEntry(record);
-  const listMatch = isCatalogEntry ? String(record.notes || "").match(/list=([^|]+)/i) : null;
-  document.getElementById("levelModalCategory").textContent = listMatch?.[1]?.trim() || "Classic";
-  document.getElementById("levelModalRank").textContent = "#" + activeDetailRank;
-  document.getElementById("levelModalPoints").textContent = pointsForRank(activeDetailRank).toFixed(2) + " pts";
-  document.getElementById("levelModalTitle").textContent = safeName;
-  const creators = Array.from(new Set(activeDetailRecords.map(item => String(item.player_name || "Unknown").trim()).filter(Boolean)));
-  document.getElementById("levelModalCreators").textContent = "by " + (creators.join(", ") || "Unknown") + (isCatalogEntry ? " · RDL level entry" : " · RDL community record");
-  const meta = document.getElementById("levelModalMeta");
-  meta.replaceChildren();
-  const hasRealRecords = activeDetailRecords.some(item => !isRdlLevelCatalogEntry(item));
-  const metaLabels = isCatalogEntry
-    ? [hasRealRecords ? "RDL level · player records available" : "Added to RDL · no player records yet", "Robot Demon List"]
-    : [activeDetailRecord.percent === 100 ? "100% completion" : String(activeDetailRecord.percent ?? "—") + "% completion", "Robot Demon List"];
-  metaLabels.forEach(label => {
-    meta.appendChild(makeElement("span", "level-modal-chip", label));
-  });
-  document.getElementById("levelModalId").textContent = "RDL ID: " + String(record.id);
-  const favoriteButton = document.getElementById("levelModalFavorite");
-  let favorites = [];
-  try { favorites = JSON.parse(localStorage.getItem("rdl-favorite-levels") || "[]"); } catch { favorites = []; }
-  const isFavorite = favorites.includes(String(record.id));
-  favoriteButton.textContent = isFavorite ? "★ Favorited" : "☆ Favorite";
-  favoriteButton.setAttribute("aria-pressed", String(isFavorite));
-
-  const proofUrl = safeHttpUrl(String(record.proof_url || ""));
-  const videoId = getYouTubeVideoId(proofUrl);
-  const preview = document.getElementById("levelModalPreview");
-  const previewLink = document.getElementById("levelModalPreviewLink");
-  const watch = document.getElementById("levelModalWatch");
-  const youtube = document.getElementById("levelModalYoutube");
-  if (videoId) {
-    preview.src = "https://i.ytimg.com/vi/" + videoId + "/hqdefault.jpg";
-    preview.alt = "YouTube preview for " + safeName;
-    preview.hidden = false;
-    previewLink.href = proofUrl;
-    previewLink.hidden = false;
-    youtube.href = "https://www.youtube.com/watch?v=" + videoId;
-    youtube.hidden = false;
-  } else if (proofUrl) {
-    preview.hidden = true;
-    preview.removeAttribute("src");
-    previewLink.href = proofUrl;
-    previewLink.hidden = true;
-    youtube.href = proofUrl;
-    youtube.hidden = false;
-  } else {
-    preview.hidden = true;
-    preview.removeAttribute("src");
-    previewLink.hidden = true;
-    youtube.hidden = true;
-  }
-  watch.href = proofUrl || "#";
-  watch.hidden = !proofUrl;
-  document.getElementById("levelModalMinimum").textContent = activeDetailRecords.length ? Math.min(...activeDetailRecords.map(item => Number(item.percent) || 0)) + "%" : "—";
-  document.getElementById("levelModalClears").textContent = activeDetailRecords.filter(item => Number(item.percent) === 100).length.toLocaleString();
-  document.getElementById("levelModalRuns").textContent = activeDetailRecords.length.toLocaleString();
-  document.getElementById("levelModalCategoryStat").textContent = "Classic";
-  document.querySelectorAll("[data-level-tab]").forEach(button => {
-    button.classList.toggle("active", button.dataset.levelTab === activeDetailTab);
-  });
-  renderLevelDetailsTab();
-  levelModalBackdrop.classList.add("open");
-  document.body.style.overflow = "hidden";
-}
-
-function renderLevelDetailsTab() {
-  if (!activeDetailRecord) return;
-  levelModalTabContent.replaceChildren();
-  if (activeDetailTab === "records") {
-    const realRecords = activeDetailRecords.filter(item => !isRdlLevelCatalogEntry(item));
-    if (!realRecords.length) {
-      levelModalTabContent.appendChild(makeElement("p", "level-modal-empty",
-        isRdlLevelCatalogEntry(activeDetailRecord)
-          ? "This level is on the RDL list. No player records have been submitted for it yet."
-          : "No approved records yet."));
-      return;
-    }
-    const ranks = getDisplayRanks(records);
-    realRecords.slice().sort((a, b) => Number(b.percent) - Number(a.percent)).forEach(item => {
-      const row = makeElement("div", "level-modal-record");
-      const info = makeElement("div");
-      info.append(
-        makeElement("strong", "", String(item.percent ?? "—") + "%"),
-        makeElement("small", "", String(item.player_name || "Unknown") + " · #" + (ranks.get(item.id) || "—"))
-      );
-      row.append(info);
-      const proof = safeHttpUrl(String(item.proof_url || ""));
-      if (proof) {
-        const link = makeElement("a", "proof-link", "Proof ↗");
-        link.href = proof; link.target = "_blank"; link.rel = "noopener noreferrer";
-        row.appendChild(link);
-      }
-      levelModalTabContent.appendChild(row);
-    });
-  } else if (activeDetailTab === "runs") {
-    levelModalTabContent.appendChild(makeElement("p", "level-modal-empty", "RDL currently tracks submitted completion percentages, not individual in-game runs."));
-  } else if (activeDetailTab === "history") {
-    levelModalTabContent.appendChild(makeElement("p", "level-modal-empty", "Rank history is not stored yet. The current rank is #" + activeDetailRank + "."));
-  } else {
-    levelModalTabContent.appendChild(makeElement("p", "level-modal-empty", "Discussion is not available yet. Use the proof link or submit a record to contribute."));
-  }
-}
-
-function closeLevelDetails() {
-  levelModalBackdrop.classList.remove("open");
-  document.body.style.overflow = "";
-  activeDetailRecord = null;
-}
-
-document.getElementById("levelModalClose").addEventListener("click", closeLevelDetails);
-levelModalBackdrop.addEventListener("click", event => {
-  if (event.target === levelModalBackdrop) closeLevelDetails();
-});
-document.addEventListener("keydown", event => {
-  if (event.key === "Escape" && levelModalBackdrop.classList.contains("open")) closeLevelDetails();
-});
-document.querySelectorAll("[data-level-tab]").forEach(button => {
-  button.addEventListener("click", () => {
-    activeDetailTab = button.dataset.levelTab;
-    document.querySelectorAll("[data-level-tab]").forEach(tab => tab.classList.toggle("active", tab === button));
-    renderLevelDetailsTab();
-  });
-});
-document.getElementById("levelModalCopy").addEventListener("click", async event => {
-  if (!activeDetailRecord) return;
-  const link = window.location.origin + window.location.pathname + "#level-" + encodeURIComponent(activeDetailRecord.id);
-  try {
-    await navigator.clipboard.writeText(link);
-    event.currentTarget.textContent = "Copied!";
-    setTimeout(() => { event.currentTarget.textContent = "Copy link"; }, 1400);
-  } catch {
-    window.prompt("Copy this level link:", link);
-  }
-});
-document.getElementById("levelModalFavorite").addEventListener("click", event => {
-  if (!activeDetailRecord) return;
-  const id = String(activeDetailRecord.id);
-  let favorites = [];
-  try { favorites = JSON.parse(localStorage.getItem("rdl-favorite-levels") || "[]"); } catch { favorites = []; }
-  favorites = favorites.includes(id) ? favorites.filter(item => item !== id) : [...favorites, id];
-  try { localStorage.setItem("rdl-favorite-levels", JSON.stringify(favorites)); } catch {}
-  event.currentTarget.textContent = favorites.includes(id) ? "★ Favorited" : "☆ Favorite";
-  event.currentTarget.setAttribute("aria-pressed", String(favorites.includes(id)));
-});
-document.getElementById("levelModalSubmit").addEventListener("click", () => {
-  closeLevelDetails();
-  document.querySelector('.main-nav a[href="#submit"]')?.click();
-  document.getElementById("submit")?.scrollIntoView({ behavior: "smooth", block: "start" });
-});
 
 function renderLeaderboard() {
   renderPlayerPointsLeaderboard();
