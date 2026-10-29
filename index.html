@@ -1701,7 +1701,7 @@ body.pack-suggest-open { overflow: hidden; }
   <section class="level-modal">
     <header class="level-modal-top">
       <div>
-        <div class="level-modal-kicker">Player profile</div>
+        <div class="level-modal-kicker">Verifier profile</div>
         <div class="level-modal-rank" id="playerProfileRank">#—</div>
       </div>
       <button class="level-modal-close" id="playerProfileClose" type="button" aria-label="Close player profile">×</button>
@@ -1710,7 +1710,7 @@ body.pack-suggest-open { overflow: hidden; }
       <h2 class="level-modal-title" id="playerProfileName">Player</h2>
       <div class="level-modal-creators" id="playerProfileDiscord">Discord not linked</div>
       <div class="level-modal-meta" id="playerProfileStats"></div>
-      <h3>Approved records</h3>
+      <h3>Verified completions</h3>
       <div id="playerProfileRecords"></div>
     </div>
   </section>
@@ -3351,7 +3351,6 @@ function openPlayerProfile(player, rank) {
   document.getElementById("playerProfileName").textContent = player.name;
   const discordArea = document.getElementById("playerProfileDiscord");
   discordArea.replaceChildren();
-  const normalizedName = player.name.trim().toLocaleLowerCase();
   const verifiedProfile = verifiedDiscordProfiles.find(profile => profile.user_id === player.user_id);
   if (verifiedProfile) {
     discordArea.appendChild(makeElement("span", "discord-verified", "✓ Verified Discord"));
@@ -3436,7 +3435,6 @@ function renderPlayerPointsLeaderboard() {
     return;
   }
 
-  const displayRanks = getDisplayRanks(records);
   const totals = new Map();
 
   verifiedCompletions.forEach(record => {
