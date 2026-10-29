@@ -3700,7 +3700,7 @@ async function setLevelRank(recordId, selectedRank, buttonElement) {
   const maxBigIntRank = 9223372036854775807n;
 
   if (rankPosition !== null) {
-    if (!/^\\d+$/.test(rankPosition) || /^0+$/.test(rankPosition)) {
+    if (!/^\d+$/.test(rankPosition) || /^0+$/.test(rankPosition)) {
       alert("Enter a positive whole-number rank, or leave the field empty for automatic ranking.");
       return;
     }
