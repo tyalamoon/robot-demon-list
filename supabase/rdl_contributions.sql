@@ -182,9 +182,10 @@ create policy "RDL owner can add changelog entries"
 
 -- Owner-only rank insertion/reordering. Rebuilds the approved display ranks atomically:
 -- inserting at a rank shifts following levels down; moving an existing level
--- also closes the gap at its former position.
+-- also closes the gap at its former position. record_submissions.id is UUID.
+drop function if exists public.set_rdl_record_rank(bigint, bigint);
 create or replace function public.set_rdl_record_rank(
-  p_record_id bigint,
+  p_record_id uuid,
   p_rank_position bigint
 )
 returns void
@@ -221,7 +222,7 @@ begin
   end if;
 
   create temporary table if not exists rdl_rank_shift_stage (
-    record_id bigint primary key,
+    record_id uuid primary key,
     old_rank bigint not null,
     new_rank bigint not null
   ) on commit drop;
@@ -290,8 +291,8 @@ begin
 end;
 $function$;
 
-revoke all on function public.set_rdl_record_rank(bigint, bigint) from public, anon;
-grant execute on function public.set_rdl_record_rank(bigint, bigint) to authenticated;
+revoke all on function public.set_rdl_record_rank(uuid, bigint) from public, anon;
+grant execute on function public.set_rdl_record_rank(uuid, bigint) to authenticated;
 
 -- Approval of a suggested level uses the same insertion/reordering function,
 -- so accepting a suggestion at an occupied rank never replaces the occupant.
