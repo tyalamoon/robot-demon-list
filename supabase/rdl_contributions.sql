@@ -276,7 +276,8 @@ begin
          and old_rank < current_display_rank
          then old_rank + 1
        else old_rank
-     end;
+     end
+   where true;
 
   -- Null ranks first to avoid transient collisions with the unique-rank index,
   -- then restore the complete reordered ranking within this same transaction.
