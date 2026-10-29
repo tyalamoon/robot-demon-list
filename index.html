@@ -3700,11 +3700,10 @@ async function setLevelRank(recordId, selectedRank, buttonElement) {
   const maxBigIntRank = 9223372036854775807n;
 
   if (rankPosition !== null) {
-    if (!/^\d+$/.test(rankPosition) || /^0+$/.test(rankPosition)) {
+    if (!/^\\d+$/.test(rankPosition) || /^0+$/.test(rankPosition)) {
       alert("Enter a positive whole-number rank, or leave the field empty for automatic ranking.");
       return;
     }
-
     try {
       if (BigInt(rankPosition) > maxBigIntRank) {
         alert("That rank is too large. The maximum supported database rank is 9223372036854775807.");
@@ -3724,52 +3723,25 @@ async function setLevelRank(recordId, selectedRank, buttonElement) {
 
   const previousDisplayRanks = getDisplayRanks(records);
   const previousRank = previousDisplayRanks.get(targetRecord.id);
-
   buttonElement.disabled = true;
   const previousText = buttonElement.textContent;
   buttonElement.textContent = "Saving...";
 
   try {
-    if (rankPosition !== null) {
-      // Free this rank if another approved record currently uses it.
-      const { error: clearError } = await rdlSupabase
-        .from("record_submissions")
-        .update({ rank_position: null })
-        .eq("status", "approved")
-        .eq("rank_position", rankPosition)
-        .neq("id", recordId);
-
-      if (clearError) throw clearError;
-    }
-
-    const { data, error } = await rdlSupabase
-      .from("record_submissions")
-      .update({ rank_position: rankPosition })
-      .eq("id", recordId)
-      .eq("status", "approved")
-      .select("id");
-
+    const { error } = await rdlSupabase.rpc("set_rdl_record_rank", {
+      p_record_id: recordId,
+      p_rank_position: rankPosition
+    });
     if (error) throw error;
 
-    if (!data || data.length === 0) {
-      throw new Error("No approved record was updated. Check the owner UPDATE policy.");
-    }
-
     await loadRecords();
-
     const updatedRecord = records.find((item) => String(item.id) === String(recordId));
     const updatedDisplayRanks = getDisplayRanks(records);
     const newRank = updatedRecord ? updatedDisplayRanks.get(updatedRecord.id) : null;
-    const oldRankValue = previousRank == null ? null : BigInt(String(previousRank));
-    const newRankValue = newRank == null ? null : BigInt(String(newRank));
-    const rankActuallyChanged = oldRankValue !== null && newRankValue !== null
-      ? oldRankValue !== newRankValue
-      : previousRank !== newRank;
+    const rankActuallyChanged = String(previousRank ?? "") !== String(newRank ?? "");
 
-    // Don't create noise when the level's visible rank didn't actually change.
     if (updatedRecord && rankActuallyChanged) {
       let changelogMessage;
-
       if (rankPosition === null) {
         changelogMessage = updatedRecord.level_name + "'s rank was returned to automatic ranking (now #" + newRank + ").";
       } else {
@@ -3782,19 +3754,15 @@ async function setLevelRank(recordId, selectedRank, buttonElement) {
         const targetIndex = orderedRecords.findIndex((item) => String(item.id) === String(recordId));
         const above = targetIndex > 0 ? orderedRecords[targetIndex - 1]?.level_name : "";
         const below = targetIndex >= 0 && targetIndex < orderedRecords.length - 1
-          ? orderedRecords[targetIndex + 1]?.level_name
-          : "";
-
+          ? orderedRecords[targetIndex + 1]?.level_name : "";
         const relationParts = [];
         if (above && above !== updatedRecord.level_name) relationParts.push("above " + above);
         if (below && below !== updatedRecord.level_name) relationParts.push("below " + below);
-        const relation = relationParts.length ? ", " + relationParts.join(" and ") : "";
-        changelogMessage = updatedRecord.level_name + " was moved to #" + newRank + relation + ".";
+        changelogMessage = updatedRecord.level_name + " was placed at #" + newRank
+          + (relationParts.length ? ", " + relationParts.join(" and ") : "") + ".";
       }
-
       const { error: changelogError } = await rdlSupabase
-        .from("rdl_changelog")
-        .insert({ message: changelogMessage });
+        .from("rdl_changelog").insert({ message: changelogMessage });
       if (changelogError) console.error("RDL changelog save error:", changelogError);
     }
   } catch (error) {
