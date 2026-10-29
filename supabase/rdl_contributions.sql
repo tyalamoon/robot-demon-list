@@ -178,3 +178,86 @@ create policy "RDL owner can add changelog entries"
     (select public.is_rdl_owner())
     and char_length(message) between 1 and 500
   );
+
+
+-- Owner-only rank insertion. Occupied ranks shift down atomically instead of
+-- being cleared/replaced. Rank updates are staged through a temporary table to
+-- avoid collisions with the unique approved-rank constraint.
+create or replace function public.set_rdl_record_rank(
+  p_record_id bigint,
+  p_rank_position bigint
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $function$
+declare
+  current_rank bigint;
+begin
+  if not coalesce(public.is_rdl_owner(), false) then
+    raise exception 'Only the RDL owner can change leaderboard rankings.';
+  end if;
+
+  if p_rank_position is not null and p_rank_position < 1 then
+    raise exception 'Rank must be a positive whole number.';
+  end if;
+
+  select rank_position
+    into current_rank
+    from public.record_submissions
+   where id = p_record_id and status = 'approved'
+   for update;
+
+  if not found then
+    raise exception 'Approved record not found.';
+  end if;
+
+  if p_rank_position is null then
+    update public.record_submissions
+       set rank_position = null
+     where id = p_record_id and status = 'approved';
+    return;
+  end if;
+
+  -- If the record already has a rank, free its old slot first.
+  update public.record_submissions
+     set rank_position = null
+   where id = p_record_id and status = 'approved';
+
+  -- Preserve every occupant at the requested rank and below, shifting each
+  -- one position down. Temporarily null these ranks to satisfy uniqueness.
+  create temporary table if not exists rdl_rank_shift_stage (
+    record_id bigint primary key,
+    shifted_rank bigint not null
+  ) on commit drop;
+  truncate table rdl_rank_shift_stage;
+
+  insert into rdl_rank_shift_stage (record_id, shifted_rank)
+  select id, rank_position + 1
+    from public.record_submissions
+   where status = 'approved'
+     and rank_position >= p_rank_position
+     and id <> p_record_id
+   order by rank_position desc
+   for update;
+
+  update public.record_submissions
+     set rank_position = null
+   where status = 'approved'
+     and rank_position >= p_rank_position
+     and id <> p_record_id;
+
+  update public.record_submissions r
+     set rank_position = s.shifted_rank
+    from rdl_rank_shift_stage s
+   where r.id = s.record_id;
+
+  update public.record_submissions
+     set rank_position = p_rank_position
+   where id = p_record_id and status = 'approved';
+end;
+$function$;
+
+revoke all on function public.set_rdl_record_rank(bigint, bigint) from public, anon;
+grant execute on function public.set_rdl_record_rank(bigint, bigint) to authenticated;
