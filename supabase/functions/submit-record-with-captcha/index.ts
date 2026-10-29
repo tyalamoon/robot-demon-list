@@ -73,11 +73,37 @@ Deno.serve(async (req: Request) => {
       return json({ error: "One or more submission fields are invalid." }, 400);
     }
 
+    const verifierUserId = typeof submission.verifier_user_id === "string"
+      ? submission.verifier_user_id.trim()
+      : "";
+    if (!verifierUserId || verifierUserId.length > 80) {
+      return json({ error: "Choose an existing RDL username as the verifier." }, 400);
+    }
+
     const authorization = req.headers.get("Authorization");
     const db = createClient(supabaseUrl, anonKey, {
       auth: { persistSession: false, autoRefreshToken: false },
       global: authorization ? { headers: { Authorization: authorization } } : undefined,
     });
+
+    const { data: verifierProfile, error: verifierLookupError } = await db
+      .from("rdl_profiles")
+      .select("user_id")
+      .eq("user_id", verifierUserId)
+      .maybeSingle();
+    if (verifierLookupError || !verifierProfile) {
+      return json({ error: "That verifier is not an existing RDL user. Search and select a username from the list." }, 400);
+    }
+
+    let submitterUserId: string | null = null;
+    if (authorization) {
+      const { data: authData, error: authError } = await db.auth.getUser();
+      if (!authError && authData.user) submitterUserId = authData.user.id;
+    }
+    if (submitterUserId && submitterUserId === verifierUserId) {
+      return json({ error: "You cannot verify your own submission. Choose another RDL user." }, 400);
+    }
+
     const { error } = await db.from("record_submissions").insert({
       player_name: playerName,
       level_name: levelName,
@@ -85,6 +111,8 @@ Deno.serve(async (req: Request) => {
       proof_url: proofUrl,
       notes,
       status: "pending",
+      verifier_user_id: verifierUserId,
+      submitted_by_user_id: submitterUserId,
     });
 
     if (error) {
