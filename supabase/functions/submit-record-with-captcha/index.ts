@@ -100,9 +100,6 @@ Deno.serve(async (req: Request) => {
       const { data: authData, error: authError } = await db.auth.getUser();
       if (!authError && authData.user) submitterUserId = authData.user.id;
     }
-    if (Number(percent) === 100 && !submitterUserId) {
-      return json({ error: "Sign in to your RDL account before submitting a 100% completion so self-verification can be prevented." }, 401);
-    }
     if (submitterUserId && submitterUserId === verifierUserId) {
       return json({ error: "You cannot verify your own submission. Choose another RDL user." }, 400);
     }
