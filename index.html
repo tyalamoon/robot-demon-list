@@ -1088,8 +1088,64 @@ textarea.field { min-height: 90px; resize: vertical; }
   display: none !important;
 }
 
+body.account-open {
+  overflow: hidden;
+}
 body.account-open #account {
-  display: block !important;
+  position: fixed !important;
+  inset: 0;
+  z-index: 1300;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  box-sizing: border-box;
+  margin: 0;
+  padding: clamp(18px, 4vw, 48px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background:
+    radial-gradient(ellipse at 18% 0%, rgba(217,170,69,.17), transparent 48%),
+    linear-gradient(145deg, #1a150c 0%, #100d08 60%, #171108 100%);
+}
+body.account-open #account .section-heading,
+body.account-open #account .account-card {
+  width: min(100%, 720px);
+  box-sizing: border-box;
+  margin-left: auto;
+  margin-right: auto;
+}
+body.account-open #account .section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+body.account-open #account .account-card {
+  border-color: rgba(217,170,69,.42);
+  box-shadow: 0 24px 90px rgba(0,0,0,.48), 0 0 45px rgba(217,170,69,.07);
+}
+.account-fullscreen-close {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(217,170,69,.4);
+  border-radius: 10px;
+  background: #21190d;
+  color: var(--gold-light);
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+}
+.account-fullscreen-close:hover {
+  border-color: var(--gold-light);
+  background: #332612;
+}
+@media (max-width: 600px) {
+  body.account-open #account { padding: 16px; }
+  body.account-open #account .account-card { padding: 20px; }
 }
 
 body.players-open #playerLeaderboard {
@@ -2170,7 +2226,10 @@ body.players-open .player-leaderboard-close { display: grid; place-items: center
         <h2>Your <span>Account</span></h2>
         <p>Create an RDL account or sign in.</p>
       </div>
-      <span class="section-tag">SUPABASE AUTH</span>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span class="section-tag">SUPABASE AUTH</span>
+        <button class="account-fullscreen-close" id="closeAccount" type="button" aria-label="Close account" title="Close account">×</button>
+      </div>
     </div>
 
     <div class="account-card">
@@ -3156,6 +3215,10 @@ accountNavLink?.addEventListener("click", (event) => {
   } else {
     document.getElementById("leaderboard")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+});
+
+document.getElementById("closeAccount")?.addEventListener("click", () => {
+  document.body.classList.remove("account-open");
 });
 
 submitNavLink?.addEventListener("click", (event) => {
