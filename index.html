@@ -1987,6 +1987,28 @@ body.players-open .player-leaderboard-close { display: grid; place-items: center
 @media (max-width: 600px) {
   .player-leaderboard-close { top: 10px; right: 10px; width: 36px; height: 36px; }
 }
+
+/* Larger level thumbnails across the RDL leaderboard. */
+#levels .level .thumbnail {
+  width: 220px;
+  height: 124px;
+  flex-basis: 220px;
+}
+@media (max-width: 720px) {
+  #levels .level .thumbnail {
+    width: 150px;
+    height: 84px;
+    flex-basis: 150px;
+  }
+}
+@media (max-width: 520px) {
+  #levels .level .thumbnail {
+    width: 112px;
+    height: 72px;
+    flex-basis: 112px;
+  }
+}
+
 </style>
   <link rel="icon" href="/favicon.ico?v=2" type="image/x-icon">
 </head>
