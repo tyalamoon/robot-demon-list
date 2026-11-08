@@ -1088,6 +1088,18 @@ textarea.field { min-height: 90px; resize: vertical; }
   display: none !important;
 }
 
+/* Shared glass backdrop for the Account and Player Leaderboard dialogs. */
+body.account-open::before,
+body.players-open::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1190;
+  background: rgba(5, 5, 8, .38);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  pointer-events: none;
+}
 body.account-open {
   overflow: hidden;
 }
@@ -1106,9 +1118,7 @@ body.account-open #account {
   padding: clamp(18px, 4vw, 48px);
   overflow-y: auto;
   overscroll-behavior: contain;
-  background:
-    radial-gradient(ellipse at 18% 0%, rgba(217,170,69,.17), transparent 48%),
-    linear-gradient(145deg, #1a150c 0%, #100d08 60%, #171108 100%);
+  background: transparent;
 }
 body.account-open #account .section-heading,
 body.account-open #account .account-card {
@@ -1125,7 +1135,8 @@ body.account-open #account .section-heading {
 }
 body.account-open #account .account-card {
   border-color: rgba(217,170,69,.42);
-  box-shadow: 0 24px 90px rgba(0,0,0,.48), 0 0 45px rgba(217,170,69,.07);
+  background: linear-gradient(145deg, rgba(35, 28, 17, .98), rgba(20, 16, 11, .98));
+  box-shadow: 0 24px 90px rgba(0,0,0,.58), 0 0 45px rgba(217,170,69,.07);
 }
 .account-fullscreen-close {
   display: grid;
@@ -1158,31 +1169,38 @@ body.players-open #playerLeaderboard {
   position: fixed !important;
   inset: 0;
   z-index: 1200;
-  display: block !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100vh;
   height: 100dvh;
+  box-sizing: border-box;
   margin: 0;
-  padding: clamp(18px, 4vw, 48px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  background:
-    radial-gradient(ellipse at 18% 0%, rgba(217,170,69,.16), transparent 48%),
-    linear-gradient(145deg, #1a150c 0%, #100d08 60%, #171108 100%);
+  padding: clamp(12px, 3vw, 36px);
+  overflow: hidden;
+  background: transparent;
 }
 body.players-open #playerLeaderboard .player-points-board {
+  position: relative;
   width: min(100%, 1050px);
-  min-height: calc(100% - 8px);
+  max-height: 92vh;
+  max-height: 92dvh;
+  min-height: 0;
   margin: 0 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   border-color: rgba(217,170,69,.42);
-  box-shadow: 0 24px 90px rgba(0,0,0,.48), 0 0 45px rgba(217,170,69,.07);
+  background: linear-gradient(145deg, rgba(35, 28, 17, .99), rgba(20, 16, 11, .99));
+  box-shadow: 0 24px 90px rgba(0,0,0,.58), 0 0 45px rgba(217,170,69,.07);
 }
 body.players-open {
   overflow: hidden;
 }
 @media (max-width: 600px) {
+  body.account-open #account { padding: 12px; }
   body.players-open #playerLeaderboard { padding: 10px; }
-  body.players-open #playerLeaderboard .player-points-board { min-height: 100%; }
+  body.players-open #playerLeaderboard .player-points-board { max-height: 94dvh; }
 }
 
 body.about-open #about {
