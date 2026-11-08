@@ -1957,6 +1957,35 @@ select:focus-visible, textarea:focus-visible {
 }
 hr { border-color: rgba(217,170,69,.22); }
 
+
+/* Full-screen player leaderboard close control */
+.player-leaderboard-close {
+  display: none;
+  position: fixed;
+  top: 18px;
+  right: 22px;
+  z-index: 1210;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(224,177,75,.55);
+  border-radius: 12px;
+  background: rgba(20,20,22,.94);
+  color: #f2c765;
+  font: 32px/1 Arial, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 8px 28px rgba(0,0,0,.35);
+  transition: background .18s ease, transform .18s ease, border-color .18s ease;
+}
+body.players-open .player-leaderboard-close { display: grid; place-items: center; }
+.player-leaderboard-close:hover {
+  background: #e0b14b;
+  color: #17130b;
+  border-color: #f2c765;
+  transform: rotate(90deg);
+}
+@media (max-width: 600px) {
+  .player-leaderboard-close { top: 10px; right: 10px; width: 40px; height: 40px; }
+}
 </style>
   <link rel="icon" href="/favicon.ico?v=2" type="image/x-icon">
 </head>
@@ -2021,6 +2050,7 @@ hr { border-color: rgba(217,170,69,.22); }
   </section>
 
   <section class="section" id="playerLeaderboard">
+    <button class="player-leaderboard-close" id="closePlayerLeaderboard" type="button" aria-label="Close leaderboard" title="Close leaderboard">×</button>
     <div class="board player-points-board">
       <div class="board-top player-board-top">
         <div class="player-points-heading">
@@ -3043,6 +3073,12 @@ submitNavLink?.addEventListener("click", (event) => {
   } else {
     document.getElementById("leaderboard")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+});
+
+document.getElementById("closePlayerLeaderboard")?.addEventListener("click", () => {
+  document.body.classList.remove("players-open");
+  document.body.style.overflow = "";
+  document.getElementById("leaderboard")?.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
 playersNavLink?.addEventListener("click", (event) => {
