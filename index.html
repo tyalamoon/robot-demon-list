@@ -1093,7 +1093,34 @@ body.account-open #account {
 }
 
 body.players-open #playerLeaderboard {
+  position: fixed !important;
+  inset: 0;
+  z-index: 1200;
   display: block !important;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0;
+  padding: clamp(18px, 4vw, 48px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background:
+    radial-gradient(ellipse at 18% 0%, rgba(217,170,69,.16), transparent 48%),
+    linear-gradient(145deg, #1a150c 0%, #100d08 60%, #171108 100%);
+}
+body.players-open #playerLeaderboard .player-points-board {
+  width: min(100%, 1050px);
+  min-height: calc(100% - 8px);
+  margin: 0 auto;
+  border-color: rgba(217,170,69,.42);
+  box-shadow: 0 24px 90px rgba(0,0,0,.48), 0 0 45px rgba(217,170,69,.07);
+}
+body.players-open {
+  overflow: hidden;
+}
+@media (max-width: 600px) {
+  body.players-open #playerLeaderboard { padding: 10px; }
+  body.players-open #playerLeaderboard .player-points-board { min-height: 100%; }
 }
 
 body.about-open #about {
@@ -3023,8 +3050,9 @@ playersNavLink?.addEventListener("click", (event) => {
   const wasOpen = document.body.classList.contains("players-open");
   document.body.classList.remove("account-open", "submit-open", "about-open");
   document.body.classList.toggle("players-open", !wasOpen);
+  document.body.style.overflow = wasOpen ? "" : "hidden";
   if (!wasOpen) {
-    document.getElementById("playerLeaderboard")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById("playerLeaderboard")?.scrollTo({ top: 0, behavior: "instant" });
   } else {
     document.getElementById("leaderboard")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
