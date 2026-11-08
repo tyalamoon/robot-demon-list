@@ -1333,6 +1333,183 @@ body.pack-suggest-open { overflow: hidden; }
 }
 
 
+
+/* Refined RDL leaderboard presentation */
+.leaderboard-board {
+  overflow: hidden;
+  border: 1px solid rgba(139, 164, 255, .22);
+  border-radius: 20px;
+  background: linear-gradient(160deg, rgba(19, 28, 53, .96), rgba(10, 15, 30, .98));
+  box-shadow: 0 28px 80px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255,255,255,.045);
+}
+.leaderboard-top {
+  align-items: center;
+  gap: 24px;
+  padding: 25px 28px;
+  background: linear-gradient(110deg, rgba(73, 101, 196, .16), rgba(20, 27, 50, .15) 65%);
+  border-bottom: 1px solid rgba(139, 164, 255, .16);
+}
+.leaderboard-heading { min-width: 0; }
+.leaderboard-kicker {
+  display: block;
+  margin-bottom: 5px;
+  color: #9db4ff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 2.4px;
+}
+.leaderboard-heading h2 {
+  margin: 0;
+  color: #f5f7ff;
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 950;
+  letter-spacing: -.8px;
+  line-height: 1.15;
+}
+.leaderboard-heading h2 span { color: #9db4ff; }
+.leaderboard-heading p {
+  margin: 7px 0 0;
+  color: #9ba8c8;
+  font-size: 13px;
+}
+.leaderboard-top .board-tools {
+  flex: 0 1 310px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+.leaderboard-search-label {
+  color: #aab5d0;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+}
+.leaderboard-top .search-field {
+  width: 100%;
+  min-height: 46px;
+  padding: 11px 15px;
+  border-color: rgba(139, 164, 255, .25);
+  border-radius: 11px;
+  background: rgba(7, 12, 27, .72);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.22);
+}
+.leaderboard-top .search-field:focus {
+  border-color: #91aaff;
+  outline: 2px solid rgba(111, 145, 255, .18);
+  outline-offset: 1px;
+}
+#levels {
+  min-height: 130px;
+  padding: 18px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(91, 119, 214, .07), transparent 65%);
+}
+#levels .level {
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  gap: 18px;
+  max-width: none;
+  margin: 0 0 10px;
+  padding: 15px 18px;
+  border: 1px solid rgba(151, 170, 224, .13);
+  border-radius: 14px;
+  background: linear-gradient(105deg, rgba(36, 48, 83, .72), rgba(19, 27, 50, .88));
+  box-shadow: 0 7px 18px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.035);
+  transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+#levels .level:last-child { margin-bottom: 0; }
+#levels .level::before { display: none; }
+#levels .level:hover {
+  transform: translateY(-2px);
+  border-color: rgba(142, 166, 255, .38);
+  background: linear-gradient(105deg, rgba(43, 58, 101, .88), rgba(22, 32, 59, .96));
+  box-shadow: 0 12px 26px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.06);
+}
+#levels .level .rank {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  justify-self: center;
+  border: 1px solid rgba(164, 180, 220, .2);
+  border-radius: 12px;
+  background: rgba(5, 10, 24, .45);
+  color: #b8c4e2;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+#levels .level .rank.top-three {
+  border-color: rgba(255, 207, 96, .38);
+  background: linear-gradient(145deg, rgba(255, 202, 89, .18), rgba(255, 202, 89, .06));
+  color: #ffd77b;
+  text-shadow: 0 0 16px rgba(255, 202, 89, .18);
+}
+#levels .level .level-info { gap: 16px; }
+#levels .level .thumbnail {
+  width: 148px;
+  height: 84px;
+  flex-basis: 148px;
+  border-color: rgba(153, 174, 255, .2);
+  border-radius: 10px;
+  background: linear-gradient(135deg, #25345d, #10182d);
+  box-shadow: 0 5px 14px rgba(0,0,0,.25);
+}
+#levels .level .level-name {
+  color: #f0f3ff;
+  font-size: clamp(15px, 1.5vw, 20px);
+  letter-spacing: .15px;
+  text-transform: none;
+}
+#levels .level:hover .level-name { color: #b8caff; }
+#levels .level .creator {
+  margin-top: 5px;
+  color: #9caacb;
+  font-size: 12px;
+}
+#levels .level .percent-badge {
+  padding: 7px 12px;
+  border-color: rgba(117, 217, 154, .25);
+  background: rgba(74, 190, 126, .09);
+  color: #8ce0ad;
+  font-size: 13px;
+}
+#levels .level .level-score {
+  padding-top: 10px;
+  border-top-color: rgba(151, 170, 224, .1);
+}
+#levels .level .proof-link { color: #9db4ff; }
+#levels .level .approved-label {
+  border-color: rgba(117, 217, 154, .25);
+  background: rgba(74, 190, 126, .08);
+  color: #8ce0ad;
+}
+#levels .empty {
+  margin: 4px;
+  padding: 38px 20px;
+  border: 1px dashed rgba(139, 164, 255, .2);
+  border-radius: 14px;
+  background: rgba(7, 12, 27, .28);
+}
+@media (max-width: 720px) {
+  .leaderboard-top { align-items: stretch; padding: 20px; }
+  .leaderboard-top .board-tools { flex: 1 1 100%; }
+  #levels { padding: 12px; }
+  #levels .level { padding: 12px; gap: 11px; }
+  #levels .level .thumbnail { width: 112px; height: 66px; flex-basis: 112px; }
+}
+@media (max-width: 520px) {
+  .leaderboard-top { padding: 17px 15px; gap: 15px; }
+  .leaderboard-heading p { font-size: 12px; }
+  #levels { padding: 9px; }
+  #levels .level { grid-template-columns: 30px minmax(0, 1fr); gap: 8px; }
+  #levels .level .rank { width: 29px; height: 29px; border-radius: 9px; font-size: 11px; }
+  #levels .level .level-info { gap: 9px; }
+  #levels .level .thumbnail { width: 86px; height: 56px; flex-basis: 86px; }
+  #levels .level .level-name { font-size: 13px; }
+  #levels .level .creator { font-size: 11px; }
+  #levels .level .percent-badge { font-size: 11px; padding: 5px 9px; }
+}
+
 </style>
   <link rel="icon" href="/favicon.ico?v=2" type="image/x-icon">
 </head>
@@ -1370,9 +1547,15 @@ body.pack-suggest-open { overflow: hidden; }
 
 <main id="home">
   <section class="section" id="leaderboard">
-    <div class="board">
-      <div class="board-top">
+    <div class="board leaderboard-board">
+      <div class="board-top leaderboard-top">
+        <div class="leaderboard-heading">
+          <span class="leaderboard-kicker">ROBOT DEMON LIST</span>
+          <h2>Level <span>Leaderboard</span></h2>
+          <p>Explore the hardest robot challenges and their verified records.</p>
+        </div>
         <div class="board-tools">
+          <label class="leaderboard-search-label" for="search">Find a level or player</label>
           <input class="field search-field" id="search" type="search" placeholder="Search levels..." aria-label="Search players or levels" maxlength="150">
         </div>
       </div>
