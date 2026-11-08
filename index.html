@@ -1709,6 +1709,227 @@ body.pack-suggest-open { overflow: hidden; }
   background: rgba(224,177,75,.045);
 }
 
+
+/* ============================================================
+   FULL-SITE GOLD THEME
+   Applies the RDL gold identity across navigation, hero, forms,
+   menus, panels, account/admin areas, modals and leaderboards.
+   ============================================================ */
+:root {
+  --background: #100d08;
+  --surface: #1b160d;
+  --surface-light: #29200f;
+  --border: #594522;
+  --gold: #d9aa45;
+  --gold-light: #f3cf79;
+  --text: #f7f0df;
+  --muted: #b7aa91;
+  --green: #77d99a;
+  --red: #ff8585;
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 18% 0%, rgba(217,170,69,.17), transparent 43%),
+    radial-gradient(ellipse at 88% 26%, rgba(153,105,29,.12), transparent 42%),
+    linear-gradient(145deg, #1a150c 0%, #100d08 58%, #171108 100%);
+  color: var(--text);
+}
+.site-header {
+  border-bottom-color: rgba(217,170,69,.38);
+  background: rgba(16,13,8,.96);
+  box-shadow: 0 8px 28px rgba(0,0,0,.2);
+}
+.brand-icon {
+  border-color: var(--gold);
+  box-shadow: 0 0 18px rgba(217,170,69,.16);
+}
+.main-nav a,
+.main-nav .nav-submit {
+  border-color: #8b6727;
+  background: linear-gradient(135deg, #d9aa45, #b98528);
+  color: #1b1408;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+}
+.main-nav a:hover,
+.main-nav .nav-submit:hover {
+  border-color: var(--gold-light);
+  background: linear-gradient(135deg, #f3cf79, #d9aa45);
+  color: #171006;
+}
+.main-nav a:focus-visible { outline-color: var(--gold-light); }
+
+.hero h1,
+.section-heading h2,
+.submit-intro h2,
+.account-card h2 { color: var(--text); }
+.hero h1 span,
+.section-heading h2 span,
+.submit-intro h2 span,
+.account-card h2 span,
+.brand-text span { color: var(--gold-light); }
+.eyebrow { color: var(--gold-light); }
+.hero p, .section-heading p { color: var(--muted); }
+
+.button {
+  border-color: #594522;
+  background: linear-gradient(145deg, #2a2111, #21190d);
+  color: var(--text);
+}
+.button:hover {
+  border-color: var(--gold);
+  background: #332612;
+  color: var(--gold-light);
+}
+.button-primary {
+  border-color: var(--gold);
+  background: linear-gradient(135deg, #e4b64f, #bd8a2d);
+  color: #1b1408;
+  box-shadow: 0 5px 18px rgba(217,170,69,.14);
+}
+.button-primary:hover {
+  border-color: var(--gold-light);
+  background: linear-gradient(135deg, #f3cf79, #d9aa45);
+  color: #171006;
+}
+button:focus-visible, a:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible {
+  outline-color: var(--gold-light);
+}
+
+.stat-card,
+.board,
+.submit-card,
+.account-card,
+.admin-panel,
+.account-status,
+.admin-record,
+.form-message,
+.section-tag {
+  border-color: rgba(217,170,69,.28);
+}
+.stat-card {
+  background: linear-gradient(135deg, rgba(217,170,69,.09), rgba(255,255,255,.012));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+}
+.stat-value, .board-title span, .board-bottom strong,
+.footer-inner strong, .account-status strong,
+.admin-record h3 { color: var(--gold-light); }
+.board { background: rgba(27,22,13,.92); }
+.board-top {
+  border-bottom-color: rgba(217,170,69,.24);
+  background: linear-gradient(110deg, rgba(217,170,69,.09), transparent 75%);
+}
+.column-head {
+  border-bottom-color: rgba(217,170,69,.28);
+  background: #21190d;
+  color: #c8b68f;
+}
+.board-bottom {
+  border-top-color: rgba(217,170,69,.24);
+  background: #171209;
+}
+.field,
+.rank-input {
+  border-color: #594522;
+  background: #100d08;
+  color: var(--text);
+}
+.field:focus,
+.rank-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(217,170,69,.12);
+}
+.field::placeholder { color: #887b61; }
+.field option { background: #1b160d; color: var(--text); }
+.form-group label { color: #e9d9b5; }
+.form-group small, .account-copy, .auth-message { color: var(--muted); }
+.submit-card,
+.account-card {
+  background:
+    radial-gradient(ellipse at top left, rgba(217,170,69,.13), transparent 62%),
+    linear-gradient(145deg, #21190d, #171209);
+}
+.submit-note {
+  border-left-color: var(--gold);
+  background: rgba(217,170,69,.09);
+  color: #dfd0ad;
+}
+.form-message.info { color: #d8c69e; }
+.admin-panel {
+  background: linear-gradient(145deg, rgba(217,170,69,.07), transparent 65%), var(--surface);
+}
+.admin-record { background: #171209; }
+.admin-record a { color: var(--gold-light); }
+.admin-approve { border-color: var(--green); color: var(--green); }
+.admin-reject { border-color: var(--red); color: var(--red); }
+
+.site-footer {
+  border-top-color: rgba(217,170,69,.3);
+  background: #0d0a06;
+}
+.footer-links a:hover { color: var(--gold-light); }
+.section-tag {
+  background: rgba(217,170,69,.055);
+  color: #d4c29d;
+}
+.empty { color: var(--text); }
+.empty span { color: var(--muted); }
+
+/* Gold treatment for every level card, including its media and details. */
+.level {
+  border-color: rgba(217,170,69,.22);
+  background:
+    linear-gradient(135deg, rgba(217,170,69,.13), rgba(217,170,69,.035) 48%, rgba(153,105,29,.075)),
+    rgba(27,22,13,.88);
+  box-shadow: 0 24px 50px -24px rgba(0,0,0,.72), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.level:hover {
+  border-color: rgba(243,207,121,.58);
+  box-shadow: 0 30px 60px -22px rgba(0,0,0,.78), 0 0 24px rgba(217,170,69,.08), inset 0 1px 0 rgba(255,255,255,.13);
+}
+.level .rank.top-three { color: var(--gold-light); }
+.level .thumbnail {
+  border-color: rgba(217,170,69,.32);
+  background:
+    radial-gradient(ellipse at 75% 25%, rgba(217,170,69,.3), transparent 58%),
+    linear-gradient(135deg, #332612, #171209);
+  color: var(--gold-light);
+}
+.level:hover .thumbnail { border-color: rgba(243,207,121,.7); }
+.level .level-name { color: #f7edda; }
+.level:hover .level-name { color: var(--gold-light); }
+.level .creator { color: #b7aa91; }
+.level .percent-badge {
+  border-color: rgba(217,170,69,.4);
+  background: rgba(217,170,69,.12);
+  color: var(--gold-light);
+}
+.level .level-score { border-top-color: rgba(217,170,69,.2); }
+.level .proof-link { color: var(--gold-light); }
+.level .proof-link:hover { color: #ffe5a5; }
+.level .approved-label {
+  border-color: rgba(119,217,154,.28);
+  background: rgba(119,217,154,.08);
+  color: var(--green);
+}
+
+/* Menus, dropdowns, popups and detail panels used throughout the site. */
+.dropdown-menu, .dropdown-content, .menu,
+.modal, .modal-content, .popup, .popup-content,
+.detail-panel, .level-details-panel, .player-details,
+.changelog-panel, .news-panel {
+  border-color: rgba(217,170,69,.32);
+  background-color: #1b160d;
+  color: var(--text);
+}
+.dropdown-menu a:hover, .dropdown-content a:hover,
+.menu a:hover, .menu button:hover {
+  background: rgba(217,170,69,.12);
+  color: var(--gold-light);
+}
+hr { border-color: rgba(217,170,69,.22); }
+
 </style>
   <link rel="icon" href="/favicon.ico?v=2" type="image/x-icon">
 </head>
