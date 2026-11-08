@@ -1655,6 +1655,60 @@ body.pack-suggest-open { overflow: hidden; }
   #levels .level .percent-badge { font-size: 11px; padding: 5px 9px; }
 }
 
+
+/* Unified gold theme for the full level leaderboard. */
+#levels .level {
+  border-color: rgba(224,177,75,.24);
+  background:
+    linear-gradient(115deg, rgba(224,177,75,.13), rgba(224,177,75,.045) 52%, rgba(224,177,75,.09)),
+    rgba(28, 23, 15, .88);
+  box-shadow: 0 18px 42px -25px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,224,157,.09);
+}
+#levels .level:hover {
+  border-color: rgba(255,205,105,.58);
+  background:
+    linear-gradient(115deg, rgba(224,177,75,.2), rgba(224,177,75,.075) 52%, rgba(224,177,75,.14)),
+    rgba(32, 26, 16, .94);
+  box-shadow: 0 24px 48px -24px rgba(0,0,0,.82), 0 0 24px rgba(224,177,75,.09), inset 0 1px 0 rgba(255,224,157,.15);
+}
+#levels .level .rank,
+#levels .level .rank.top-three { color: #f0c96f; text-shadow: 0 0 16px rgba(224,177,75,.18); }
+#levels .level .rank {
+  border-color: rgba(224,177,75,.22);
+  background: rgba(224,177,75,.08);
+}
+#levels .level .level-name { color: #fff0c9; }
+#levels .level:hover .level-name { color: #ffd779; }
+#levels .level .creator { color: #c4ad7d; }
+#levels .level .thumbnail {
+  border-color: rgba(224,177,75,.28);
+  background:
+    radial-gradient(ellipse at 75% 25%, rgba(224,177,75,.35), transparent 58%),
+    linear-gradient(135deg, #45351a, #17130c);
+  color: #ffe3a0;
+}
+#levels .level .percent-badge {
+  border-color: rgba(224,177,75,.42);
+  background: rgba(224,177,75,.13);
+  color: #ffdc87;
+}
+#levels .level .level-score { border-top-color: rgba(224,177,75,.2); }
+#levels .level .proof-link { color: #f2c96f; }
+#levels .level .approved-label {
+  border-color: rgba(224,177,75,.35);
+  background: rgba(224,177,75,.1);
+  color: #f4d48c;
+}
+#levels .column-head {
+  border-color: rgba(224,177,75,.2);
+  color: #e8c879;
+  background: rgba(224,177,75,.055);
+}
+#levels .empty {
+  border-color: rgba(224,177,75,.28);
+  background: rgba(224,177,75,.045);
+}
+
 </style>
   <link rel="icon" href="/favicon.ico?v=2" type="image/x-icon">
 </head>
