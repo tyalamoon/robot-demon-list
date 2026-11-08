@@ -4355,7 +4355,7 @@ function renderLeaderboard() {
 
     // Approved level suggestions store the verifier in the record notes.
     // Only display a verification credit when that information is actually present.
-    const verifierMatch = String(record.notes || "").match(/(?:^|\\|\\s)verifier=([^|]+)/i);
+    const verifierMatch = String(record.notes || "").match(/verifier=([^|]+)/i);
     const verifierName = verifierMatch ? verifierMatch[1].trim() : "";
     if (verifierName) {
       levelMeta.appendChild(makeElement("span", "creator-separator", "·"));
