@@ -1134,9 +1134,16 @@ body.account-open #account .section-heading {
   gap: 16px;
 }
 body.account-open #account .account-card {
+  position: relative;
   border-color: rgba(217,170,69,.42);
   background: linear-gradient(145deg, rgba(35, 28, 17, .98), rgba(20, 16, 11, .98));
   box-shadow: 0 24px 90px rgba(0,0,0,.58), 0 0 45px rgba(217,170,69,.07);
+}
+body.account-open #account .account-fullscreen-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
 }
 .account-fullscreen-close {
   display: grid;
@@ -2250,13 +2257,11 @@ body.players-open .player-leaderboard-close { display: grid; place-items: center
         <h2>Your <span>Account</span></h2>
         <p>Create an RDL account or sign in.</p>
       </div>
-      <div style="display:flex;align-items:center;gap:12px">
-        <span class="section-tag">SUPABASE AUTH</span>
-        <button class="account-fullscreen-close" id="closeAccount" type="button" aria-label="Close account" title="Close account">×</button>
-      </div>
+      
     </div>
 
     <div class="account-card">
+      <button class="account-fullscreen-close" id="closeAccount" type="button" aria-label="Close account" title="Close account">×</button>
       <div id="accountSignedOut">
         <h2>Join the <span>RDL community</span></h2>
         <p class="account-copy">Use email and password, or continue with Google. If email confirmation is enabled, check your inbox after signing up.</p>
