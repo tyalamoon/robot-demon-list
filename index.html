@@ -2009,6 +2009,50 @@ body.players-open .player-leaderboard-close { display: grid; place-items: center
   }
 }
 
+
+/* Clearer level title and creator / verifier credits beside thumbnails. */
+#levels .level .level-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 9px;
+  min-width: 0;
+}
+#levels .level .level-name {
+  font-size: clamp(17px, 1.7vw, 22px);
+  font-weight: 850;
+  line-height: 1.2;
+  letter-spacing: .1px;
+  overflow-wrap: anywhere;
+}
+#levels .level .level-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-width: 0;
+  color: #b7ad98;
+  font-size: 12px;
+  line-height: 1.4;
+}
+#levels .level .creator-byline {
+  color: #d8c9a8;
+  font-weight: 650;
+}
+#levels .level .creator-separator {
+  color: rgba(224,177,75,.55);
+  font-weight: 800;
+}
+#levels .level .verified-byline {
+  color: #e9c875;
+  font-weight: 750;
+}
+@media (max-width: 520px) {
+  #levels .level .level-details { gap: 6px; }
+  #levels .level .level-name { font-size: 15px; }
+  #levels .level .level-meta { font-size: 11px; gap: 5px; }
+}
+
 </style>
   <link rel="icon" href="/favicon.ico?v=2" type="image/x-icon">
 </head>
@@ -4305,10 +4349,20 @@ function renderLeaderboard() {
     }
 
     const details = makeElement("div", "level-details");
-    details.append(
-      makeElement("div", "level-name", record.level_name),
-      makeElement("div", "creator", "by " + record.player_name)
-    );
+    const levelTitle = makeElement("div", "level-name", record.level_name);
+    const levelMeta = makeElement("div", "level-meta");
+    levelMeta.appendChild(makeElement("span", "creator-byline", "by " + (record.player_name || "Unknown")));
+
+    // Approved level suggestions store the verifier in the record notes.
+    // Only display a verification credit when that information is actually present.
+    const verifierMatch = String(record.notes || "").match(/(?:^|\\|\\s)verifier=([^|]+)/i);
+    const verifierName = verifierMatch ? verifierMatch[1].trim() : "";
+    if (verifierName) {
+      levelMeta.appendChild(makeElement("span", "creator-separator", "·"));
+      levelMeta.appendChild(makeElement("span", "verified-byline", "verified by " + verifierName));
+    }
+
+    details.append(levelTitle, levelMeta);
 
     info.append(thumbnail, details);
     row.tabIndex = 0;
