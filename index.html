@@ -837,45 +837,125 @@ textarea.field { min-height: 90px; resize: vertical; }
 
 .player-board-top {
   justify-content: flex-start;
+  padding: 24px 26px 22px;
+  background: linear-gradient(115deg, rgba(224,177,75,.09), transparent 58%);
+  border-bottom: 1px solid var(--border);
 }
 
+.player-points-heading { min-width: 0; }
+.player-points-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 9px;
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+.player-points-kicker::before {
+  content: "";
+  width: 17px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--gold);
+}
+.player-points-heading .board-title { font-size: 25px; letter-spacing: -.7px; }
 .player-points-rule {
-  margin: 8px 0 0;
+  max-width: 680px;
+  margin: 9px 0 0;
   color: var(--muted);
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 1.7;
 }
-
 .player-standing {
   display: grid;
   grid-template-columns: 62px minmax(0, 1fr) 115px;
   align-items: center;
   gap: 14px;
-  padding: 14px 20px;
-  border-bottom: 1px solid #292929;
+  padding: 15px 22px;
+  border-bottom: 1px solid var(--border);
+  transition: background .18s ease;
 }
-
 .player-standing:last-child { border-bottom: none; }
-.player-standing:hover { background: rgba(255,255,255,.025); }
+.player-standing:hover { background: rgba(255,255,255,.035); }
 .player-standing[role="button"] { cursor: pointer; }
 .player-standing[role="button"]:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
 #playerProfileRecords .level-modal-record { gap: 14px; }
 .player-standing-head {
-  background: #141414;
+  background: rgba(255,255,255,.025);
   color: var(--muted);
   font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1px;
+  font-weight: 900;
+  letter-spacing: 1.3px;
   text-transform: uppercase;
 }
 .player-standing-info { min-width: 0; }
 .player-standing-name { overflow-wrap: anywhere; font-size: 14px; font-weight: 900; }
 .player-points-total { color: var(--gold); font-weight: 900; text-align: right; white-space: nowrap; }
+.player-standing:not(.player-standing-head) .rank {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255,255,255,.035);
+  font-size: 12px;
+  font-weight: 900;
+}
+.player-standing:not(.player-standing-head) .rank.top-three {
+  border-color: rgba(224,177,75,.38);
+  background: rgba(224,177,75,.11);
+  color: var(--gold);
+}
+.player-standing:not(.player-standing-head) .player-points-total {
+  justify-self: end;
+  padding: 7px 11px;
+  border: 1px solid rgba(224,177,75,.2);
+  border-radius: 9px;
+  background: rgba(224,177,75,.07);
+  font-variant-numeric: tabular-nums;
+}
+.player-points-empty {
+  display: flex;
+  min-height: 190px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 30px 20px;
+  text-align: center;
+  background: radial-gradient(ellipse at 50% 0%, rgba(224,177,75,.075), transparent 68%);
+}
+.player-points-empty::before {
+  content: "★";
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  margin-bottom: 3px;
+  border: 1px solid rgba(224,177,75,.25);
+  border-radius: 14px;
+  background: rgba(224,177,75,.08);
+  color: var(--gold);
+  font-size: 21px;
+}
+.player-points-empty strong { font-size: 15px; font-weight: 900; }
+.player-points-empty span { max-width: 340px; color: var(--muted); font-size: 12px; line-height: 1.6; }
 
+@media (max-width: 600px) {
+  .player-board-top { padding: 20px 16px; }
+  .player-points-heading .board-title { font-size: 22px; }
+}
 @media (max-width: 430px) {
   .player-standing { grid-template-columns: 36px minmax(0, 1fr) 82px; gap: 8px; padding-left: 12px; padding-right: 12px; }
   .player-standing-name { font-size: 12px; }
   .player-points-total { font-size: 12px; }
+  .player-standing:not(.player-standing-head) .rank { width: 30px; height: 30px; }
+  .player-standing:not(.player-standing-head) .player-points-total { padding: 6px 7px; }
 }
 
 .contribute-menu-wrap { position: relative; display: inline-flex; align-items: center; }
@@ -1569,9 +1649,10 @@ body.pack-suggest-open { overflow: hidden; }
   </section>
 
   <section class="section" id="playerLeaderboard">
-    <div class="board">
+    <div class="board player-points-board">
       <div class="board-top player-board-top">
-        <div>
+        <div class="player-points-heading">
+          <span class="player-points-kicker">PLAYER RANKINGS</span>
           <div class="board-title">Player <span>Points</span></div>
           <p class="player-points-rule">Players earn points for their approved levels based on each level’s position on the list. A player’s total is the sum of the points earned across all their approved levels.</p>
         </div>
@@ -3421,7 +3502,7 @@ function renderPlayerPointsLeaderboard() {
   playerPointsElement.replaceChildren();
 
   if (records.length === 0) {
-    const empty = makeElement("div", "empty");
+    const empty = makeElement("div", "player-points-empty");
     empty.append(
       makeElement("strong", "", "No approved records yet"),
       makeElement("span", "", "Player points will appear after records are approved.")
