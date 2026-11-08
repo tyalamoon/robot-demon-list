@@ -1128,24 +1128,30 @@ body.account-open #account .account-card {
   box-shadow: 0 24px 90px rgba(0,0,0,.48), 0 0 45px rgba(217,170,69,.07);
 }
 .account-fullscreen-close {
+  display: grid;
+  place-items: center;
   flex: 0 0 auto;
-  width: 42px;
-  height: 42px;
-  border: 1px solid rgba(217,170,69,.4);
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(224,177,75,.55);
   border-radius: 10px;
-  background: #21190d;
-  color: var(--gold-light);
-  font-size: 25px;
-  line-height: 1;
+  background: rgba(20,20,22,.94);
+  color: #f2c765;
+  font: 29px/1 Arial, sans-serif;
   cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0,0,0,.3);
+  transition: background .18s ease, transform .18s ease, border-color .18s ease;
 }
 .account-fullscreen-close:hover {
-  border-color: var(--gold-light);
-  background: #332612;
+  background: #e0b14b;
+  color: #17130b;
+  border-color: #f2c765;
+  transform: rotate(90deg);
 }
 @media (max-width: 600px) {
   body.account-open #account { padding: 16px; }
   body.account-open #account .account-card { padding: 20px; }
+  .account-fullscreen-close { width: 36px; height: 36px; }
 }
 
 body.players-open #playerLeaderboard {
