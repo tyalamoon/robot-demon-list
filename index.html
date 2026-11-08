@@ -961,32 +961,97 @@ textarea.field { min-height: 90px; resize: vertical; }
 .contribute-menu-wrap { position: relative; display: inline-flex; align-items: center; }
 .contribute-dropdown {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 12px);
   left: 0;
   z-index: 2000;
-  width: 240px;
-  padding: 7px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: #181818;
-  box-shadow: 0 14px 36px rgba(0,0,0,.5);
+  width: 286px;
+  padding: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(224,177,75,.3);
+  border-radius: 16px;
+  background:
+    radial-gradient(ellipse at 0 0, rgba(224,177,75,.12), transparent 58%),
+    linear-gradient(145deg, #1c1d21, #111216 78%);
+  box-shadow: 0 22px 55px rgba(0,0,0,.62), 0 0 0 1px rgba(255,255,255,.025) inset;
+  transform-origin: top left;
+  animation: contribute-menu-in .16s ease-out;
+}
+@keyframes contribute-menu-in {
+  from { opacity: 0; transform: translateY(-6px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .contribute-dropdown[hidden] { display: none !important; }
-.contribute-dropdown-option {
+.contribute-dropdown-heading {
+  padding: 10px 11px 12px;
+  margin-bottom: 5px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.contribute-dropdown-kicker {
   display: block;
+  margin-bottom: 5px;
+  color: var(--gold);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 1.8px;
+}
+.contribute-dropdown-heading strong {
+  display: block;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: -.2px;
+}
+.contribute-dropdown-heading span:last-child {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.contribute-dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 11px;
   width: 100%;
-  padding: 11px 12px;
-  border: 0;
-  border-radius: 7px;
+  min-height: 43px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
   background: transparent;
   color: var(--text);
   text-align: left;
   font: inherit;
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 750;
   cursor: pointer;
+  transition: background .16s ease, border-color .16s ease, transform .16s ease;
 }
-.contribute-dropdown-option:hover { background: #202b40; }
-.contribute-dropdown-option.selected { background: #1d4ed8; color: #fff; }
+.contribute-dropdown-option::before {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 27px;
+  place-items: center;
+  border: 1px solid rgba(224,177,75,.2);
+  border-radius: 8px;
+  background: rgba(224,177,75,.08);
+  color: var(--gold);
+  font-size: 13px;
+  content: "✦";
+}
+.contribute-dropdown-option[data-contribute-choice="record"]::before { content: "✓"; }
+.contribute-dropdown-option[data-contribute-choice="level"]::before { content: "◆"; }
+.contribute-dropdown-option[data-contribute-choice="pack"]::before { content: "▦"; }
+.contribute-dropdown-option[data-contribute-choice="change"]::before { content: "↗"; }
+.contribute-dropdown-option[data-contribute-choice="idea"]::before { content: "✧"; }
+.contribute-dropdown-option:hover {
+  transform: translateX(2px);
+  border-color: rgba(224,177,75,.18);
+  background: rgba(224,177,75,.09);
+}
+.contribute-dropdown-option.selected { border-color: rgba(224,177,75,.3); background: rgba(224,177,75,.15); color: var(--gold); }
+@media (max-width: 600px) {
+  .contribute-dropdown { width: min(286px, calc(100vw - 28px)); }
+}
 .contribute-chooser, .contribute-suggestion {
   padding: 28px;
   border: 1px solid var(--border);
@@ -1606,6 +1671,11 @@ body.pack-suggest-open { overflow: hidden; }
       <div class="contribute-menu-wrap">
         <a class="nav-submit" href="#submit" aria-expanded="false" aria-controls="contributeDropdown">Contribute</a>
         <div class="contribute-dropdown" id="contributeDropdown" hidden>
+          <div class="contribute-dropdown-heading">
+            <span class="contribute-dropdown-kicker">SUPPORT THE LIST</span>
+            <strong>Make your mark.</strong>
+            <span>Help build the Robot Demon List community.</span>
+          </div>
           <button type="button" class="contribute-dropdown-option" data-contribute-choice="record">Submit a record</button>
           <button type="button" class="contribute-dropdown-option" data-contribute-choice="level">Suggest a level</button>
           <button type="button" class="contribute-dropdown-option" data-contribute-choice="pack">Suggest a Level Pack</button>
