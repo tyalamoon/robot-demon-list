@@ -2560,12 +2560,7 @@ body.players-open .player-leaderboard-close { display: grid; place-items: center
     </header>
     <div class="donation-modal-content">
       <p>Donations help support the Robot Demon List, its website and the community around it. Every contribution is appreciated.</p>
-      <label>Currency</label>
-      <div class="donation-currency" role="group" aria-label="Donation currency">
-        <button type="button" data-donation-currency="CZK" aria-pressed="true">CZK · Kč</button>
-        <button type="button" data-donation-currency="EUR" aria-pressed="false">EUR · €</button>
-      </div>
-      <label>Amount</label>
+      <label>Amount (CZK)</label>
       <div class="donation-amounts" id="donationAmounts">
         <button type="button" data-donation-amount="50" aria-pressed="false">50 Kč</button>
         <button type="button" data-donation-amount="100" aria-pressed="true">100 Kč</button>
@@ -5029,24 +5024,21 @@ loadRecords();
   const modal = document.getElementById("donationModal");
   const openButton = document.getElementById("donateNavButton");
   const closeButton = document.getElementById("donationModalClose");
-  const currencyButtons = [...modal.querySelectorAll("[data-donation-currency]")];
   const amounts = document.getElementById("donationAmounts");
   const custom = document.getElementById("donationCustomAmount");
   const summary = document.getElementById("donationSummary");
-  const symbols = { CZK: "Kč", EUR: "€" };
-  const presets = { CZK: [50, 100, 200, 500], EUR: [2, 5, 10, 20] };
-  let currency = "CZK";
+  const presets = [50, 100, 200, 500];
   let selected = 100;
   let previousFocus = null;
 
   function render() {
     amounts.replaceChildren();
-    presets[currency].forEach(value => {
+    presets.forEach(value => {
       const button = document.createElement("button");
       button.type = "button";
       button.dataset.donationAmount = String(value);
       button.setAttribute("aria-pressed", String(!custom.value && selected === value));
-      button.textContent = currency === "EUR" ? value + " €" : value + " Kč";
+      button.textContent = value + " Kč";
       button.addEventListener("click", () => {
         selected = value;
         custom.value = "";
@@ -5054,14 +5046,11 @@ loadRecords();
       });
       amounts.appendChild(button);
     });
-    currencyButtons.forEach(button => {
-      button.setAttribute("aria-pressed", String(button.dataset.donationCurrency === currency));
-    });
-    custom.placeholder = currency === "EUR" ? "Enter amount in €" : "Enter amount in Kč";
+    custom.placeholder = "Enter amount in Kč";
     const value = custom.value ? Number(custom.value) : selected;
     summary.textContent = "Selected donation: " +
       (Number.isFinite(value) && value > 0 ? value.toLocaleString("en-US") : "—") +
-      " " + symbols[currency];
+      " Kč";
   }
 
   function openModal(event) {
@@ -5090,12 +5079,6 @@ loadRecords();
   document.addEventListener("keydown", event => {
     if (event.key === "Escape" && !modal.hidden) closeModal();
   });
-  currencyButtons.forEach(button => button.addEventListener("click", () => {
-    currency = button.dataset.donationCurrency;
-    selected = presets[currency][1];
-    custom.value = "";
-    render();
-  }));
   custom.addEventListener("input", render);
   render();
 })();
