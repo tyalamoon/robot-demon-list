@@ -84,8 +84,13 @@ select:focus-visible, textarea:focus-visible {
 
 .main-nav {
   display: flex;
+  flex: 1;
   align-items: center;
   gap: 10px;
+}
+
+.main-nav > a[href="donate.html"] {
+  margin-left: auto;
 }
 
 .main-nav a {
@@ -2197,7 +2202,6 @@ body.players-open .player-leaderboard-close { display: grid; place-items: center
           <button type="button" class="contribute-dropdown-option" data-contribute-choice="idea">Share an idea</button>
         </div>
       </div>
-      <a class="nav-button" href="donate.html">Donate</a>
       <a class="nav-button" href="#account">Account</a>
       <div class="contribute-menu-wrap news-menu-wrap">
         <a class="nav-button" href="#news-menu" id="newsMenuLink" aria-expanded="false" aria-controls="newsDropdown">News</a>
@@ -2206,6 +2210,7 @@ body.players-open .player-leaderboard-close { display: grid; place-items: center
           <button type="button" class="contribute-dropdown-option" data-news-choice="news">News</button>
         </div>
       </div>
+      <a class="nav-button" href="donate.html">Donate</a>
     </nav>
   </div>
 </header>
