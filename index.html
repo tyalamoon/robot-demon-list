@@ -2253,6 +2253,8 @@ body.players-open .player-leaderboard-close { display: grid; place-items: center
 .donation-methods { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .donation-method { padding: 6px 10px; border: 1px solid var(--border); border-radius: 7px; color: #c5cbe0; font-size: 12px; font-weight: 700; }
 .donation-notice { margin: 16px 0 0 !important; color: var(--muted); font-size: 12px !important; text-align: center; }
+.donation-checkout-button { width: 100%; margin-top: 14px; }
+.donation-checkout .form-message { margin-top: 12px; text-align: left; }
 @media (max-width: 560px) {
   .donation-modal-backdrop { padding: 10px; }
   .donation-modal-header { padding: 16px 18px; }
@@ -2559,7 +2561,7 @@ body.players-open .player-leaderboard-close { display: grid; place-items: center
       <button class="level-modal-close" id="donationModalClose" type="button" aria-label="Close donation window">×</button>
     </header>
     <div class="donation-modal-content">
-      <p>Donations help support the Robot Demon List, its website and the community around it. Every contribution is appreciated.</p>
+      <p>Support the Robot Demon List website and community. Every contribution is appreciated.</p>
       <label>Amount (CZK)</label>
       <div class="donation-amounts" id="donationAmounts">
         <button type="button" data-donation-amount="50" aria-pressed="false">50 Kč</button>
@@ -2569,16 +2571,15 @@ body.players-open .player-leaderboard-close { display: grid; place-items: center
       </div>
       <div class="donation-custom">
         <label for="donationCustomAmount">Or enter a custom amount</label>
-        <input id="donationCustomAmount" type="number" min="1" max="100000" step="1" placeholder="Enter amount in Kč" inputmode="decimal">
+        <input id="donationCustomAmount" type="number" min="10" max="5000" step="1" placeholder="Enter amount in Kč" inputmode="numeric">
       </div>
       <div class="donation-checkout" aria-live="polite">
-        <strong id="donationSummary">Selected donation: 100 Kč</strong>
-        <p>Online donations are not open yet. Payment checkout will be enabled after the payment account and bank payout setup are completed.</p>
-        <div class="donation-methods" aria-label="Planned payment methods">
-          <span class="donation-method">Cards</span><span class="donation-method">PayPal</span><span class="donation-method">Google Pay</span><span class="donation-method">Apple Pay</span>
-        </div>
+        <strong id="donationSummary">Selected support: 100 Kč</strong>
+        <p>You'll be redirected to Stripe's secure checkout. Available payment methods will be shown there.</p>
+        <button class="button button-primary donation-checkout-button" id="donationCheckoutButton" type="button">Continue to secure checkout</button>
+        <div class="form-message" id="donationCheckoutStatus" role="status" aria-live="polite"></div>
       </div>
-      <p class="donation-notice">No payment is collected here yet. Never enter card or bank details on this page.</p>
+      <p class="donation-notice">Test mode only: no real payments are collected. Real payments are not enabled.</p>
     </div>
   </section>
 </div>
@@ -5027,6 +5028,8 @@ loadRecords();
   const amounts = document.getElementById("donationAmounts");
   const custom = document.getElementById("donationCustomAmount");
   const summary = document.getElementById("donationSummary");
+  const checkoutButton = document.getElementById("donationCheckoutButton");
+  const checkoutStatus = document.getElementById("donationCheckoutStatus");
   const presets = [50, 100, 200, 500];
   let selected = 100;
   let previousFocus = null;
@@ -5042,15 +5045,49 @@ loadRecords();
       button.addEventListener("click", () => {
         selected = value;
         custom.value = "";
+        checkoutStatus.textContent = "";
+        checkoutStatus.className = "form-message";
         render();
       });
       amounts.appendChild(button);
     });
-    custom.placeholder = "Enter amount in Kč";
     const value = custom.value ? Number(custom.value) : selected;
-    summary.textContent = "Selected donation: " +
+    summary.textContent = "Selected support: " +
       (Number.isFinite(value) && value > 0 ? value.toLocaleString("en-US") : "—") +
       " Kč";
+  }
+
+  async function startCheckout() {
+    const amount = custom.value.trim() ? Number(custom.value) : selected;
+    if (!Number.isSafeInteger(amount) || amount < 10 || amount > 5000) {
+      checkoutStatus.textContent = "Enter a whole amount between 10 and 5,000 Kč.";
+      checkoutStatus.className = "form-message visible error";
+      return;
+    }
+
+    checkoutButton.disabled = true;
+    checkoutButton.textContent = "Opening Stripe...";
+    checkoutStatus.textContent = "Creating your secure checkout session...";
+    checkoutStatus.className = "form-message visible info";
+
+    try {
+      const { data, error } = await rdlSupabase.functions.invoke(
+        "create-checkout-session",
+        { body: { amount } }
+      );
+      if (error) throw error;
+      if (!data?.url || !data.url.startsWith("https://checkout.stripe.com/")) {
+        throw new Error("Stripe did not return a valid checkout link.");
+      }
+      checkoutStatus.textContent = "Redirecting to Stripe...";
+      window.location.assign(data.url);
+    } catch (error) {
+      console.error("RDL checkout error:", error);
+      checkoutStatus.textContent = "Checkout could not be started. Please try again in a moment.";
+      checkoutStatus.className = "form-message visible error";
+      checkoutButton.disabled = false;
+      checkoutButton.textContent = "Continue to secure checkout";
+    }
   }
 
   function openModal(event) {
@@ -5079,7 +5116,12 @@ loadRecords();
   document.addEventListener("keydown", event => {
     if (event.key === "Escape" && !modal.hidden) closeModal();
   });
-  custom.addEventListener("input", render);
+  custom.addEventListener("input", () => {
+    checkoutStatus.textContent = "";
+    checkoutStatus.className = "form-message";
+    render();
+  });
+  checkoutButton.addEventListener("click", startCheckout);
   render();
 })();
 </script>
