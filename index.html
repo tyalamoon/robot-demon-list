@@ -1356,11 +1356,28 @@ body.record-submit-open #submit .record-submit-card {
 .level-modal-record:last-child { border-bottom: 0; }
 .level-modal-record small { display: block; color: var(--muted); }
 .level-modal-empty { color: var(--muted); font-size: 14px; }
+.profile-avatar {
+  width: 72px; height: 72px; flex: 0 0 72px; border: 1px solid var(--gold);
+  border-radius: 50%; object-fit: cover; background: #0b0b0b;
+}
+.profile-heading { display: flex; align-items: center; gap: 16px; }
+.profile-heading-copy { min-width: 0; }
+.profile-stat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 22px 0; }
+.profile-stat { padding: 15px 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); }
+.profile-stat strong { display: block; color: var(--gold); font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
+.profile-stat span { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
+.profile-edit { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--border); }
+.profile-edit[hidden] { display: none; }
+.profile-edit .form-group { margin-bottom: 13px; }
+.profile-edit-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.profile-help { color: var(--muted); font-size: 13px; line-height: 1.5; }
 @media (max-width: 600px) {
   .level-modal-backdrop { padding: 8px; }
   .level-modal-top, .level-modal-body { padding-left: 16px; padding-right: 16px; }
   .level-modal-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .level-modal-actions .button { flex: 1 1 100%; }
+  .profile-heading { align-items: flex-start; }
+  .profile-stat-grid { grid-template-columns: 1fr; }
 }
 
 
@@ -2200,6 +2217,7 @@ body.players-open .player-leaderboard-close { display: grid; place-items: center
         </div>
       </div>
       <a class="nav-button" href="#account">Account</a>
+      <a class="nav-button" href="#profile" id="profileNavLink">Profile</a>
       <div class="contribute-menu-wrap news-menu-wrap">
         <a class="nav-button" href="#news-menu" id="newsMenuLink" aria-expanded="false" aria-controls="newsDropdown">News</a>
         <div class="contribute-dropdown" id="newsDropdown" hidden>
@@ -2529,6 +2547,50 @@ body.players-open .player-leaderboard-close { display: grid; place-items: center
       <div class="level-modal-meta" id="playerProfileStats"></div>
       <h3>Approved records</h3>
       <div id="playerProfileRecords"></div>
+    </div>
+  </section>
+</div>
+
+<div class="level-modal-backdrop" id="accountProfileBackdrop" role="dialog" aria-modal="true" aria-labelledby="accountProfileName" aria-hidden="true">
+  <section class="level-modal">
+    <header class="level-modal-top">
+      <div>
+        <div class="level-modal-kicker">RDL profile</div>
+        <div class="level-modal-points" id="accountProfileStatus">Loading profile…</div>
+      </div>
+      <button class="level-modal-close" id="accountProfileClose" type="button" aria-label="Close profile">×</button>
+    </header>
+    <div class="level-modal-body">
+      <div class="profile-heading">
+        <img class="profile-avatar" id="accountProfileAvatar" alt="Profile avatar">
+        <div class="profile-heading-copy">
+          <h2 class="level-modal-title" id="accountProfileName">Your profile</h2>
+          <div class="level-modal-creators" id="accountProfileIdentity"></div>
+        </div>
+      </div>
+      <p class="profile-help" id="accountProfileSignedOut">Sign in through Account to view your verified RDL profile, records, and points.</p>
+      <div class="profile-stat-grid" id="accountProfileStats" hidden></div>
+      <div id="accountProfileRecordsArea" hidden>
+        <h3>Approved records</h3>
+        <div id="accountProfileRecords"></div>
+      </div>
+      <div class="profile-edit" id="accountProfileEdit" hidden>
+        <h3>Edit profile</h3>
+        <p class="profile-help">Changes are saved to your RDL account. Your record statistics continue to use the verified Discord name when one is linked.</p>
+        <div class="form-group">
+          <label for="profileDisplayName">Display name</label>
+          <input class="field" id="profileDisplayName" type="text" maxlength="80" autocomplete="nickname" placeholder="Your display name">
+        </div>
+        <div class="form-group">
+          <label for="profileAvatarUrl">Avatar image URL</label>
+          <input class="field" id="profileAvatarUrl" type="url" maxlength="500" autocomplete="url" placeholder="https://example.com/avatar.png">
+        </div>
+        <div class="profile-edit-actions">
+          <button class="button button-primary" id="saveProfileButton" type="button">Save profile</button>
+          <button class="button" id="editProfileButton" type="button">Edit profile</button>
+        </div>
+        <div class="auth-message" id="profileMessage" role="status" aria-live="polite"></div>
+      </div>
     </div>
   </section>
 </div>
@@ -3224,6 +3286,7 @@ document.addEventListener("click", (event) => {
 const submitNavLink = document.querySelector('.main-nav a[href="#submit"]');
 const playersNavLink = document.querySelector('.main-nav a[href="#playerLeaderboard"]');
 const aboutNavLink = document.querySelector('.main-nav a[href="#about"]');
+const profileNavLink = document.getElementById("profileNavLink");
 
 aboutNavLink?.addEventListener("click", (event) => {
   event.preventDefault();
@@ -3295,6 +3358,19 @@ const signInButton = document.getElementById("signInButton");
 const signUpButton = document.getElementById("signUpButton");
 const googleSignInButton = document.getElementById("googleSignInButton");
 const signOutButton = document.getElementById("signOutButton");
+const accountProfileBackdrop = document.getElementById("accountProfileBackdrop");
+const accountProfileAvatar = document.getElementById("accountProfileAvatar");
+const accountProfileName = document.getElementById("accountProfileName");
+const accountProfileIdentity = document.getElementById("accountProfileIdentity");
+const accountProfileStatus = document.getElementById("accountProfileStatus");
+const accountProfileSignedOut = document.getElementById("accountProfileSignedOut");
+const accountProfileStats = document.getElementById("accountProfileStats");
+const accountProfileRecordsArea = document.getElementById("accountProfileRecordsArea");
+const accountProfileRecords = document.getElementById("accountProfileRecords");
+const accountProfileEdit = document.getElementById("accountProfileEdit");
+const profileDisplayName = document.getElementById("profileDisplayName");
+const profileAvatarUrl = document.getElementById("profileAvatarUrl");
+const profileMessage = document.getElementById("profileMessage");
 
 const adminPanel = document.getElementById("adminPanel");
 const adminStatus = document.getElementById("adminStatus");
@@ -3324,6 +3400,144 @@ let verifiedDiscordProfiles = [];
 let currentAuthUser = null;
 let currentDiscordIdentity = null;
 let discordAutoFilledSubmission = false;
+
+function profileDefaultAvatar(name) {
+  const initial = (String(name || "R").trim().slice(0, 1).toUpperCase() || "R").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
+  return "data:image/svg+xml," + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><rect width="96" height="96" fill="#16120a"/><circle cx="48" cy="48" r="45" fill="#242016" stroke="#e7bd62" stroke-width="2"/><text x="48" y="62" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#f3d98f">${initial}</text></svg>`
+  );
+}
+
+function userProfileName(user) {
+  const metadata = user?.user_metadata || {};
+  const discord = getDiscordIdentityDetails(getDiscordIdentity(user));
+  return String(metadata.display_name || discord.globalName || discord.username || metadata.user_name || metadata.full_name || metadata.name || user?.email?.split("@")[0] || "RDL player").trim();
+}
+
+function profileAvatarSource(user, name) {
+  const metadata = user?.user_metadata || {};
+  const discordData = getDiscordIdentity(user)?.identity_data || {};
+  return safeHttpUrl(String(discordData.avatar_url || metadata.avatar_url || metadata.picture || "")) || profileDefaultAvatar(name);
+}
+
+function profileRecordNames(user, displayName) {
+  const metadata = user?.user_metadata || {};
+  const discord = getDiscordIdentityDetails(getDiscordIdentity(user));
+  return new Set([displayName, discord.username, discord.globalName, metadata.display_name, metadata.user_name, metadata.full_name]
+    .map(value => String(value || "").trim().toLocaleLowerCase()).filter(Boolean));
+}
+
+function refreshAccountProfile() {
+  if (!accountProfileBackdrop) return;
+  const user = currentAuthUser;
+  const name = userProfileName(user);
+  const signedIn = Boolean(user);
+  accountProfileAvatar.src = profileAvatarSource(user, name);
+  accountProfileAvatar.onerror = () => { accountProfileAvatar.onerror = null; accountProfileAvatar.src = profileDefaultAvatar(name); };
+  accountProfileName.textContent = signedIn ? name : "Your RDL profile";
+  accountProfileStatus.textContent = signedIn ? "Signed in" : "Sign in required";
+  accountProfileSignedOut.hidden = signedIn;
+  accountProfileStats.hidden = !signedIn;
+  accountProfileRecordsArea.hidden = !signedIn;
+  accountProfileEdit.hidden = !signedIn;
+  if (!signedIn) {
+    accountProfileIdentity.textContent = "Your profile is ready when you are.";
+    accountProfileStats.replaceChildren();
+    accountProfileRecords.replaceChildren();
+    return;
+  }
+
+  const discord = getDiscordIdentityDetails(currentDiscordIdentity);
+  accountProfileIdentity.textContent = discord.username
+    ? "Verified Discord: @" + discord.username
+    : (user.email || "RDL account");
+  profileDisplayName.value = String(user.user_metadata?.display_name || "");
+  profileAvatarUrl.value = safeHttpUrl(String(user.user_metadata?.avatar_url || "")) || "";
+  const nameSet = profileRecordNames(user, name);
+  const ownRecords = records.filter(record => nameSet.has(String(record.player_name || "").trim().toLocaleLowerCase()) && !isRdlLevelCatalogEntry(record));
+  const ranks = getDisplayRanks(records);
+  ownRecords.sort((a, b) => (Number(ranks.get(a.id)) || Infinity) - (Number(ranks.get(b.id)) || Infinity));
+  const hardest = ownRecords[0];
+  const completedLevels = new Set(ownRecords.filter(record => Number(record.percent) === 100).map(record => String(record.level_name || "").trim().toLocaleLowerCase()).filter(Boolean)).size;
+  const points = ownRecords.reduce((total, record) => total + pointsForRank(ranks.get(record.id)), 0);
+  const statItems = [
+    [hardest ? String(hardest.level_name || "Unknown level") + " · #" + (ranks.get(hardest.id) || "—") : "No verified completion yet", "Hardest verified completion"],
+    [points.toFixed(2), "Points"],
+    [String(ownRecords.length), "Approved records"],
+    [String(completedLevels), "Completed levels"]
+  ];
+  accountProfileStats.replaceChildren(...statItems.map(([value, label]) => {
+    const item = makeElement("div", "profile-stat");
+    item.append(makeElement("strong", "", value), makeElement("span", "", label));
+    return item;
+  }));
+  accountProfileRecords.replaceChildren();
+  if (!ownRecords.length) {
+    accountProfileRecords.appendChild(makeElement("p", "level-modal-empty", "No approved records are linked to this account yet."));
+  } else {
+    ownRecords.forEach(record => {
+      const item = makeElement("div", "level-modal-record");
+      const details = makeElement("div");
+      details.append(makeElement("strong", "", String(record.level_name || "Unknown level")), makeElement("small", "", String(record.percent ?? "—") + "% · #" + (ranks.get(record.id) || "—")));
+      item.appendChild(details);
+      const proofUrl = safeHttpUrl(String(record.proof_url || ""));
+      if (proofUrl) {
+        const proof = makeElement("a", "proof-link", "Proof ↗");
+        proof.href = proofUrl; proof.target = "_blank"; proof.rel = "noopener noreferrer";
+        item.appendChild(proof);
+      }
+      accountProfileRecords.appendChild(item);
+    });
+  }
+}
+
+function openAccountProfile() {
+  refreshAccountProfile();
+  profileMessage.textContent = "";
+  profileMessage.className = "auth-message";
+  accountProfileBackdrop.classList.add("open");
+  accountProfileBackdrop.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function closeAccountProfile() {
+  accountProfileBackdrop.classList.remove("open");
+  accountProfileBackdrop.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+profileNavLink?.addEventListener("click", event => { event.preventDefault(); openAccountProfile(); });
+document.getElementById("accountProfileClose")?.addEventListener("click", closeAccountProfile);
+accountProfileBackdrop?.addEventListener("click", event => { if (event.target === accountProfileBackdrop) closeAccountProfile(); });
+document.addEventListener("keydown", event => { if (event.key === "Escape" && accountProfileBackdrop?.classList.contains("open")) closeAccountProfile(); });
+
+document.getElementById("editProfileButton")?.addEventListener("click", () => profileDisplayName?.focus());
+document.getElementById("saveProfileButton")?.addEventListener("click", async () => {
+  if (!currentAuthUser) return;
+  const displayName = profileDisplayName.value.trim();
+  const avatarUrl = profileAvatarUrl.value.trim();
+  if (avatarUrl && !safeHttpUrl(avatarUrl)) {
+    profileMessage.textContent = "Use a valid http or https avatar URL.";
+    profileMessage.className = "auth-message error";
+    return;
+  }
+  const saveButton = document.getElementById("saveProfileButton");
+  saveButton.disabled = true;
+  try {
+    const { data, error } = await rdlSupabase.auth.updateUser({ data: { ...currentAuthUser.user_metadata, display_name: displayName, avatar_url: avatarUrl } });
+    if (error) throw error;
+    currentAuthUser = data.user || currentAuthUser;
+    refreshAccountProfile();
+    profileMessage.textContent = "Profile saved.";
+    profileMessage.className = "auth-message success";
+  } catch (error) {
+    console.error("RDL profile save error:", error);
+    profileMessage.textContent = error?.message || "Couldn't save your profile.";
+    profileMessage.className = "auth-message error";
+  } finally {
+    saveButton.disabled = false;
+  }
+});
 
 function showAuthMessage(message, type = "") {
   authMessage.textContent = message;
@@ -3418,6 +3632,7 @@ function renderAuthSession(session) {
   accountSignedIn.hidden = !user;
   accountEmail.textContent = user?.email || "Signed-in account";
   renderDiscordLinkState(session);
+  refreshAccountProfile();
 
   if (!user) {
     isRdlOwner = false;
@@ -3453,6 +3668,7 @@ async function loadVerifiedDiscordProfiles() {
     verifiedDiscordProfiles = [];
   }
   renderPlayerPointsLeaderboard();
+  refreshAccountProfile();
 }
 
 async function runAuthAction(action, successMessage) {
