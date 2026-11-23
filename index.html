@@ -115,6 +115,16 @@ select:focus-visible, textarea:focus-visible {
   outline-offset: 3px;
 }
 
+.profile-nav-button {
+  margin-left: auto;
+  gap: 7px;
+}
+.profile-nav-icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+}
+
 .main-nav .nav-submit {
   padding: 9px 15px;
   border-color: #3b82f6;
@@ -2217,7 +2227,6 @@ body.players-open .player-leaderboard-close { display: grid; place-items: center
         </div>
       </div>
       <a class="nav-button" href="#account">Account</a>
-      <a class="nav-button" href="#profile" id="profileNavLink">Profile</a>
       <div class="contribute-menu-wrap news-menu-wrap">
         <a class="nav-button" href="#news-menu" id="newsMenuLink" aria-expanded="false" aria-controls="newsDropdown">News</a>
         <div class="contribute-dropdown" id="newsDropdown" hidden>
@@ -2225,6 +2234,7 @@ body.players-open .player-leaderboard-close { display: grid; place-items: center
           <button type="button" class="contribute-dropdown-option" data-news-choice="news">News</button>
         </div>
       </div>
+      <a class="nav-button profile-nav-button" href="#profile" id="profileNavLink"><svg class="profile-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-5.33 0-9 2.67-9 5v3h18v-3c0-2.33-3.67-5-9-5Z"/></svg>Profile</a>
     </nav>
   </div>
 </header>
